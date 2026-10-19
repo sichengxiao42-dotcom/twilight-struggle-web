@@ -6,7 +6,7 @@ export interface TtsManifest {
   cards: Record<string, { sheet: string; index: number }>;
 }
 
-// 清单在 assets/ 下（被 gitignore），不存在时 glob 为空，前端自动回退为文字卡。
+// 中文清单随仓库提交；不存在时 glob 为空，前端自动回退为文字卡。
 const found = import.meta.glob<TtsManifest>('../../../assets/tts-manifest.json', { eager: true, import: 'default' });
 const manifest: TtsManifest | undefined = Object.values(found)[0];
 

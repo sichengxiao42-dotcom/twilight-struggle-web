@@ -1,0 +1,474 @@
+{
+  "source": {
+    "workshopId": "2793711137",
+    "language": "zh-CN",
+    "checkedOn": "2026-10-19",
+    "note": "Chinese mod card art; translation and event text not independently verified"
+  },
+  "sheets": {
+    "43": {
+      "url": "/tts/zh-resource-941b0f7c5695711d.jpg",
+      "columns": 10,
+      "rows": 7
+    },
+    "42": {
+      "url": "/tts/zh-resource-31b658a366d4085a.jpg",
+      "columns": 10,
+      "rows": 7
+    },
+    "48": {
+      "url": "/tts/zh-resource-047bc92a01c6230a.jpg",
+      "columns": 10,
+      "rows": 7
+    },
+    "46": {
+      "url": "/tts/zh-resource-308d0beb2dc6e71d.jpg",
+      "columns": 10,
+      "rows": 7
+    }
+  },
+  "cards": {
+    "1": {
+      "sheet": "43",
+      "index": 0
+    },
+    "2": {
+      "sheet": "43",
+      "index": 1
+    },
+    "3": {
+      "sheet": "43",
+      "index": 2
+    },
+    "4": {
+      "sheet": "43",
+      "index": 3
+    },
+    "5": {
+      "sheet": "43",
+      "index": 4
+    },
+    "6": {
+      "sheet": "43",
+      "index": 5
+    },
+    "7": {
+      "sheet": "43",
+      "index": 6
+    },
+    "8": {
+      "sheet": "43",
+      "index": 7
+    },
+    "9": {
+      "sheet": "43",
+      "index": 8
+    },
+    "10": {
+      "sheet": "43",
+      "index": 9
+    },
+    "11": {
+      "sheet": "43",
+      "index": 10
+    },
+    "12": {
+      "sheet": "43",
+      "index": 11
+    },
+    "13": {
+      "sheet": "43",
+      "index": 12
+    },
+    "14": {
+      "sheet": "43",
+      "index": 13
+    },
+    "15": {
+      "sheet": "43",
+      "index": 14
+    },
+    "16": {
+      "sheet": "43",
+      "index": 15
+    },
+    "17": {
+      "sheet": "43",
+      "index": 16
+    },
+    "18": {
+      "sheet": "43",
+      "index": 17
+    },
+    "19": {
+      "sheet": "43",
+      "index": 18
+    },
+    "20": {
+      "sheet": "43",
+      "index": 19
+    },
+    "21": {
+      "sheet": "43",
+      "index": 20
+    },
+    "22": {
+      "sheet": "43",
+      "index": 21
+    },
+    "23": {
+      "sheet": "43",
+      "index": 22
+    },
+    "24": {
+      "sheet": "43",
+      "index": 23
+    },
+    "25": {
+      "sheet": "43",
+      "index": 24
+    },
+    "26": {
+      "sheet": "43",
+      "index": 25
+    },
+    "27": {
+      "sheet": "43",
+      "index": 26
+    },
+    "28": {
+      "sheet": "43",
+      "index": 27
+    },
+    "29": {
+      "sheet": "43",
+      "index": 28
+    },
+    "30": {
+      "sheet": "43",
+      "index": 29
+    },
+    "31": {
+      "sheet": "43",
+      "index": 30
+    },
+    "32": {
+      "sheet": "43",
+      "index": 31
+    },
+    "33": {
+      "sheet": "43",
+      "index": 32
+    },
+    "34": {
+      "sheet": "43",
+      "index": 33
+    },
+    "35": {
+      "sheet": "43",
+      "index": 34
+    },
+    "36": {
+      "sheet": "42",
+      "index": 0
+    },
+    "37": {
+      "sheet": "42",
+      "index": 1
+    },
+    "38": {
+      "sheet": "42",
+      "index": 2
+    },
+    "39": {
+      "sheet": "42",
+      "index": 3
+    },
+    "40": {
+      "sheet": "42",
+      "index": 4
+    },
+    "41": {
+      "sheet": "42",
+      "index": 5
+    },
+    "42": {
+      "sheet": "42",
+      "index": 6
+    },
+    "43": {
+      "sheet": "42",
+      "index": 7
+    },
+    "44": {
+      "sheet": "42",
+      "index": 8
+    },
+    "45": {
+      "sheet": "42",
+      "index": 9
+    },
+    "46": {
+      "sheet": "42",
+      "index": 10
+    },
+    "47": {
+      "sheet": "42",
+      "index": 11
+    },
+    "48": {
+      "sheet": "42",
+      "index": 12
+    },
+    "49": {
+      "sheet": "42",
+      "index": 13
+    },
+    "50": {
+      "sheet": "42",
+      "index": 14
+    },
+    "51": {
+      "sheet": "42",
+      "index": 15
+    },
+    "52": {
+      "sheet": "42",
+      "index": 16
+    },
+    "53": {
+      "sheet": "42",
+      "index": 17
+    },
+    "54": {
+      "sheet": "42",
+      "index": 18
+    },
+    "55": {
+      "sheet": "42",
+      "index": 19
+    },
+    "56": {
+      "sheet": "42",
+      "index": 20
+    },
+    "57": {
+      "sheet": "42",
+      "index": 21
+    },
+    "58": {
+      "sheet": "42",
+      "index": 22
+    },
+    "59": {
+      "sheet": "42",
+      "index": 23
+    },
+    "60": {
+      "sheet": "42",
+      "index": 24
+    },
+    "61": {
+      "sheet": "42",
+      "index": 25
+    },
+    "62": {
+      "sheet": "42",
+      "index": 26
+    },
+    "63": {
+      "sheet": "42",
+      "index": 27
+    },
+    "64": {
+      "sheet": "42",
+      "index": 28
+    },
+    "65": {
+      "sheet": "42",
+      "index": 29
+    },
+    "66": {
+      "sheet": "42",
+      "index": 30
+    },
+    "67": {
+      "sheet": "42",
+      "index": 31
+    },
+    "68": {
+      "sheet": "42",
+      "index": 32
+    },
+    "69": {
+      "sheet": "42",
+      "index": 33
+    },
+    "70": {
+      "sheet": "42",
+      "index": 34
+    },
+    "71": {
+      "sheet": "42",
+      "index": 35
+    },
+    "72": {
+      "sheet": "42",
+      "index": 36
+    },
+    "73": {
+      "sheet": "42",
+      "index": 37
+    },
+    "74": {
+      "sheet": "42",
+      "index": 38
+    },
+    "75": {
+      "sheet": "42",
+      "index": 39
+    },
+    "76": {
+      "sheet": "42",
+      "index": 40
+    },
+    "77": {
+      "sheet": "42",
+      "index": 41
+    },
+    "78": {
+      "sheet": "42",
+      "index": 42
+    },
+    "79": {
+      "sheet": "42",
+      "index": 43
+    },
+    "80": {
+      "sheet": "42",
+      "index": 44
+    },
+    "81": {
+      "sheet": "42",
+      "index": 45
+    },
+    "82": {
+      "sheet": "48",
+      "index": 0
+    },
+    "83": {
+      "sheet": "48",
+      "index": 1
+    },
+    "84": {
+      "sheet": "48",
+      "index": 2
+    },
+    "85": {
+      "sheet": "48",
+      "index": 3
+    },
+    "86": {
+      "sheet": "48",
+      "index": 4
+    },
+    "87": {
+      "sheet": "48",
+      "index": 5
+    },
+    "88": {
+      "sheet": "48",
+      "index": 6
+    },
+    "89": {
+      "sheet": "48",
+      "index": 7
+    },
+    "90": {
+      "sheet": "48",
+      "index": 8
+    },
+    "91": {
+      "sheet": "48",
+      "index": 9
+    },
+    "92": {
+      "sheet": "48",
+      "index": 10
+    },
+    "93": {
+      "sheet": "48",
+      "index": 11
+    },
+    "94": {
+      "sheet": "48",
+      "index": 12
+    },
+    "95": {
+      "sheet": "48",
+      "index": 13
+    },
+    "96": {
+      "sheet": "48",
+      "index": 14
+    },
+    "97": {
+      "sheet": "48",
+      "index": 15
+    },
+    "98": {
+      "sheet": "48",
+      "index": 16
+    },
+    "99": {
+      "sheet": "48",
+      "index": 17
+    },
+    "100": {
+      "sheet": "48",
+      "index": 18
+    },
+    "101": {
+      "sheet": "48",
+      "index": 19
+    },
+    "102": {
+      "sheet": "48",
+      "index": 20
+    },
+    "103": {
+      "sheet": "43",
+      "index": 35
+    },
+    "104": {
+      "sheet": "46",
+      "index": 0
+    },
+    "105": {
+      "sheet": "46",
+      "index": 1
+    },
+    "106": {
+      "sheet": "46",
+      "index": 2
+    },
+    "107": {
+      "sheet": "46",
+      "index": 3
+    },
+    "108": {
+      "sheet": "46",
+      "index": 4
+    },
+    "109": {
+      "sheet": "46",
+      "index": 5
+    },
+    "110": {
+      "sheet": "46",
+      "index": 6
+    }
+  },
+  "unmatched": [],
+  "board": "/tts/zh-resource-2a2094f37e503dc7.jpg"
+}

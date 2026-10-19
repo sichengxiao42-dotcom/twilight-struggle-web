@@ -1,8 +1,12 @@
 node_modules/
 dist/
 .env
-# 版权素材：只在本地使用，绝不提交
+# 原始模组、缓存、英文备份只保留本地；中文索引按用户要求入库。
 assets/*
 !assets/README.md
+!assets/tts-manifest.json
 
-apps/web/public/tts/
+# 仅将已核验的中文图片入库。
+apps/web/public/tts/*
+!apps/web/public/tts/zh-resource-*.jpg
+!apps/web/public/tts/zh-resource-*.png
