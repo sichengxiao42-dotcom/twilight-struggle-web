@@ -13,7 +13,7 @@ export interface Country {
 }
 
 // 稳定度与战场国按豪华版地图整理，需对照实体规则书复核（见 docs/RULES.md）。
-// TODO(M1): 国家间相邻关系 adjacency 尚未录入。
+// 国家间连接见 adjacency.ts（棋盘连线，不等同于地理接壤）。
 const c = (
   id: string, name: string, nameZh: string, region: Region, stability: number,
   battleground = false, subRegions: SubRegion[] = [], adjacentTo?: 'USSR' | 'US',

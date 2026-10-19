@@ -15,7 +15,7 @@ export interface CardDef {
 }
 
 // 仅录入元数据（名称/OPS/阵营/时期），不收录卡面文字；事件效果以代码实现。
-// 当前只录入早期战争牌，数值需对照实体卡复核。TODO(M2): 中期、后期战争牌。
+// 当前只录入早期战争牌，数值需对照实体卡复核。TODO(M4): 中期、后期战争牌。
 const card = (
   id: number, name: string, nameZh: string, side: CardSide, ops: number, starred: boolean,
   period: Period = 'EARLY',

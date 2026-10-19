@@ -31,3 +31,41 @@ button { font: inherit; padding: 4px 12px; }
 .card.side-US { border-top-color: var(--us); }
 .card.side-USSR { border-top-color: var(--ussr); }
 .card.image { padding: 0; border: none; background-repeat: no-repeat; }
+main { max-width: 1400px; }
+.notice { padding: 12px; background: #806b2420; border-left: 3px solid #b99938; }
+.tracks,.toolbar { display:flex; gap:20px; align-items:center; flex-wrap:wrap; padding:14px 0; }
+.toolbar { border-block:1px solid var(--line); }
+.board-scroll { overflow:auto; border:1px solid var(--line); border-radius:10px; margin:16px 0; }
+.board { width:100%; min-width:980px; display:block; background:color-mix(in srgb,var(--bg) 90%, #66888a); }
+.region-title { fill:var(--muted); font-size:17px; font-weight:700; }
+.country { cursor:default; outline:none; }
+.country rect { fill:var(--bg); stroke:var(--line); stroke-width:1; }
+.country text { fill:var(--fg); font-size:10px; pointer-events:none; }
+.country .stability { fill:var(--muted); }
+.country .us-value { fill:var(--us); font-size:14px; font-weight:bold; }
+.country .ussr-value { fill:var(--ussr); font-size:14px; font-weight:bold; }
+.country.controlled-US rect { fill:color-mix(in srgb,var(--bg) 83%,var(--us)); }
+.country.controlled-USSR rect { fill:color-mix(in srgb,var(--bg) 83%,var(--ussr)); }
+.country.legal { cursor:pointer; }
+.country.legal rect { stroke:#b39236; stroke-width:2; }
+.country:focus rect,.country:hover rect { stroke:var(--fg); stroke-width:2; }
+.connection { stroke:#bc8a35; stroke-width:2; opacity:.8; }
+.card-button { background:transparent; color:var(--fg); padding:0; border:none; cursor:pointer; text-align:left; }
+.card-button:disabled { opacity:.5; cursor:default; }
+.card-button:not(:disabled):hover .card { outline:2px solid #b39236; }
+.hand { margin-top:12px; }
+.error { color:var(--ussr); }
+.log { max-height:260px; overflow:auto; font-size:13px; line-height:1.8; }
+details { margin-top:24px; }
+select { font:inherit; padding:6px; }
+.decision-panel,.card-detail { border:1px solid var(--line); border-radius:8px; padding:16px; margin-top:14px; }
+.decision-panel { border-color:#b39236; }
+.decision-panel button,.card-detail button { margin:6px 8px 6px 0; }
+.card-detail label { display:inline-block; margin:6px 12px 6px 0; }
+.card-detail p { max-width:760px; line-height:1.7; }
+.card-button.selected .card { outline:3px solid #b39236; }
+button:disabled { cursor:default; opacity:.5; }
+.online-panel { padding:16px; margin:16px 0; border:1px solid var(--line); border-radius:8px; }
+.online-panel button,.online-panel label { margin:5px 10px 5px 0; }
+.online-panel input { font:inherit; padding:6px; max-width:100%; box-sizing:border-box; }
+.online-panel input[readonly] { width:min(640px,100%); }

@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { mkdtemp, mkdir, writeFile, symlink, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { request } from 'node:http';
+import { io } from 'socket.io-client';
+import { createGameServer } from '../src/server';
+test('production HTTP serves frontend, assets, HEAD, SPA links and Socket.IO from one port',async t=>{
+  const temp=await mkdtemp(join(tmpdir(),'twilight-http-')),root=join(temp,'web');
+  await mkdir(join(root,'assets'),{recursive:true});
+  await writeFile(join(root,'index.html'),'<html>Twilight test</html>');
+  await writeFile(join(root,'assets','index-abcdefgh.js'),'console.log("game")');
+  await writeFile(join(temp,'secret.txt'),'outside secret');
+  await symlink(join(temp,'secret.txt'),join(root,'escape.txt'));
+  const server=createGameServer(undefined,{webRoot:root});
+  await new Promise<void>(resolve=>server.http.listen(0,'127.0.0.1',resolve));
+  const address=server.http.address();assert.ok(address&&typeof address==='object');
+  const get=(path:string,method='GET',headers:Record<string,string>={})=>new Promise<{status:number;headers:import('node:http').IncomingHttpHeaders;body:string}>((resolve,reject)=>{
+    const req=request({hostname:'127.0.0.1',port:address.port,path,method,headers},res=>{const chunks:Buffer[]=[];res.on('data',c=>chunks.push(c));res.on('end',()=>resolve({status:res.statusCode!,headers:res.headers,body:Buffer.concat(chunks).toString()}));});req.on('error',reject);req.end();
+  });
+  const client=io('http://127.0.0.1:'+address.port,{autoConnect:false,transports:['websocket']});
+  t.after(async()=>{client.disconnect();await new Promise<void>(resolve=>server.io.close(()=>resolve()));await rm(temp,{recursive:true,force:true});});
+  const home=await get('/');assert.equal(home.status,200);assert.equal(home.body,'<html>Twilight test</html>');assert.equal(home.headers['cache-control'],'no-cache');
+  const js=await get('/assets/index-abcdefgh.js');assert.equal(js.status,200);assert.match(String(js.headers['content-type']),/javascript/);assert.match(String(js.headers['cache-control']),/immutable/);
+  const head=await get('/assets/index-abcdefgh.js','HEAD');assert.equal(head.body,'');assert.equal(head.headers['content-length'],js.headers['content-length']);
+  assert.equal((await get('/assets/index-abcdefgh.js','GET',{'if-none-match':String(js.headers.etag)})).status,304);
+  assert.equal((await get('/room/example','GET',{accept:'text/html'})).body,home.body);
+  assert.equal((await get('/missing.js','GET',{accept:'text/html'})).status,404);
+  assert.equal((await get('/api/missing','GET',{accept:'text/html'})).status,404);
+  assert.equal((await get('/health?check=1')).body,'{"ok":true}');
+  assert.equal((await get('/','POST')).status,405);
+  assert.equal((await get('/%zz')).status,400);assert.equal((await get('/%00')).status,400);
+  assert.equal((await get('/../secret.txt')).status,403);assert.equal((await get('/%2e%2e%2fsecret.txt')).status,403);
+  assert.equal((await get('/.env')).status,404);assert.equal((await get('/escape.txt')).status,403);
+  await new Promise<void>((resolve,reject)=>{client.once('connect',resolve);client.once('connect_error',reject);client.connect();});
+  const reply=await client.timeout(3000).emitWithAck('create',{side:'US'});assert.equal(reply.ok,true);
+});

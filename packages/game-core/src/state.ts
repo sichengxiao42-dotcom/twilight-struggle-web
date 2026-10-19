@@ -7,11 +7,44 @@ export type Influence = Record<Side, number>;
 
 export type Phase =
   | { kind: 'SETUP_PLACEMENT'; side: Side; remaining: number; subRegion: 'EASTERN_EUROPE' | 'WESTERN_EUROPE' }
-  | { kind: 'HEADLINE' }
+  | { kind: 'HEADLINE'; side: Side }
+  | { kind: 'DECISION'; side: Side; decision: Decision }
+  | { kind: 'EARLY_WAR_COMPLETE' }
+  | { kind: 'M1_COMPLETE' }
+  | { kind: 'OPS'; side: Side; round: number; mode: 'INFLUENCE' | 'REALIGNMENT' | 'COUP'; remaining: number; ops: number; eligible: string[]; china?: boolean; asiaOnly?: boolean; seaOnly?: boolean; militaryOps?: number }
   | { kind: 'ACTION_ROUND'; round: number; side: Side }
   | { kind: 'GAME_OVER'; winner: Side | 'DRAW'; reason: string };
 
+
+export type Decision =
+  | { kind: 'INFLUENCE'; prompt: string; targets: string[]; affected: Side; operation: 'ADD' | 'REMOVE' | 'CLEAR' | 'MATCH'; remaining: number; perCountry: number; used: Record<string, number>; optional?: boolean; relocation?: boolean; singleCountry?: boolean }
+  | { kind: 'CHOICE'; prompt: string; options: { id: string; label: string }[]; event: number; actor: Side; phasing: Side }
+  | { kind: 'OPS_MODE'; prompt: string; base: number; china?: boolean; phasing: Side }
+  | { kind: 'REVEAL'; prompt: string; cards: number[] };
+export type Task =
+  | { kind: 'EVENT'; card: number; actor: Side; phasing: Side; headline?: boolean }
+  | { kind: 'DISPOSE'; card: number; event: boolean }
+  | { kind: 'START_OPS'; side: Side; base: number; mode?: 'INFLUENCE' | 'REALIGNMENT' | 'COUP'; china?: boolean; asiaOnly?: boolean; seaOnly?: boolean }
+  | { kind: 'FINISH_ACTION'; side: Side; round: number }
+  | { kind: 'FINISH_HEADLINES' }
+  | { kind: 'END_TURN'; final?: boolean }
+  | { kind: 'HELD_DISCARD'; side: Side }
+  | { kind: 'CAMBRIDGE_PLACEMENT'; regions: import('@ts/shared').Region[] };
+export interface Effects {
+  containment?: boolean; vietnam?: boolean; purge: Partial<Record<Side, boolean>>;
+  nato?: boolean; warsaw?: boolean; marshall?: boolean; deGaulle?: boolean;
+  japan?: boolean; formosan?: boolean; norad?: boolean; cia?: boolean;
+}
+
 export interface GameState {
+  mode: 'PRACTICE' | 'EARLY_WAR';
+  tasks: Task[];
+  effects: Effects;
+  headlines: Partial<Record<Side, number>>;
+  spaceAttempts: Influence;
+  phasingSide: Side;
+  actionStartInfluence: Record<string, Influence> | null;
+  noradPending: boolean;
   seed: number;
   /** 已消耗的随机数次数，用于从 seed 恢复 RNG。 */
   rngCalls: number;
@@ -42,7 +75,7 @@ const INITIAL_INFLUENCE: Record<Side, Record<string, number>> = {
   },
 };
 
-export function createGame(seed: number): GameState {
+export function createGame(seed: number, mode: GameState['mode'] = 'EARLY_WAR'): GameState {
   const rng = createRng(seed);
   let rngCalls = 0;
   const counted = () => { rngCalls++; return rng(); };
@@ -61,6 +94,7 @@ export function createGame(seed: number): GameState {
   const hands: Record<Side, number[]> = { USSR: deck.splice(0, HAND_SIZE.early), US: deck.splice(0, HAND_SIZE.early) };
 
   return {
+    mode, tasks: [], effects: { purge: {} }, headlines: {}, spaceAttempts: { USSR: 0, US: 0 }, phasingSide: 'USSR', actionStartInfluence: null, noradPending: false,
     seed,
     rngCalls,
     turn: 1,

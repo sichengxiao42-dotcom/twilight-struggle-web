@@ -1,0 +1,64 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { io, type Socket } from 'socket.io-client';
+import type { ClientToServer, ServerToClient, RoomSnapshot, Session, Side } from '@ts/shared';
+import { CARD_BY_ID, type Action, type PlayerView } from '@ts/game-core';
+import { createGameServer } from '../src/server';
+import { RoomStore } from '../src/rooms';
+type Snapshot=Omit<RoomSnapshot,'view'>&{view:PlayerView};
+class Client {
+  socket:Socket<ServerToClient,ClientToServer>;last?:Snapshot;
+  constructor(url:string){this.socket=io(url,{autoConnect:false,transports:['websocket'],reconnection:false});this.socket.on('state',s=>{this.last=s as Snapshot;});}
+  async connect(){await new Promise<void>((resolve,reject)=>{this.socket.once('connect',resolve);this.socket.once('connect_error',reject);this.socket.connect();});}
+  async wait(predicate:(s:Snapshot)=>boolean){
+    if(this.last&&predicate(this.last))return this.last;
+    return new Promise<Snapshot>((resolve,reject)=>{const timer=setTimeout(()=>{this.socket.off('state',check);reject(new Error('state timeout'));},3000);const check=(s:RoomSnapshot)=>{if(predicate(s as Snapshot)){clearTimeout(timer);this.socket.off('state',check);resolve(s as Snapshot);}};this.socket.on('state',check);});
+  }
+  async create(side:Side){const r=await this.socket.timeout(3000).emitWithAck('create',{side});assert.ok(r.ok,r.ok?'':r.error);return r.data;}
+  async join(session:Pick<Session,'roomId'|'side'>&{token?:string}){return this.socket.timeout(3000).emitWithAck('join',session);}
+  async act(action:Action,id:string,revision=this.last!.revision){return this.socket.timeout(3000).emitWithAck('action',{id,expectedRevision:revision,action});}
+}
+test('real Socket.IO clients: separate views, full early-war flow, duplicates and token reconnection', {timeout:20000},async t=>{
+  const server=createGameServer(new RoomStore(()=>42));
+  await new Promise<void>(resolve=>server.http.listen(0,'127.0.0.1',resolve));
+  const addr=server.http.address();assert.ok(addr&&typeof addr==='object');const url='http://127.0.0.1:'+addr.port;
+  const a=new Client(url),b=new Client(url),intruder=new Client(url),reconnected=new Client(url);
+  t.after(async()=>{for(const c of [a,b,intruder,reconnected])c.socket.disconnect();await new Promise<void>(resolve=>server.io.close(()=>resolve()));});
+  await Promise.all([a.connect(),b.connect(),intruder.connect()]);
+  const session=await a.create('USSR');await a.wait(s=>s.side==='USSR');
+  assert.equal((await intruder.join({roomId:session.roomId,side:'USSR'})).ok,false);
+  const us=await b.join({roomId:session.roomId,side:'US'});assert.ok(us.ok);
+  await Promise.all([a.wait(s=>s.seats.US.connected),b.wait(s=>s.seats.USSR.connected)]);
+  assert.deepEqual(a.last!.view.hands.US,[]);assert.deepEqual(b.last!.view.hands.USSR,[]);
+  assert.equal((await b.act({type:'PLACE_SETUP',country:'france'},'wrong')).ok,false);
+  const first=await a.act({type:'PLACE_SETUP',country:'poland'},'first');assert.ok(first.ok);
+  await Promise.all([a.wait(s=>s.revision===1),b.wait(s=>s.revision===1)]);
+  const again=await a.act({type:'PLACE_SETUP',country:'poland'},'first',0);assert.ok(again.ok);assert.equal(again.data.revision,1);
+  assert.equal((await a.act({type:'PLACE_SETUP',country:'poland'},'stale',0)).ok,false);
+  a.socket.disconnect();await b.wait(s=>!s.seats.USSR.connected);
+  await reconnected.connect();assert.equal((await reconnected.join(session)).ok,true);
+  await Promise.all([reconnected.wait(s=>s.revision===1),b.wait(s=>s.seats.USSR.connected)]);
+  const clients:Record<Side,Client>={USSR:reconnected,US:b};
+  for(let step=0;step<400;step++){
+    const view=b.last!.view;
+    if(view.phase.kind==='GAME_OVER'||view.phase.kind==='EARLY_WAR_COMPLETE')break;
+    assert.ok('side' in view.phase);const side=view.phase.side,client=clients[side],p=client.last!.view.phase;
+    assert.notEqual(p.kind,'WAITING');let action:Action;
+    if(p.kind==='SETUP_PLACEMENT')action={type:'PLACE_SETUP',country:side==='USSR'?'poland':'west_germany'};
+    else if(p.kind==='HEADLINE')action={type:'SELECT_HEADLINE',card:client.last!.view.hands[side].find(id=>CARD_BY_ID.get(id)!.scoring)??client.last!.view.hands[side].find(id=>id!==32)!};
+    else if(p.kind==='ACTION_ROUND'){
+      const id=client.last!.view.hands[side].find(id=>CARD_BY_ID.get(id)!.scoring)??client.last!.view.hands[side][0];
+      action=id===undefined?{type:'PASS_EMPTY'}:CARD_BY_ID.get(id)!.scoring?{type:'PLAY_EVENT',card:id}:{type:'PLAY_OPS',card:id,mode:'INFLUENCE'};
+    }else if(p.kind==='OPS')action={type:'END_OPS'};
+    else if(p.kind==='DECISION'){
+      const d=p.decision;action={type:'CHOOSE',value:d.kind==='REVEAL'?'confirm':d.kind==='OPS_MODE'?'skip':d.kind==='CHOICE'?d.options[0].id:client.last!.view.targets[0]??'done'};
+    }else throw new Error('unexpected phase '+p.kind);
+    const next=client.last!.revision+1;const reply=await client.act(action,'step_'+step);assert.ok(reply.ok,reply.ok?'':reply.error);
+    await Promise.all([b.wait(s=>s.revision===next),reconnected.wait(s=>s.revision===next)]);
+    for(const c of [b,reconnected]){
+      assert.ok(!('seed' in c.last!.view));assert.ok(!('deck' in c.last!.view));assert.ok(!('tasks' in c.last!.view));
+      const enemy=c.last!.side==='US'?'USSR':'US';if(!(c.last!.side==='US'&&c.last!.view.effects.cia))assert.deepEqual(c.last!.view.hands[enemy],[]);
+    }
+  }
+  assert.equal(b.last!.view.phase.kind,'EARLY_WAR_COMPLETE');assert.equal(b.last!.view.turn,3);
+});

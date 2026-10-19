@@ -1,56 +1,126 @@
-import { useMemo, useState } from 'react';
-import type { Region } from '@ts/shared';
-import { CARD_BY_ID, COUNTRIES, controller, createGame } from '@ts/game-core';
+import { useEffect, useState } from 'react';
+import type { Region, Side } from '@ts/shared';
+import { ADJACENCY, CARD_BY_ID, COUNTRIES, EVENT_SUMMARIES, activeSide, apply, controller, createGame, legalTargets, type Action, type OpsMode } from '@ts/game-core';
 import { CardView } from './CardView';
-
-const REGION_LABEL: Record<Region, string> = {
-  EUROPE: '欧洲', MIDDLE_EAST: '中东', ASIA: '亚洲',
-  AFRICA: '非洲', CENTRAL_AMERICA: '中美洲', SOUTH_AMERICA: '南美洲',
-};
-
-// 骨架页：本地热座预览初始局面。地图将在 M1 换成 SVG 世界地图。
+import { displayState, useOnline } from './useOnline';
+const labels: Record<Region, string> = { EUROPE: '欧洲', ASIA: '亚洲', MIDDLE_EAST: '中东', AFRICA: '非洲', CENTRAL_AMERICA: '中美洲', SOUTH_AMERICA: '南美洲' };
+const sides: Record<Side, string> = { USSR: '苏联', US: '美国' };
+const modes: Record<OpsMode, string> = { INFLUENCE: '放置影响力', REALIGNMENT: '调整', COUP: '政变' };
+// Region panels form an original schematic board; connections are board links, not geographic borders.
+const origins: Record<Region, [number, number]> = { CENTRAL_AMERICA: [12, 12], SOUTH_AMERICA: [12, 330], EUROPE: [410, 12], AFRICA: [410, 430], MIDDLE_EAST: [808, 12], ASIA: [808, 330] };
+const positions = Object.fromEntries(COUNTRIES.map(c => {
+  const group = COUNTRIES.filter(x => x.region === c.region), i = group.indexOf(c), [x, y] = origins[c.region];
+  return [c.id, [x + (i % 3) * 128, y + 42 + Math.floor(i / 3) * 48]];
+}));
 export function App() {
-  const [seed, setSeed] = useState(1);
-  const state = useMemo(() => createGame(seed), [seed]);
+  const [localState, setState] = useState(() => createGame(1));
+  const online=useOnline();
+  const state=online.snapshot?displayState(online.snapshot.view):localState;
+  const [roomId,setRoomId]=useState(()=>new URLSearchParams(location.hash.slice(1)).get('room')??'');
+  const [seat,setSeat]=useState<Side>(()=>new URLSearchParams(location.hash.slice(1)).get('side')==='US'?'US':'USSR');
+  const [copyStatus,setCopyStatus]=useState('');
+  const [mode, setMode] = useState<OpsMode>('INFLUENCE');
+  const [selected, setSelected] = useState<number | null>(null);
+  const [use, setUse] = useState<'OPS'|'EVENT'|'SPACE'>('OPS');
+  const [order, setOrder] = useState<'BEFORE'|'AFTER'>('BEFORE');
+  const [regional, setRegional] = useState<'NONE'|'ASIA'|'SEA'>('NONE');
+  const [error, setError] = useState('');
+  const [revealed, setRevealed] = useState(false);
+  const [hover, setHover] = useState<string | null>(null);
+  const actor=activeSide(state),side=online.session?.side??actor,p=state.phase;
+  const onlineActive=Boolean(online.session);
+  const canAct=!onlineActive||Boolean(online.ready&&!online.busy&&online.snapshot&&actor===side&&online.snapshot.seats.US.occupied&&online.snapshot.seats.USSR.occupied);
+  const targets=canAct?(online.snapshot?online.snapshot.view.targets:legalTargets(state)):[];
+  useEffect(()=>{setSelected(null);setRegional('NONE');},[online.snapshot?.revision,online.session?.roomId]);
+  const invite=online.session?location.origin+location.pathname+'#room='+online.session.roomId+'&side='+(online.session.side==='US'?'USSR':'US'):'';
+  const dispatch = (action: Action) => {
+    if (!side || !canAct) return;
+    if(onlineActive){online.send(action);return;}
+    try {
+      const next = apply(state, side, action);
+      if (activeSide(next) !== side) setRevealed(false);
+      setState(next); setSelected(null); setRegional('NONE'); setError('');
+    } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+  };
+  const status = onlineActive&&!online.ready?'连接中 / 等待恢复房间':online.snapshot?.view.phase.kind==='WAITING'?'等待'+sides[online.snapshot.view.phase.side]+'处理事件':p.kind === 'SETUP_PLACEMENT' ? sides[p.side] + '在' + (p.subRegion === 'EASTERN_EUROPE' ? '东欧' : '西欧') + '布点 · 剩余 ' + p.remaining
+    : p.kind === 'ACTION_ROUND' ? sides[p.side] + ' · 行动轮 ' + p.round + '/6 · 选择卡牌'
+    : p.kind === 'OPS' ? sides[p.side] + ' · ' + modes[p.mode] + ' · 剩余 ' + p.remaining + ' OPS'
+    : p.kind === 'HEADLINE' ? sides[p.side] + ' · 暗选头条'
+    : p.kind === 'DECISION' ? sides[p.side] + ' · ' + p.decision.prompt
+    : p.kind === 'EARLY_WAR_COMPLETE' ? '早期战争三回合完成 · 当前 VP ' + state.vp + '（尚未进入中期或终局）'
+    : p.kind === 'GAME_OVER' ? (p.winner === 'DRAW' ? '平局' : sides[p.winner]) + '获胜：' + p.reason
+    : '练习回合完成，可重新开局';
+  return <main>
+    <header><h1>冷战热斗</h1><span>{state.mode === 'EARLY_WAR' ? 'M2 · 早期战争' : 'M1 · OPS 练习'}</span><button disabled={onlineActive} onClick={() => { setState(createGame((state.seed + 1) >>> 0,state.mode)); setRevealed(false); setSelected(null); setError(''); }}>重新开局</button></header>
+    <section className="online-panel">
+      <h2>双人联机</h2><p>同一局域网联机时，请先通过电脑的局域网 IP 打开页面，再复制邀请链接。</p>
+      {!online.session?<><label>阵营 <select value={seat} onChange={e=>setSeat(e.target.value as Side)}><option value="USSR">苏联</option><option value="US">美国</option></select></label>
+        <button disabled={online.busy} onClick={()=>online.create(seat)}>创建房间</button>
+        <label>房间号 <input value={roomId} onChange={e=>setRoomId(e.target.value)} maxLength={10} placeholder="朋友的房间号"/></label>
+        <button disabled={online.busy||!roomId.trim()} onClick={()=>online.join(roomId,seat)}>加入房间</button>
+        <button disabled={online.busy} onClick={online.resume}>恢复上次房间</button></>:<>
+        <p>房间 <strong>{online.session.roomId}</strong> · 你是{sides[online.session.side]} · {online.ready?'已连接':'连接已中断，自动重连中'}</p>
+        <p>{(['USSR','US'] as const).map(s=><span key={s}>{sides[s]}：{online.snapshot?.seats[s].connected?'在线':online.snapshot?.seats[s].occupied?'离线（保留席位）':'等待加入'} </span>)}</p>
+        <input aria-label="邀请链接" readOnly value={invite}/><button onClick={()=>{if(!navigator.clipboard){setCopyStatus('请长按链接复制');return;}navigator.clipboard.writeText(invite).then(()=>setCopyStatus('已复制')).catch(()=>setCopyStatus('请长按链接复制'));}}>复制邀请链接</button><span>{copyStatus}</span>
+        <button onClick={online.leave}>返回本地（保留恢复身份）</button>
+        {online.hasPending&&<button disabled={!online.ready||online.busy} onClick={online.retry}>重试待确认操作</button>}
+      </>}
+      {online.error&&<p role="alert" className="error">{online.error}</p>}
+    </section>
+    <p className="notice">{state.mode === 'EARLY_WAR' ? (onlineActive?'联机早期战争：操作由服务器结算，只下发各自可见的信息；中晚期尚未开放。':'本地双人热座：开局布点 → 暗选头条 → 6 轮行动 → 回合结束。包含早期事件及可选牌，完成第 3 回合后停止。') : 'OPS 练习：跳过头条与事件，只进行第一回合。'}</p>
+    <label>新局模式 <select disabled={onlineActive} value={state.mode} onChange={e=>{setState(createGame(state.seed+1,e.target.value as 'EARLY_WAR'|'PRACTICE'));setRevealed(false);setSelected(null);setError('');}}><option value="EARLY_WAR">M2 早期战争</option><option value="PRACTICE">M1 OPS 练习</option></select></label>
+    <div className="tracks"><b>第 {state.turn} 回合</b><b>DEFCON {state.defcon}</b><b>VP {state.vp}</b><span>军事行动：苏 {state.milOps.USSR} / 美 {state.milOps.US}</span><span>中国牌：{sides[state.chinaCard.holder]} · {state.chinaCard.faceUp?'正面':'背面'}</span><span>太空：苏 {state.space.USSR} / 美 {state.space.US}</span></div>
+    <section className="toolbar"><strong aria-live="polite">{status}</strong>{p.kind === 'OPS' && canAct && <button onClick={() => dispatch({ type: 'END_OPS' })}>结束操作 / 放弃余点</button>}</section>
+    {error && <p role="alert" className="error">{error}</p>}
+    <p>金色边框为可操作国家；★ 为战场国。蓝色数字为美国，红色数字为苏联。悬停或聚焦查看相邻连线。</p>
+    <div className="board-scroll"><svg viewBox="0 0 1208 810" className="board" aria-label="世界局势示意地图">
+      {(Object.keys(labels) as Region[]).map(r => { const [x,y] = origins[r]; return <text key={r} x={x+8} y={y+25} className="region-title">{labels[r]}</text>; })}
+      {hover && ADJACENCY[hover].map(id => { const a=positions[hover],b=positions[id]; return <line key={id} x1={a[0]+60} y1={a[1]+20} x2={b[0]+60} y2={b[1]+20} className="connection"/>; })}
+      {COUNTRIES.map(c => {
+        const [x,y]=positions[c.id], inf=state.influence[c.id], ctrl=controller(state,c.id), legal=targets.includes(c.id);
+        const click=()=>dispatch(p.kind === 'DECISION' ? {type:'CHOOSE',value:c.id} : { type: p.kind === 'SETUP_PLACEMENT' ? 'PLACE_SETUP' : 'TARGET', country:c.id });
+        return <g key={c.id} transform={'translate('+x+','+y+')'} className={'country '+(legal?'legal ':'')+(ctrl?'controlled-'+ctrl:'')} role="button" aria-disabled={!legal} aria-label={c.nameZh+' 稳定度'+c.stability+' 美国'+inf.US+' 苏联'+inf.USSR} tabIndex={0} onMouseEnter={()=>setHover(c.id)} onMouseLeave={()=>setHover(null)} onFocus={()=>setHover(c.id)} onBlur={()=>setHover(null)} onClick={()=>{if(legal)click();}} onKeyDown={e=>{if(legal&&(e.key==='Enter'||e.key===' ')){e.preventDefault();click();}}}>
+          <title>{c.nameZh+' · 稳定度 '+c.stability+' · 相邻：'+ADJACENCY[c.id].map(id=>COUNTRIES.find(n=>n.id===id)!.nameZh).join('、')}</title>
+          <rect width="120" height="40" rx="5"/><text x="6" y="15">{c.battleground?'★ ':''}{c.nameZh}</text><text x="6" y="32" className="stability">稳 {c.stability}</text><text x="72" y="32" className="us-value">{inf.US}</text><text x="99" y="32" className="ussr-value">{inf.USSR}</text>
+        </g>;
+      })}
+    </svg></div>
+    {side && <section className="play-panel"><h2>{sides[side]}手牌 · {state.hands[side].length} 张</h2>
+      {!revealed ? <button onClick={()=>setRevealed(true)}>{onlineActive?'显示我的手牌':'交给'+sides[side]+'玩家 · 显示手牌'}</button> : <>
+        <button onClick={()=>setRevealed(false)}>隐藏手牌</button>
 
-  return (
-    <main>
-      <header>
-        <h1>冷战热斗 · 网页版</h1>
-        <span>第 {state.turn} 回合 · DEFCON {state.defcon} · VP {state.vp}</span>
-        <button onClick={() => setSeed((s) => s + 1)}>重新发牌</button>
-      </header>
+        {p.kind === 'HEADLINE' && state.space[side]>=4 && state.space[side==='US'?'USSR':'US']<4 && state.headlines[side==='US'?'USSR':'US']!==undefined && <p>太空特权：对方头条为 {CARD_BY_ID.get(state.headlines[side==='US'?'USSR':'US']!)!.nameZh}</p>}
+        {p.kind === 'DECISION' && canAct && <div className="decision-panel">
+          <h2>{p.decision.prompt}</h2>
+          {p.decision.kind === 'REVEAL' && <><div className="hand">{p.decision.cards.map(id=><CardView key={id} card={CARD_BY_ID.get(id)!}/>)}</div><button onClick={()=>dispatch({type:'CHOOSE',value:'confirm'})}>已查看 · 继续</button></>}
+          {p.decision.kind === 'CHOICE' && p.decision.options.map(o=><button key={o.id} onClick={()=>dispatch({type:'CHOOSE',value:o.id})}>{o.label}</button>)}
+          {p.decision.kind === 'INFLUENCE' && <><p>点击金色边框的国家 · 剩余 {p.decision.remaining} 点/次</p>{p.decision.optional && <button onClick={()=>dispatch({type:'CHOOSE',value:'done'})}>移除完毕 · 进入重新放置</button>}</>}
+          {p.decision.kind === 'OPS_MODE' && <>
+            {(Object.keys(modes) as OpsMode[]).map(m=><span key={m}><button onClick={()=>dispatch({type:'CHOOSE',value:m})}>{modes[m]}</button>{side==='USSR'&&state.effects.vietnam&&<button onClick={()=>dispatch({type:'CHOOSE',value:m+':SEA'})}>{modes[m]} · 限东南亚奖励</button>}</span>)}
+            <button onClick={()=>dispatch({type:'CHOOSE',value:'skip'})}>放弃这些 OPS</button>
+          </>}
+        </div>}
+        {(p.kind === 'ACTION_ROUND' || p.kind === 'HEADLINE' || p.kind === 'SETUP_PLACEMENT') && <>
+          {p.kind === 'ACTION_ROUND' && state.mode==='PRACTICE' && state.hands[side].every(id=>CARD_BY_ID.get(id)!.scoring) && <button onClick={()=>dispatch({type:'PASS_PRACTICE'})}>无 OPS 牌 · 跳过练习行动</button>}
+          {canAct && p.kind==='ACTION_ROUND' && state.mode==='EARLY_WAR' && !state.hands[side].length && <button onClick={()=>dispatch({type:'PASS_EMPTY'})}>手牌用尽 · 跳过行动</button>}
+          <div className="hand">{[...state.hands[side],...(state.mode==='EARLY_WAR'&&p.kind==='ACTION_ROUND'&&state.chinaCard.holder===side&&state.chinaCard.faceUp?[6]:[])].map(id=>{const card=CARD_BY_ID.get(id)!;return <button className={'card-button '+(selected===id?'selected':'')} key={id} disabled={!canAct||p.kind==='SETUP_PLACEMENT'||(state.mode==='PRACTICE'&&Boolean(card.scoring))} onClick={()=>{setSelected(id);setRegional('NONE');setUse(card.scoring?'EVENT':'OPS');}}><CardView card={card}/></button>;})}</div>
+          {selected!==null && <section className="card-detail">
+            <h2>{CARD_BY_ID.get(selected)!.nameZh}</h2><p>{EVENT_SUMMARIES[selected]}</p>
+            {p.kind==='HEADLINE' ? <button disabled={!canAct||selected===32||selected===6} onClick={()=>dispatch({type:'SELECT_HEADLINE',card:selected})}>确定头条 · 交给另一方</button> : <>
+              {state.mode==='EARLY_WAR' && <label>出牌方式 <select value={selected===6?'OPS':use} onChange={e=>setUse(e.target.value as typeof use)}><option value="OPS" disabled={CARD_BY_ID.get(selected)!.scoring}>OPS 操作</option><option value="EVENT" disabled={selected===6}>事件 / 计分</option><option value="SPACE" disabled={selected===6||CARD_BY_ID.get(selected)!.scoring}>太空竞赛</option></select></label>}
+              {(use==='OPS'||selected===6) && <><label> OPS 用途 <select value={mode} onChange={e=>setMode(e.target.value as OpsMode)}>{(Object.keys(modes) as OpsMode[]).map(m=><option key={m} value={m}>{modes[m]}</option>)}</select></label>
+                {state.mode==='EARLY_WAR'&&<><label> 对手事件 <select value={order} onChange={e=>setOrder(e.target.value as typeof order)}><option value="BEFORE">OPS 前结算</option><option value="AFTER">OPS 后结算</option></select></label>
+                  <label> 区域奖励 <select value={regional} onChange={e=>setRegional(e.target.value as typeof regional)}><option value="NONE">不限制地区</option>{selected===6&&<option value="ASIA">全部在亚洲 · 中国牌奖励</option>}{side==='USSR'&&state.effects.vietnam&&<option value="SEA">全部在东南亚 · 越南奖励{selected===6?' + 中国牌奖励':''}</option>}</select></label></>}
+              </>}
+              <button disabled={!canAct||p.kind!=='ACTION_ROUND'} onClick={()=>dispatch(state.mode==='PRACTICE'||selected===6||use==='OPS'?{type:'PLAY_OPS',card:selected,mode,order,asiaOnly:regional==='ASIA',seaOnly:regional==='SEA'}:use==='EVENT'?{type:'PLAY_EVENT',card:selected}:{type:'SPACE',card:selected})}>确认出牌</button>
+            </>}
+          </section>}
+        </>}
+        {state.effects.cia && side==='US' && <details><summary>中央情报局：本回合苏联公开手牌</summary><div className="hand">{state.hands.USSR.map(id=><CardView key={id} card={CARD_BY_ID.get(id)!}/>)}</div></details>}
 
-      <section className="regions">
-        {(Object.keys(REGION_LABEL) as Region[]).map((region) => (
-          <div key={region} className="region">
-            <h2>{REGION_LABEL[region]}</h2>
-            <ul>
-              {COUNTRIES.filter((c) => c.region === region).map((c) => {
-                const inf = state.influence[c.id];
-                const ctrl = controller(state, c.id);
-                return (
-                  <li key={c.id} className={ctrl ? `ctrl-${ctrl}` : undefined}>
-                    <span className={c.battleground ? 'bg' : undefined}>{c.nameZh}</span>
-                    <small>稳{c.stability}</small>
-                    <span className="inf">{inf.US || ''}</span>
-                    <span className="inf ussr">{inf.USSR || ''}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
-      </section>
-
-      {(['USSR', 'US'] as const).map((side) => (
-        <section key={side}>
-          <h2>{side === 'USSR' ? '苏联' : '美国'}手牌</h2>
-          <div className="hand">
-            {state.hands[side].map((id) => <CardView key={id} card={CARD_BY_ID.get(id)!} />)}
-          </div>
-        </section>
-      ))}
-    </main>
-  );
+      </>}
+    </section>}
+    {online.snapshot&&<p>对方手牌：{online.snapshot.view.handCounts[side==='US'?'USSR':'US']} 张 · 牌库：{online.snapshot.view.deckCount} 张 · 局面版本 {online.snapshot.revision}</p>}
+    <details open><summary>对局日志 · {state.log.length} 条</summary><ol className="log">{state.log.map((line,i)=><li key={i}>{line}</li>)}</ol></details>
+  </main>;
 }
