@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+# 版权素材：只在本地使用，绝不提交
+assets/*
+!assets/README.md
+
+apps/web/public/tts/
