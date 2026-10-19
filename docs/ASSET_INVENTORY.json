@@ -1,0 +1,3257 @@
+{
+  "checkedOn": "2026-10-19",
+  "workshop": {
+    "id": "3311714280",
+    "url": "https://steamcommunity.com/sharedfiles/filedetails/?id=3311714280",
+    "language": "en"
+  },
+  "coverage": {
+    "cards": 110,
+    "missingCardNumbers": [],
+    "imageFiles": 96,
+    "modPdfFiles": 4,
+    "otherFiles": 6,
+    "allDownloadedResources": 106
+  },
+  "sheets": {
+    "63": {
+      "url": "/tts/sheet-63.jpg",
+      "columns": 10,
+      "rows": 7
+    },
+    "66": {
+      "url": "/tts/sheet-66.jpg",
+      "columns": 10,
+      "rows": 7
+    },
+    "65": {
+      "url": "/tts/sheet-65.jpg",
+      "columns": 10,
+      "rows": 7
+    }
+  },
+  "cards": {
+    "6": {
+      "sheet": "63",
+      "index": 5,
+      "name": "",
+      "ttsCardId": 6305
+    },
+    "5": {
+      "sheet": "63",
+      "index": 4,
+      "name": "Five-Year Plan",
+      "ttsCardId": 6304
+    },
+    "25": {
+      "sheet": "63",
+      "index": 24,
+      "name": "Containment",
+      "ttsCardId": 6324
+    },
+    "10": {
+      "sheet": "63",
+      "index": 9,
+      "name": "Blockade",
+      "ttsCardId": 6309
+    },
+    "2": {
+      "sheet": "63",
+      "index": 1,
+      "name": "Europe Scoring",
+      "ttsCardId": 6301
+    },
+    "22": {
+      "sheet": "63",
+      "index": 21,
+      "name": "Independement Reds                 ",
+      "ttsCardId": 6321
+    },
+    "14": {
+      "sheet": "63",
+      "index": 13,
+      "name": "Comecon",
+      "ttsCardId": 6313
+    },
+    "27": {
+      "sheet": "63",
+      "index": 26,
+      "name": "Us/Japan Mutual Defence Pack",
+      "ttsCardId": 6326
+    },
+    "33": {
+      "sheet": "63",
+      "index": 32,
+      "name": "De-Stalinzation",
+      "ttsCardId": 6332
+    },
+    "16": {
+      "sheet": "63",
+      "index": 15,
+      "name": "Warsaw Pact Formed",
+      "ttsCardId": 6315
+    },
+    "15": {
+      "sheet": "63",
+      "index": 14,
+      "name": "Nasser",
+      "ttsCardId": 6314
+    },
+    "21": {
+      "sheet": "63",
+      "index": 20,
+      "name": "Nato",
+      "ttsCardId": 6320
+    },
+    "4": {
+      "sheet": "63",
+      "index": 3,
+      "name": "Duck and Cover",
+      "ttsCardId": 6303
+    },
+    "3": {
+      "sheet": "63",
+      "index": 2,
+      "name": "Middle East Scoring",
+      "ttsCardId": 6302
+    },
+    "30": {
+      "sheet": "63",
+      "index": 29,
+      "name": "Decolonization",
+      "ttsCardId": 6329
+    },
+    "24": {
+      "sheet": "63",
+      "index": 23,
+      "name": "Indo-Pakistani War",
+      "ttsCardId": 6323
+    },
+    "28": {
+      "sheet": "63",
+      "index": 27,
+      "name": "Suez Crisis",
+      "ttsCardId": 6327
+    },
+    "105": {
+      "sheet": "63",
+      "index": 37,
+      "name": "Spesial Relationship",
+      "ttsCardId": 6337
+    },
+    "29": {
+      "sheet": "63",
+      "index": 28,
+      "name": "East Europian Unrest",
+      "ttsCardId": 6328
+    },
+    "31": {
+      "sheet": "63",
+      "index": 30,
+      "name": "Red Scare-Purge",
+      "ttsCardId": 6330
+    },
+    "20": {
+      "sheet": "63",
+      "index": 19,
+      "name": "Olympic Games",
+      "ttsCardId": 6319
+    },
+    "106": {
+      "sheet": "63",
+      "index": 38,
+      "name": "NORAD",
+      "ttsCardId": 6338
+    },
+    "12": {
+      "sheet": "63",
+      "index": 11,
+      "name": "Romanian Abdication",
+      "ttsCardId": 6311
+    },
+    "1": {
+      "sheet": "63",
+      "index": 0,
+      "name": "Asia Scoring",
+      "ttsCardId": 6300
+    },
+    "18": {
+      "sheet": "63",
+      "index": 17,
+      "name": "Captured nazi Scientist",
+      "ttsCardId": 6317
+    },
+    "104": {
+      "sheet": "63",
+      "index": 36,
+      "name": "The Cambrifge Five",
+      "ttsCardId": 6336
+    },
+    "32": {
+      "sheet": "63",
+      "index": 31,
+      "name": "Un Intervention",
+      "ttsCardId": 6331
+    },
+    "13": {
+      "sheet": "63",
+      "index": 12,
+      "name": "Arab Israeli War",
+      "ttsCardId": 6312
+    },
+    "19": {
+      "sheet": "63",
+      "index": 18,
+      "name": "Truman Doctrine",
+      "ttsCardId": 6318
+    },
+    "9": {
+      "sheet": "63",
+      "index": 8,
+      "name": "Vietnam Revolts",
+      "ttsCardId": 6308
+    },
+    "34": {
+      "sheet": "63",
+      "index": 33,
+      "name": "Nuclear test Ban",
+      "ttsCardId": 6333
+    },
+    "17": {
+      "sheet": "63",
+      "index": 16,
+      "name": "De Gaulle Leads France",
+      "ttsCardId": 6316
+    },
+    "23": {
+      "sheet": "63",
+      "index": 22,
+      "name": "Marshal Plan",
+      "ttsCardId": 6322
+    },
+    "7": {
+      "sheet": "63",
+      "index": 6,
+      "name": "Socialist Goverments",
+      "ttsCardId": 6306
+    },
+    "11": {
+      "sheet": "63",
+      "index": 10,
+      "name": "Korean War",
+      "ttsCardId": 6310
+    },
+    "103": {
+      "sheet": "63",
+      "index": 35,
+      "name": "Deffectors",
+      "ttsCardId": 6335
+    },
+    "26": {
+      "sheet": "63",
+      "index": 25,
+      "name": "Cia Created",
+      "ttsCardId": 6325
+    },
+    "35": {
+      "sheet": "63",
+      "index": 34,
+      "name": "Formosan Resolution",
+      "ttsCardId": 6334
+    },
+    "8": {
+      "sheet": "63",
+      "index": 7,
+      "name": "Fidel",
+      "ttsCardId": 6307
+    },
+    "70": {
+      "sheet": "66",
+      "index": 34,
+      "name": "OAS Founded",
+      "ttsCardId": 6634
+    },
+    "74": {
+      "sheet": "66",
+      "index": 38,
+      "name": "The Voice of America",
+      "ttsCardId": 6638
+    },
+    "76": {
+      "sheet": "66",
+      "index": 40,
+      "name": "USSRI River Skirmish",
+      "ttsCardId": 6640
+    },
+    "42": {
+      "sheet": "66",
+      "index": 6,
+      "name": "Quagmire",
+      "ttsCardId": 6606
+    },
+    "37": {
+      "sheet": "66",
+      "index": 1,
+      "name": "Central america Scoring",
+      "ttsCardId": 6601
+    },
+    "65": {
+      "sheet": "66",
+      "index": 29,
+      "name": "Camp David Accords",
+      "ttsCardId": 6629
+    },
+    "54": {
+      "sheet": "66",
+      "index": 18,
+      "name": "Allende",
+      "ttsCardId": 6618
+    },
+    "51": {
+      "sheet": "66",
+      "index": 15,
+      "name": "Brezhnev Doctrine",
+      "ttsCardId": 6615
+    },
+    "72": {
+      "sheet": "66",
+      "index": 36,
+      "name": "Sadar Expels Soviets",
+      "ttsCardId": 6636
+    },
+    "45": {
+      "sheet": "66",
+      "index": 9,
+      "name": "Summit",
+      "ttsCardId": 6609
+    },
+    "43": {
+      "sheet": "66",
+      "index": 7,
+      "name": "Salt Negotiations",
+      "ttsCardId": 6607
+    },
+    "59": {
+      "sheet": "66",
+      "index": 23,
+      "name": "Flower Power",
+      "ttsCardId": 6623
+    },
+    "53": {
+      "sheet": "66",
+      "index": 17,
+      "name": "South African Unrest",
+      "ttsCardId": 6617
+    },
+    "78": {
+      "sheet": "66",
+      "index": 42,
+      "name": "Alliance For Progress",
+      "ttsCardId": 6642
+    },
+    "55": {
+      "sheet": "66",
+      "index": 19,
+      "name": "Willy Brandt",
+      "ttsCardId": 6619
+    },
+    "67": {
+      "sheet": "66",
+      "index": 31,
+      "name": "Grain Sales to Soviets",
+      "ttsCardId": 6631
+    },
+    "57": {
+      "sheet": "66",
+      "index": 21,
+      "name": "ABM Treaty",
+      "ttsCardId": 6621
+    },
+    "81": {
+      "sheet": "66",
+      "index": 45,
+      "name": "Sout America Scoring",
+      "ttsCardId": 6645
+    },
+    "60": {
+      "sheet": "66",
+      "index": 24,
+      "name": "U2 Incident",
+      "ttsCardId": 6624
+    },
+    "77": {
+      "sheet": "66",
+      "index": 41,
+      "name": "Ask Not What your country can do for you",
+      "ttsCardId": 6641
+    },
+    "62": {
+      "sheet": "66",
+      "index": 26,
+      "name": "Lone Gunman",
+      "ttsCardId": 6626
+    },
+    "66": {
+      "sheet": "66",
+      "index": 30,
+      "name": "Puppet Governments",
+      "ttsCardId": 6630
+    },
+    "38": {
+      "sheet": "66",
+      "index": 2,
+      "name": "SouthEast Asia Scoring",
+      "ttsCardId": 6602
+    },
+    "48": {
+      "sheet": "66",
+      "index": 12,
+      "name": "Kitchen Debates",
+      "ttsCardId": 6612
+    },
+    "58": {
+      "sheet": "66",
+      "index": 22,
+      "name": "Cultural Revolution",
+      "ttsCardId": 6622
+    },
+    "107": {
+      "sheet": "66",
+      "index": 46,
+      "name": "Che",
+      "ttsCardId": 6646
+    },
+    "49": {
+      "sheet": "66",
+      "index": 13,
+      "name": "Missile Envy",
+      "ttsCardId": 6613
+    },
+    "41": {
+      "sheet": "66",
+      "index": 5,
+      "name": "Nuclear Subs",
+      "ttsCardId": 6605
+    },
+    "36": {
+      "sheet": "66",
+      "index": 0,
+      "name": "Brush War",
+      "ttsCardId": 6600
+    },
+    "79": {
+      "sheet": "66",
+      "index": 43,
+      "name": "Africa Scoring",
+      "ttsCardId": 6643
+    },
+    "52": {
+      "sheet": "66",
+      "index": 16,
+      "name": "Portuguese Empire Crumbles",
+      "ttsCardId": 6616
+    },
+    "69": {
+      "sheet": "66",
+      "index": 33,
+      "name": "Latin American Death Squads",
+      "ttsCardId": 6633
+    },
+    "71": {
+      "sheet": "66",
+      "index": 35,
+      "name": "Nixon Plays the China card",
+      "ttsCardId": 6635
+    },
+    "39": {
+      "sheet": "66",
+      "index": 3,
+      "name": "Arms Race",
+      "ttsCardId": 6603
+    },
+    "75": {
+      "sheet": "66",
+      "index": 39,
+      "name": "Liberation Theology",
+      "ttsCardId": 6639
+    },
+    "46": {
+      "sheet": "66",
+      "index": 10,
+      "name": "How I Learned to stop Worrying",
+      "ttsCardId": 6610
+    },
+    "56": {
+      "sheet": "66",
+      "index": 20,
+      "name": "Muslim Revolution",
+      "ttsCardId": 6620
+    },
+    "80": {
+      "sheet": "66",
+      "index": 44,
+      "name": "One Small Step...",
+      "ttsCardId": 6644
+    },
+    "68": {
+      "sheet": "66",
+      "index": 32,
+      "name": "John Paul Elected Pope",
+      "ttsCardId": 6632
+    },
+    "73": {
+      "sheet": "66",
+      "index": 37,
+      "name": "Shuttle diplomacy",
+      "ttsCardId": 6637
+    },
+    "44": {
+      "sheet": "66",
+      "index": 8,
+      "name": "Bear trap",
+      "ttsCardId": 6608
+    },
+    "108": {
+      "sheet": "66",
+      "index": 47,
+      "name": "Our Man in Tehran",
+      "ttsCardId": 6647
+    },
+    "64": {
+      "sheet": "66",
+      "index": 28,
+      "name": "Panama Canal Returned",
+      "ttsCardId": 6628
+    },
+    "63": {
+      "sheet": "66",
+      "index": 27,
+      "name": "Colonial Rear Guards",
+      "ttsCardId": 6627
+    },
+    "47": {
+      "sheet": "66",
+      "index": 11,
+      "name": "Junta",
+      "ttsCardId": 6611
+    },
+    "50": {
+      "sheet": "66",
+      "index": 14,
+      "name": "We will Bury You",
+      "ttsCardId": 6614
+    },
+    "61": {
+      "sheet": "66",
+      "index": 25,
+      "name": "Opec",
+      "ttsCardId": 6625
+    },
+    "40": {
+      "sheet": "66",
+      "index": 4,
+      "name": "Cuban Missile Crisis",
+      "ttsCardId": 6604
+    },
+    "91": {
+      "sheet": "65",
+      "index": 9,
+      "name": "Ortega Elected in Nicaragua",
+      "ttsCardId": 6509
+    },
+    "96": {
+      "sheet": "65",
+      "index": 14,
+      "name": "Tear Down This Wall",
+      "ttsCardId": 6514
+    },
+    "102": {
+      "sheet": "65",
+      "index": 20,
+      "name": "Iran-Iraq War",
+      "ttsCardId": 6520
+    },
+    "98": {
+      "sheet": "65",
+      "index": 16,
+      "name": "Aldrich Ames Remix",
+      "ttsCardId": 6516
+    },
+    "110": {
+      "sheet": "65",
+      "index": 22,
+      "name": "Awacs Sale To Saudis",
+      "ttsCardId": 6522
+    },
+    "83": {
+      "sheet": "65",
+      "index": 1,
+      "name": "The Iron Lady",
+      "ttsCardId": 6501
+    },
+    "99": {
+      "sheet": "65",
+      "index": 17,
+      "name": "Pershing Deployed",
+      "ttsCardId": 6517
+    },
+    "88": {
+      "sheet": "65",
+      "index": 6,
+      "name": "Marine Barracks Bombing",
+      "ttsCardId": 6506
+    },
+    "90": {
+      "sheet": "65",
+      "index": 8,
+      "name": "Glasnost",
+      "ttsCardId": 6508
+    },
+    "85": {
+      "sheet": "65",
+      "index": 3,
+      "name": "Star Wars",
+      "ttsCardId": 6503
+    },
+    "93": {
+      "sheet": "65",
+      "index": 11,
+      "name": "Iran-Contra Scandal",
+      "ttsCardId": 6511
+    },
+    "109": {
+      "sheet": "65",
+      "index": 21,
+      "name": "Yuri and Samantha",
+      "ttsCardId": 6521
+    },
+    "87": {
+      "sheet": "65",
+      "index": 5,
+      "name": "The Reformer",
+      "ttsCardId": 6505
+    },
+    "86": {
+      "sheet": "65",
+      "index": 4,
+      "name": "North Sea Oil",
+      "ttsCardId": 6504
+    },
+    "84": {
+      "sheet": "65",
+      "index": 2,
+      "name": "Reagan Bombs Libya",
+      "ttsCardId": 6502
+    },
+    "89": {
+      "sheet": "65",
+      "index": 7,
+      "name": "Soviets Shoot Down KAL-007",
+      "ttsCardId": 6507
+    },
+    "94": {
+      "sheet": "65",
+      "index": 12,
+      "name": "Chernobyl",
+      "ttsCardId": 6512
+    },
+    "101": {
+      "sheet": "65",
+      "index": 19,
+      "name": "Solidarity",
+      "ttsCardId": 6519
+    },
+    "100": {
+      "sheet": "65",
+      "index": 18,
+      "name": "WarGames",
+      "ttsCardId": 6518
+    },
+    "82": {
+      "sheet": "65",
+      "index": 0,
+      "name": "Irnian Hostage Crisis",
+      "ttsCardId": 6500
+    },
+    "92": {
+      "sheet": "65",
+      "index": 10,
+      "name": "Terrorism",
+      "ttsCardId": 6510
+    },
+    "97": {
+      "sheet": "65",
+      "index": 15,
+      "name": "An Evil Empire",
+      "ttsCardId": 6515
+    },
+    "95": {
+      "sheet": "65",
+      "index": 13,
+      "name": "Latin American Debt Crisis",
+      "ttsCardId": 6513
+    }
+  },
+  "board": "/tts/resource-9aa84dd841eba1d2.jpg",
+  "resources": [
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/957468055304819970/1B4527492F1673471C1C69056C471589FE1D7A25/",
+      "kind": "TableURL",
+      "bytes": 840373,
+      "content_type": "application/octet-stream",
+      "sha256": "7a2281a20b93f2992f1712a0b6b3585211b68745ece96f97021adae6bb79232f",
+      "format": "image",
+      "dimensions": [
+        2560,
+        1600
+      ],
+      "publicPath": "/tts/resource-92adf75caccd9796.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1762567661833100187/212E47740AD8273332A99414796B707253A0F4E9/",
+      "kind": "CurrentAudioURL",
+      "bytes": 57352354,
+      "content_type": "application/octet-stream",
+      "sha256": "7a489475e11ac3760b2ca1a7cc18f276f79665ff1b881afd147603fa81b4cce1",
+      "format": "other",
+      "dimensions": null
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2474250552093835440/6F677F4E7EC34F8AE90A05B6E6613EC27D3D4E4F/",
+      "kind": "ImageURL",
+      "bytes": 303633,
+      "content_type": "application/octet-stream",
+      "sha256": "460c70d42133f3ac839ca70f1ba2e379476288d48491948dc79bca17ad830875",
+      "format": "image",
+      "dimensions": [
+        592,
+        281
+      ],
+      "publicPath": "/tts/resource-deca8234d60a97ba.png"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876952163/7EF6D7C79E0E7821DDF9389C2997AEB68E53E540/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 9289,
+      "content_type": "image/jpeg",
+      "sha256": "feb6691a03ef8fb0dd16de6eaaec75900beb5c2e1c00d7aa3f3794111bd54826",
+      "format": "image",
+      "dimensions": [
+        130,
+        129
+      ],
+      "publicPath": "/tts/resource-0538fc59b4c097ed.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1762567848456588228/01F783B8E97C6BD02D6AE6EF1EB766F76C7668F5/",
+      "kind": "PDFUrl",
+      "bytes": 79226,
+      "content_type": "application/octet-stream",
+      "sha256": "67a73260c19ea2a89c8ea66b605cc686ce9ae3d2b36753b0d594d4801df505ce",
+      "format": "pdf",
+      "dimensions": null
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2321110410948328699/354E999F1E2C98BEB3DD117CA85142DFC30CA169/",
+      "kind": "ImageURL",
+      "bytes": 4748868,
+      "content_type": "image/jpeg",
+      "sha256": "da42aea9ffc3c02599e3690a9f7248a5037cf2d1b26df08e84ce9f995ffd6b03",
+      "format": "image",
+      "dimensions": [
+        6800,
+        4400
+      ],
+      "publicPath": "/tts/resource-9aa84dd841eba1d2.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2313225941481626320/28151BB1B1BBE778B808BEF5A7AA7664F19E2446/",
+      "kind": "PDFUrl",
+      "bytes": 3330646,
+      "content_type": "application/octet-stream",
+      "sha256": "be838c244dd13c2cfaeeb6cb903d0f90f9c2b3b10979ab6f5dee0129e132ad02",
+      "format": "pdf",
+      "dimensions": null
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2313225941497831836/DE3ED760D0FEA34FF5AF1FD584EAFA6D6129EFB4/",
+      "kind": "FaceURL",
+      "bytes": 5894219,
+      "content_type": "image/png",
+      "sha256": "8d7ffa1be01358005da2757ca753a6fa76424227c60bb81787f35f256f272eae",
+      "format": "image",
+      "dimensions": [
+        3750,
+        3676
+      ]
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2313225941497878735/A522A75AC0A8BC65BDA874FD2F8D10E336E89868/",
+      "kind": "BackURL",
+      "bytes": 1261426,
+      "content_type": "image/png",
+      "sha256": "5e57a645c05c9114e95b02f8061c3be86ea815e60f1adcc4611b3aa0f3c00de2",
+      "format": "image",
+      "dimensions": [
+        837,
+        1131
+      ],
+      "publicPath": "/tts/resource-06b2f7f176b12f42.png"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139318221456/2B21E8C5C0C3EF00DE0AF52B9474F7498944998C/",
+      "kind": "FaceURL",
+      "bytes": 297114,
+      "content_type": "application/octet-stream",
+      "sha256": "8c4f684ee7ff0c8a1e55102b103cfe3ed4fef22941f4538912eb55b8201e76b3",
+      "format": "image",
+      "dimensions": [
+        1200,
+        687
+      ]
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139318180637/DD39C9D2DBC2F75035BA35BD5EC24F979D4B7E7F/",
+      "kind": "BackURL",
+      "bytes": 1730,
+      "content_type": "image/png",
+      "sha256": "8f1d63dcb3f2e1efa6a43f209963f10536d8b3ed0359b8fcdd4e97eaf6157451",
+      "format": "image",
+      "dimensions": [
+        907,
+        295
+      ],
+      "publicPath": "/tts/resource-3003a16e8e5b5fc8.png"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139318167230/DCA2FEFCC4ED7D134560FE60A50933BE269D0E2E/",
+      "kind": "FaceURL",
+      "bytes": 102152,
+      "content_type": "application/octet-stream",
+      "sha256": "7ef2f647daf889dfe7c5066a44b6c510ad2458c97bf6bc7a645058f63945a155",
+      "format": "image",
+      "dimensions": [
+        907,
+        295
+      ]
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2313225941481692240/DF07439DCF45A183AECAB3CCA98A40EC4A63FFFB/",
+      "kind": "PDFUrl",
+      "bytes": 391280,
+      "content_type": "application/octet-stream",
+      "sha256": "9c8ac9ef5c2b25f558d81aa2e12205609661dc80d9ead52b64367659bac99374",
+      "format": "pdf",
+      "dimensions": null
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312085870774195/4473102B90D606EB2A918D49731EDEABB5CF1ADA/",
+      "kind": "MeshURL",
+      "bytes": 2271,
+      "content_type": "application/octet-stream",
+      "sha256": "1cbbc434aea9417347206d73e0f3819f13eaadd384eabb54a0bf9315816f7ca9",
+      "format": "other",
+      "dimensions": null
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312085870836852/77577ADDE33595FBC1168966A0293831DF6DE0C2/",
+      "kind": "DiffuseURL",
+      "bytes": 176510,
+      "content_type": "image/jpeg",
+      "sha256": "1d7065f6f9e95b18c285ec98c9e42e1dbe3cf3cbda0de9d2a4e06d65575dbd91",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-8334fdfce5b49cf7.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1249134900613207643/B50F5F4BA1209F9FC955D8E3308CADE0EDFA58D9/",
+      "kind": "MeshURL",
+      "bytes": 64361,
+      "content_type": "application/octet-stream",
+      "sha256": "ffa0b968a2201b4cf0ef72b02cefb50a3752b2b83f032b4dfe9808b83e854668",
+      "format": "other",
+      "dimensions": null
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1249134900613243954/AF4E1429F89C54B9ADA049F86D146A5C36504545/",
+      "kind": "DiffuseURL",
+      "bytes": 3911416,
+      "content_type": "image/jpeg",
+      "sha256": "f4abb55756962c21ec67b4572f3e2135386e44a04f12db696450101458578463",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-8eb34caa232fd000.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1249134900613211385/F96DFF8BE6335D0CEBDA4F37F928F9416B635827/",
+      "kind": "NormalURL",
+      "bytes": 5380072,
+      "content_type": "application/octet-stream",
+      "sha256": "cbc172541adad788106566927271a09a3398e72222b2c66e9eab2026689f664a",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-978f058c9f6f3827.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/854973288917824922/BC9BAC946F2B01D743A602E07E453CC38EF7BD54/",
+      "kind": "AssetbundleURL",
+      "bytes": 357098,
+      "content_type": "application/octet-stream",
+      "sha256": "ad05414f381fbb26fe107dd3e890001cb0043f66b1b22abaa7876a1f69898f57",
+      "format": "other",
+      "dimensions": null
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1666857292224495678/641ACCDE2CF7394F6F6075B05DB3B673425FE7E2/",
+      "kind": "MeshURL",
+      "bytes": 94833,
+      "content_type": "application/octet-stream",
+      "sha256": "c88180859d1ae629bd977fffe4ddd3acf838b2088291e7edcb24395c36444e1b",
+      "format": "other",
+      "dimensions": null
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102067885976/078A3FD8E67B678E9B8579308393852A1CE862AA/",
+      "kind": "DiffuseURL",
+      "bytes": 66133,
+      "content_type": "image/jpeg",
+      "sha256": "720b6f0919e92a6a4beb27eecfebc640ecd5530b7aac3327a9c38fd2f07b62ab",
+      "format": "image",
+      "dimensions": [
+        893,
+        891
+      ],
+      "publicPath": "/tts/resource-97556b98c765470b.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876964578/A28A260B42DB44079F86576280B6157982543451/",
+      "kind": "ImageURL",
+      "bytes": 62535,
+      "content_type": "application/octet-stream",
+      "sha256": "bf2cdcf52d015e0a760857a649393713fa03cf195cab2c12facfaae056b9a8d4",
+      "format": "image",
+      "dimensions": [
+        891,
+        893
+      ],
+      "publicPath": "/tts/resource-aa11baa1314da28c.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876965068/078A3FD8E67B678E9B8579308393852A1CE862AA/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 66133,
+      "content_type": "application/octet-stream",
+      "sha256": "720b6f0919e92a6a4beb27eecfebc640ecd5530b7aac3327a9c38fd2f07b62ab",
+      "format": "image",
+      "dimensions": [
+        893,
+        891
+      ],
+      "publicPath": "/tts/resource-ae34ae0b822ad05a.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876969147/BCE101CEE227EC468C6E27A9413B79B75EFA5C5A/",
+      "kind": "ImageURL",
+      "bytes": 54913,
+      "content_type": "application/octet-stream",
+      "sha256": "3d2273932d6dcb6ae9814aee6b5fba3ec1a230f716b8a643fa0320ab8d92281b",
+      "format": "image",
+      "dimensions": [
+        891,
+        901
+      ],
+      "publicPath": "/tts/resource-a3f2ddcfcf176460.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876969577/D13FCBDC263A1280CC65DC37E712896B929A5273/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 65891,
+      "content_type": "image/jpeg",
+      "sha256": "0aeff600b7771e1cabf3b3541c5577450ce0306e826b7f65958dc8fa2642efa7",
+      "format": "image",
+      "dimensions": [
+        891,
+        887
+      ],
+      "publicPath": "/tts/resource-25631cdfd56f033c.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876970362/9695FC723389104492593CA2B101A94AEC78BF67/",
+      "kind": "ImageURL",
+      "bytes": 54959,
+      "content_type": "application/octet-stream",
+      "sha256": "fba3b2c01f46d3d6055c87d60429f02df1aa13c25c0de5dcd4ab82662a8f6a0a",
+      "format": "image",
+      "dimensions": [
+        891,
+        905
+      ],
+      "publicPath": "/tts/resource-62768140296e0fcf.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876970647/22394A091EED5AA9461C9C45EAD67AC248C45E2A/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 69234,
+      "content_type": "image/jpeg",
+      "sha256": "7ecf1ffa2d40cbf937358f5b001b1163d24831e5d434a64d9b0cb980be6854c9",
+      "format": "image",
+      "dimensions": [
+        891,
+        889
+      ],
+      "publicPath": "/tts/resource-eee11d4e90e92611.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876971649/F012A1C33EC97606F5330E57FCA055C487865597/",
+      "kind": "ImageURL",
+      "bytes": 56391,
+      "content_type": "image/jpeg",
+      "sha256": "b01a896ff29d2802c126c34d1de953e44800d7261c6b80532ceec5dc014ae4fd",
+      "format": "image",
+      "dimensions": [
+        891,
+        902
+      ],
+      "publicPath": "/tts/resource-be904ba9b129a983.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876971998/0154FAB19AFBED25BEFF2C0342315A2287363190/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 72729,
+      "content_type": "application/octet-stream",
+      "sha256": "e439946708f1cdcdab6646ae44101980a8ab68f03ea8927ab815db7c39096ccb",
+      "format": "image",
+      "dimensions": [
+        891,
+        893
+      ],
+      "publicPath": "/tts/resource-dd05adf09eab1191.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876972808/3B78CC50DBF9A31DEEC8C5BBBB6BC8D8A22F31D1/",
+      "kind": "ImageURL",
+      "bytes": 55281,
+      "content_type": "application/octet-stream",
+      "sha256": "7a312f964bddc74ea7e030c09e008c63f711ad1a31cea0f0c7f5afa075104cec",
+      "format": "image",
+      "dimensions": [
+        891,
+        903
+      ],
+      "publicPath": "/tts/resource-ba1151c280323656.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876973088/C3B72E37892353D45A22E3D5F2A612607CEB8BAB/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 74483,
+      "content_type": "image/jpeg",
+      "sha256": "3f2ea47d2abc5b9bbdbc4094df484992b0da6dbaf19e31859a951582f966d226",
+      "format": "image",
+      "dimensions": [
+        889,
+        891
+      ],
+      "publicPath": "/tts/resource-846c1ab4f7bcaeb0.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876973903/361249FD18796EE6945ED12AEE55CE8B763D910A/",
+      "kind": "ImageURL",
+      "bytes": 61044,
+      "content_type": "image/jpeg",
+      "sha256": "d7f0ed540cfecfa97709737351f36a53802e53147966f40970d995942902b844",
+      "format": "image",
+      "dimensions": [
+        895,
+        905
+      ],
+      "publicPath": "/tts/resource-c1da6284feebcbe0.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876974211/3D4229E7000AAF77EFE6F8E9A1B3DB61E428A44D/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 74272,
+      "content_type": "image/jpeg",
+      "sha256": "d508fe28d953b01d150775a2ae61cb5db69969abfd715a518a77283a24388a4d",
+      "format": "image",
+      "dimensions": [
+        889,
+        893
+      ],
+      "publicPath": "/tts/resource-898dfc986a9313b0.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876974852/CFE7C29CE80123615CC4B2EDF73BFDD789FDBB33/",
+      "kind": "ImageURL",
+      "bytes": 52862,
+      "content_type": "image/jpeg",
+      "sha256": "b3c1e387e8806d0bb32f97950ea7b42f1fc375e5c0bea7080dce65d823cd77bc",
+      "format": "image",
+      "dimensions": [
+        890,
+        900
+      ],
+      "publicPath": "/tts/resource-115bafc5b3b239f6.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876975191/8C5D4B2511C510C5765156BDA48AE582439268A4/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 75967,
+      "content_type": "application/octet-stream",
+      "sha256": "1a1f49f9d5a522e0660d0ae34788d29ee2e71fd528c322e4ea45170632c4f32b",
+      "format": "image",
+      "dimensions": [
+        893,
+        889
+      ],
+      "publicPath": "/tts/resource-9e18e9b825e42587.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876975927/D19CE218D8DD6782E64D57CE87CADDBDE306E33B/",
+      "kind": "ImageURL",
+      "bytes": 54762,
+      "content_type": "image/jpeg",
+      "sha256": "d9092216c14504943cc2b5ae7dac600a4a0cb25a7ad9341a28cfed54250f4d04",
+      "format": "image",
+      "dimensions": [
+        890,
+        901
+      ],
+      "publicPath": "/tts/resource-e4f4500f2354b954.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876976631/7CC145E420FEAF797732A574591F504999ABF13D/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 76462,
+      "content_type": "image/jpeg",
+      "sha256": "11e3e5f30dd265d23239f7cd8d0943018f05f7ab422e6c7d8955d6fe951938dd",
+      "format": "image",
+      "dimensions": [
+        893,
+        891
+      ],
+      "publicPath": "/tts/resource-acacb22b633d11a3.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102067890217/D13FCBDC263A1280CC65DC37E712896B929A5273/",
+      "kind": "DiffuseURL",
+      "bytes": 65891,
+      "content_type": "image/jpeg",
+      "sha256": "0aeff600b7771e1cabf3b3541c5577450ce0306e826b7f65958dc8fa2642efa7",
+      "format": "image",
+      "dimensions": [
+        891,
+        887
+      ],
+      "publicPath": "/tts/resource-852ba76a4a7d8ffc.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102067907934/22394A091EED5AA9461C9C45EAD67AC248C45E2A/",
+      "kind": "DiffuseURL",
+      "bytes": 69234,
+      "content_type": "image/jpeg",
+      "sha256": "7ecf1ffa2d40cbf937358f5b001b1163d24831e5d434a64d9b0cb980be6854c9",
+      "format": "image",
+      "dimensions": [
+        891,
+        889
+      ],
+      "publicPath": "/tts/resource-aceca7d04d63f2ee.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102067909250/0154FAB19AFBED25BEFF2C0342315A2287363190/",
+      "kind": "DiffuseURL",
+      "bytes": 72729,
+      "content_type": "image/jpeg",
+      "sha256": "e439946708f1cdcdab6646ae44101980a8ab68f03ea8927ab815db7c39096ccb",
+      "format": "image",
+      "dimensions": [
+        891,
+        893
+      ],
+      "publicPath": "/tts/resource-c7c09fa7121e0806.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102067910513/C3B72E37892353D45A22E3D5F2A612607CEB8BAB/",
+      "kind": "DiffuseURL",
+      "bytes": 74483,
+      "content_type": "image/jpeg",
+      "sha256": "3f2ea47d2abc5b9bbdbc4094df484992b0da6dbaf19e31859a951582f966d226",
+      "format": "image",
+      "dimensions": [
+        889,
+        891
+      ],
+      "publicPath": "/tts/resource-a73cde13d06d32c1.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102067912020/3D4229E7000AAF77EFE6F8E9A1B3DB61E428A44D/",
+      "kind": "DiffuseURL",
+      "bytes": 74272,
+      "content_type": "image/jpeg",
+      "sha256": "d508fe28d953b01d150775a2ae61cb5db69969abfd715a518a77283a24388a4d",
+      "format": "image",
+      "dimensions": [
+        889,
+        893
+      ],
+      "publicPath": "/tts/resource-4b6d8bfdcd501170.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102067914419/8C5D4B2511C510C5765156BDA48AE582439268A4/",
+      "kind": "DiffuseURL",
+      "bytes": 75967,
+      "content_type": "image/jpeg",
+      "sha256": "1a1f49f9d5a522e0660d0ae34788d29ee2e71fd528c322e4ea45170632c4f32b",
+      "format": "image",
+      "dimensions": [
+        893,
+        889
+      ],
+      "publicPath": "/tts/resource-c48dd63c28e6a828.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102067915563/7CC145E420FEAF797732A574591F504999ABF13D/",
+      "kind": "DiffuseURL",
+      "bytes": 76462,
+      "content_type": "image/jpeg",
+      "sha256": "11e3e5f30dd265d23239f7cd8d0943018f05f7ab422e6c7d8955d6fe951938dd",
+      "format": "image",
+      "dimensions": [
+        893,
+        891
+      ],
+      "publicPath": "/tts/resource-7a740d80372319f4.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102057988645/8B52DE2BACDB3810B8AED1AB50C6A055D82C229B/",
+      "kind": "DiffuseURL",
+      "bytes": 46262,
+      "content_type": "image/jpeg",
+      "sha256": "96e84bdd3a15cd5b7b3ffc73d5f3a09280ac560a2a13065454921915e90f8f43",
+      "format": "image",
+      "dimensions": [
+        889,
+        891
+      ],
+      "publicPath": "/tts/resource-d0bb6967cde34383.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876982151/EBF93E7AD8706337EB741E6A268E0B3F49FEE226/",
+      "kind": "ImageURL",
+      "bytes": 45552,
+      "content_type": "image/jpeg",
+      "sha256": "04735a106178e7584d4b04bfb9166a291356803b9006ff54a162e8b77b38e62a",
+      "format": "image",
+      "dimensions": [
+        891,
+        905
+      ],
+      "publicPath": "/tts/resource-258ed5901d3f7ce2.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876982480/8B52DE2BACDB3810B8AED1AB50C6A055D82C229B/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 46262,
+      "content_type": "application/octet-stream",
+      "sha256": "96e84bdd3a15cd5b7b3ffc73d5f3a09280ac560a2a13065454921915e90f8f43",
+      "format": "image",
+      "dimensions": [
+        889,
+        891
+      ],
+      "publicPath": "/tts/resource-aa710f59b486d450.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876984222/90AF1C60E0B722936FE129D7781A355ED2BAA577/",
+      "kind": "ImageURL",
+      "bytes": 46064,
+      "content_type": "application/octet-stream",
+      "sha256": "e8da3ba20e04fda285e7b19b6b85a2044201fcc51524b951caf7d0377daa0d2a",
+      "format": "image",
+      "dimensions": [
+        890,
+        900
+      ],
+      "publicPath": "/tts/resource-09b1635c3434efaf.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/958608542136493959/BBE4AFA5DA4C96BE988787B0DA44C1410A7F208E/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 45448,
+      "content_type": "application/octet-stream",
+      "sha256": "e14cd464289bdd27a78827e061b22bba9e249b389eb2c3a929ea77257c5b49c0",
+      "format": "image",
+      "dimensions": [
+        891,
+        893
+      ],
+      "publicPath": "/tts/resource-3309967b0c57a024.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876985163/C6A00DE2BF65FCA177728587A67B6463CB6CB191/",
+      "kind": "ImageURL",
+      "bytes": 44331,
+      "content_type": "image/jpeg",
+      "sha256": "54c3a5f16649f27bff7997e22096d725b94fff321e25508c0b12f45db988b4c5",
+      "format": "image",
+      "dimensions": [
+        889,
+        905
+      ],
+      "publicPath": "/tts/resource-c43a94208b73b93a.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876984590/F5FA2E9F7CC31A55346658A589688211AE00F86A/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 47927,
+      "content_type": "image/jpeg",
+      "sha256": "d44024cb63d5d2b5fd3cff120c61ceec880775fb288a501f63d262ba11e7da7a",
+      "format": "image",
+      "dimensions": [
+        891,
+        891
+      ],
+      "publicPath": "/tts/resource-0efc083c5750095e.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876986163/3924BADFFCB2249441E8BCD1DAE1E0755AF040E2/",
+      "kind": "ImageURL",
+      "bytes": 49357,
+      "content_type": "application/octet-stream",
+      "sha256": "05e74c51d86a19dec934b99546e8750257111ff1b129f7e619d1f6db2cbad28a",
+      "format": "image",
+      "dimensions": [
+        893,
+        907
+      ],
+      "publicPath": "/tts/resource-3ecc5dfaf0935054.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876986438/CC7FA9AC093C58CBE1D1A2F6B5BE2A5BC75EC01E/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 42349,
+      "content_type": "application/octet-stream",
+      "sha256": "dc82ad2b8a995c606e43f0a5813ea8eb5d85cd87b9d213135ae72bbdcfab4b15",
+      "format": "image",
+      "dimensions": [
+        889,
+        891
+      ],
+      "publicPath": "/tts/resource-e9d5c1a6ec6517ff.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876987030/518E4001D4DCB0350BA376684AF0A8A58EC2FCF4/",
+      "kind": "ImageURL",
+      "bytes": 45612,
+      "content_type": "image/jpeg",
+      "sha256": "8f3a2657756dac1f303bb8ef96a2a34a91fae7dbeebe65c1b74466248612e0a9",
+      "format": "image",
+      "dimensions": [
+        891,
+        903
+      ],
+      "publicPath": "/tts/resource-fb2a9067cb16f3fb.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876987370/14C3B2A734AACEB692318CF95858559E1A40CB56/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 48009,
+      "content_type": "image/jpeg",
+      "sha256": "4d7b2b42f38934fc5226af38800d3bae78abcc1333c57d5a686ea3bdcc6c7b8e",
+      "format": "image",
+      "dimensions": [
+        891,
+        889
+      ],
+      "publicPath": "/tts/resource-3e99a38fbcb8f6c4.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876987990/C67C9EAF612C149B552280A9E327539C5FD9A8B6/",
+      "kind": "ImageURL",
+      "bytes": 45854,
+      "content_type": "image/jpeg",
+      "sha256": "68be6445f95a85778a063bd258eab9ab7ca53d81e87b6e8c1c85256473254402",
+      "format": "image",
+      "dimensions": [
+        893,
+        903
+      ],
+      "publicPath": "/tts/resource-5d298e0cc3c73ce6.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876988356/AD465C967F404D6938F84C647A5F9CCB45BF1117/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 45735,
+      "content_type": "image/jpeg",
+      "sha256": "fe678ca9a0f3f5136cc6a362cbb92c16ee4d0be3caffdb5f70acda88864bab75",
+      "format": "image",
+      "dimensions": [
+        885,
+        891
+      ],
+      "publicPath": "/tts/resource-a9cf3471158f5696.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876988894/C2E7335D5A6D1BFE411EEF808654EB5CAB0A3176/",
+      "kind": "ImageURL",
+      "bytes": 45716,
+      "content_type": "image/jpeg",
+      "sha256": "1aeefa7b0fcc4c9dabe203f56defa62addcd685c4ff7f3a4411b6826f7e3a58f",
+      "format": "image",
+      "dimensions": [
+        891,
+        903
+      ],
+      "publicPath": "/tts/resource-15d620869fbc45f3.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876989231/7A66A56C7702C8CE14E4E867D6D1567EC3ED3F34/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 48482,
+      "content_type": "image/jpeg",
+      "sha256": "0a5bbd0a32df9ac61081d4e4b8bf34301b4b8cc19fee2d55bec12c12f3bb4974",
+      "format": "image",
+      "dimensions": [
+        885,
+        887
+      ],
+      "publicPath": "/tts/resource-e2b410d72f691757.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876983206/6436975FD04F75A2FEE66FE166EF031D8308FD1D/",
+      "kind": "ImageURL",
+      "bytes": 47212,
+      "content_type": "image/jpeg",
+      "sha256": "272224a1172812ac53308446fef2876604e006f00d9c9e867882f280362bf1fc",
+      "format": "image",
+      "dimensions": [
+        893,
+        909
+      ],
+      "publicPath": "/tts/resource-e665fe31ba189efa.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876983579/AA12B48B9FDEA79FFAD43ECB3E5FCABB2D1FAE35/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 41903,
+      "content_type": "application/octet-stream",
+      "sha256": "1aafbdda78dcadfe779a4b7394b30630ca31b3767e9502f1834127563c0e0809",
+      "format": "image",
+      "dimensions": [
+        887,
+        889
+      ],
+      "publicPath": "/tts/resource-4c103b4ef7c8c454.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102057982421/AA12B48B9FDEA79FFAD43ECB3E5FCABB2D1FAE35/",
+      "kind": "DiffuseURL",
+      "bytes": 41903,
+      "content_type": "image/jpeg",
+      "sha256": "1aafbdda78dcadfe779a4b7394b30630ca31b3767e9502f1834127563c0e0809",
+      "format": "image",
+      "dimensions": [
+        887,
+        889
+      ],
+      "publicPath": "/tts/resource-1bf55aee33899292.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102057908973/BBE4AFA5DA4C96BE988787B0DA44C1410A7F208E/",
+      "kind": "DiffuseURL",
+      "bytes": 45448,
+      "content_type": "image/jpeg",
+      "sha256": "e14cd464289bdd27a78827e061b22bba9e249b389eb2c3a929ea77257c5b49c0",
+      "format": "image",
+      "dimensions": [
+        891,
+        893
+      ],
+      "publicPath": "/tts/resource-c37e9e09777abd44.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102057990511/F5FA2E9F7CC31A55346658A589688211AE00F86A/",
+      "kind": "DiffuseURL",
+      "bytes": 47927,
+      "content_type": "image/jpeg",
+      "sha256": "d44024cb63d5d2b5fd3cff120c61ceec880775fb288a501f63d262ba11e7da7a",
+      "format": "image",
+      "dimensions": [
+        891,
+        891
+      ],
+      "publicPath": "/tts/resource-0cd9a6bbc5779fc2.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102057991915/CC7FA9AC093C58CBE1D1A2F6B5BE2A5BC75EC01E/",
+      "kind": "DiffuseURL",
+      "bytes": 42349,
+      "content_type": "image/jpeg",
+      "sha256": "dc82ad2b8a995c606e43f0a5813ea8eb5d85cd87b9d213135ae72bbdcfab4b15",
+      "format": "image",
+      "dimensions": [
+        889,
+        891
+      ],
+      "publicPath": "/tts/resource-7aa1b5d57719ea2b.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102057993644/14C3B2A734AACEB692318CF95858559E1A40CB56/",
+      "kind": "DiffuseURL",
+      "bytes": 48009,
+      "content_type": "image/jpeg",
+      "sha256": "4d7b2b42f38934fc5226af38800d3bae78abcc1333c57d5a686ea3bdcc6c7b8e",
+      "format": "image",
+      "dimensions": [
+        891,
+        889
+      ],
+      "publicPath": "/tts/resource-20cd7132adbdd175.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102058000084/AD465C967F404D6938F84C647A5F9CCB45BF1117/",
+      "kind": "DiffuseURL",
+      "bytes": 45735,
+      "content_type": "image/jpeg",
+      "sha256": "fe678ca9a0f3f5136cc6a362cbb92c16ee4d0be3caffdb5f70acda88864bab75",
+      "format": "image",
+      "dimensions": [
+        885,
+        891
+      ],
+      "publicPath": "/tts/resource-807cde8d6268b307.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2478742102058001689/7A66A56C7702C8CE14E4E867D6D1567EC3ED3F34/",
+      "kind": "DiffuseURL",
+      "bytes": 48482,
+      "content_type": "image/jpeg",
+      "sha256": "0a5bbd0a32df9ac61081d4e4b8bf34301b4b8cc19fee2d55bec12c12f3bb4974",
+      "format": "image",
+      "dimensions": [
+        885,
+        887
+      ],
+      "publicPath": "/tts/resource-35515a12dbc1914d.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/487893695356644836/6F5D2BC3DEFB2C8B3B881E97C10EA5B4A4348265/",
+      "kind": "MeshURL",
+      "bytes": 11727,
+      "content_type": "application/octet-stream",
+      "sha256": "4dae83deb4819db5f7875bf30864146de764b113d5addc2e54ba264b750a5be3",
+      "format": "other",
+      "dimensions": null
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2474250552092650892/925AAD4718236BB5F8A89BFDC1CD17475F4373B7/",
+      "kind": "DiffuseURL",
+      "bytes": 366051,
+      "content_type": "image/png",
+      "sha256": "e7464a4509488cf257dc454027b52049f7aff3eeced9ebdacdd0c6c3e384a48d",
+      "format": "image",
+      "dimensions": [
+        299,
+        682
+      ],
+      "publicPath": "/tts/resource-5155e2dd852a5eb9.png"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317635475/16608EF491AB7576DDED8792A145F521240DD622/",
+      "kind": "DiffuseURL",
+      "bytes": 202952,
+      "content_type": "image/jpeg",
+      "sha256": "8a48f994367757ff0eaa397b0418144bfa6fe7feb55801856c9ec6c47e948f9e",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-2deafa9368ec93f4.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317667677/C15CD0FE6FB9122ECE5EB69489E83F4D5A7C063F/",
+      "kind": "DiffuseURL",
+      "bytes": 238250,
+      "content_type": "application/octet-stream",
+      "sha256": "2d159bd870e0c76eb753d33587b827b26969708054a9240be6e205bd65d448f5",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-ba37b99a1746dfaa.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317559980/F6131B20824FDE5D789B6DA470DCB5D35DE66083/",
+      "kind": "DiffuseURL",
+      "bytes": 217174,
+      "content_type": "application/octet-stream",
+      "sha256": "bc8a4d129644eaf3481aff6ba2b00e0d652856fbb57ca3c8d4120d6e186113da",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-b0b602c0efe51d6f.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317547188/BD7B18D5B16DE073442427211FBDDE8348167A9B/",
+      "kind": "DiffuseURL",
+      "bytes": 183754,
+      "content_type": "image/jpeg",
+      "sha256": "8259a8e432f3427eed64791f90e0b697644e0e37c961f132586326a0a2ab8b13",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-89fc33e3d53e5e37.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317728981/4CA798915DE236816D6F957610B811AAE69050D6/",
+      "kind": "DiffuseURL",
+      "bytes": 193820,
+      "content_type": "application/octet-stream",
+      "sha256": "f9102e9056312a1ab7c0d7df591fae31c6828a2ebde8c38c04223e5f21f11e4c",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-3dedaa1556ca8749.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317678329/396AF44CDB56D6D2D2E581DEEE439CB83B7B5CCC/",
+      "kind": "DiffuseURL",
+      "bytes": 172180,
+      "content_type": "image/jpeg",
+      "sha256": "488328bd61f95623dcd212bb54ad87ae72d363ee0ca9f58c0809f5615a4be0ee",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-79c3ff05b07d4234.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317712539/DC6375513936A9CE444CBE1053CF6337014A3B25/",
+      "kind": "DiffuseURL",
+      "bytes": 204353,
+      "content_type": "image/jpeg",
+      "sha256": "6b0dc8bb6712cd218ec6851abdbacc05339810390e53c307cf1f678e7d10a56d",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-002e81e90cd3a0a8.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317743931/41F284482D03ACDE575A101E5B5B94723D18EB6E/",
+      "kind": "DiffuseURL",
+      "bytes": 211448,
+      "content_type": "image/jpeg",
+      "sha256": "0187506d9da013cec292edba70063af33ade1184fc0f4345bae1b88fc10e903d",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-e637136d3c0613df.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317755296/410239F573F1ADEEB3E417FEE8DB8FCFD22D2118/",
+      "kind": "DiffuseURL",
+      "bytes": 226554,
+      "content_type": "image/jpeg",
+      "sha256": "17c38cdac4d0967327472d7b44f087966e8d34a8cd236d8f4832c31b607e4e6f",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-f4d81272ccc52b6e.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317769280/375DFE424D6FE4E9B4A3E5AAE357E8503C059C72/",
+      "kind": "DiffuseURL",
+      "bytes": 198791,
+      "content_type": "application/octet-stream",
+      "sha256": "6ecf25301b925db16f9e6bbcc3495d57f22134b80be9c05689249af6df99cf03",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-c361bce954eb2cd3.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317620364/842D7803D9674EBD24E2B2B78E00D7C380E39D8D/",
+      "kind": "DiffuseURL",
+      "bytes": 199365,
+      "content_type": "image/jpeg",
+      "sha256": "2bf6723041a8b6a294cfad6916d0d438b63ce902e592fd6d348dcf4ebcfaa0a3",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-b44d33a1f5c05160.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317583944/8D0E47E344101524B1EB89514F856512C3E82513/",
+      "kind": "DiffuseURL",
+      "bytes": 215550,
+      "content_type": "image/jpeg",
+      "sha256": "8eb4df16253b4603be2cc5b92b8969494c41d1224a7a8e210ab767f2d9705f2e",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-93b472230dc8be4e.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317606184/3F2EC7E607D5C781CDF8FB4E32B45F49B1BDCBC2/",
+      "kind": "DiffuseURL",
+      "bytes": 219990,
+      "content_type": "image/jpeg",
+      "sha256": "df0ead32a6777b6f95ceb0e71bca1f3de80876665344e02b5554912ecb7a3ca3",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-c4aded389559894b.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317648238/C7757715C9F2AF15F23234340234C02507C86442/",
+      "kind": "DiffuseURL",
+      "bytes": 200849,
+      "content_type": "application/octet-stream",
+      "sha256": "bf47507e26a71fc4adcce9928230161892e95f4954557f99c0dc815dc3cbe0af",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-695fcc7f081f144d.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317846691/CD228D5F28C1DD4CD9771A1F6E9BF68A57A82D3E/",
+      "kind": "DiffuseURL",
+      "bytes": 227361,
+      "content_type": "application/octet-stream",
+      "sha256": "4c7368604f69710b4691a19dc231c4898cf4fbbd5659c4dd4f73606ce3b15880",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-a994706fd6ebd5be.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317806425/01744FF8A4F8035FF65847AB1888EDAC6E3819A9/",
+      "kind": "DiffuseURL",
+      "bytes": 198422,
+      "content_type": "image/jpeg",
+      "sha256": "e84abf11449bb3f1be4306e24456f81838587d1b1122401ab5d51bea961ce534",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-3f64045f4844205f.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317838093/C4C2D7304F11E37AD36B34D9559846286418A02C/",
+      "kind": "DiffuseURL",
+      "bytes": 209647,
+      "content_type": "image/jpeg",
+      "sha256": "5c6693cec3334ca584d01af58e8958675718e47dfaa400e1b5edbb7017fa47f1",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-73baa8c9add1e7d6.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317827560/E700BA0F9DD61B3DF8E26587F5DA407F91C53D33/",
+      "kind": "DiffuseURL",
+      "bytes": 206667,
+      "content_type": "application/octet-stream",
+      "sha256": "13235625eb55418dca399c70b5a1c101bd3227ee90fd2c1392a23351a2fd1554",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-54f8a8f9dfe725fc.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317814520/BD1FAAE9232173C911669D43183AA0EC0DCAD183/",
+      "kind": "DiffuseURL",
+      "bytes": 178052,
+      "content_type": "image/jpeg",
+      "sha256": "f84e6599eb1b43047adae79ccdb0fcb7c46568c7a294dcbc46909437ef568cc7",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-257910a1a8639495.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317786377/F9D32557036B1B4622B2D079C74027C5EAA21AB1/",
+      "kind": "DiffuseURL",
+      "bytes": 219648,
+      "content_type": "image/jpeg",
+      "sha256": "51dcc6119892e7658c13c93f50bc6626deafd3b07e65ccee535d933808a58012",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-510149b7d00058d2.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317693956/066DAC9F5C7694475362C989058BD5BA30C5C7F7/",
+      "kind": "DiffuseURL",
+      "bytes": 232920,
+      "content_type": "image/jpeg",
+      "sha256": "88560eb9a897cb2a85c6811a15dd78e240217ceab534293ea3eddc5dc93c12eb",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-6423c9b01a206a8a.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2386431085923624967/72C7CA1B66A0EA9AE73286C4AF14C0233A34520F/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 55687,
+      "content_type": "image/png",
+      "sha256": "25e603420c6f6e7f925939f0901a9b4d3004fff788ae4bebb560d4c76f814c44",
+      "format": "image",
+      "dimensions": [
+        191,
+        192
+      ],
+      "publicPath": "/tts/resource-9518db091c1e0d4c.png"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2386431085923635206/CDDFF9366C44F2AC485A63727DD986BDF72E0477/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 32271,
+      "content_type": "image/png",
+      "sha256": "271dc6cffb5c8f11b377e703e64ed6d4658820238ce5c53f3db17fcd6b700de0",
+      "format": "image",
+      "dimensions": [
+        137,
+        140
+      ],
+      "publicPath": "/tts/resource-3d62b4d45667d615.png"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/958597478463059274/DE73B64E1B5C6F272EA3BEE5EF458E73E48FF03D/",
+      "kind": "ImageURL",
+      "bytes": 4373,
+      "content_type": "image/png",
+      "sha256": "a3bb24e7865ec635eabd3b33e19e0f903192c55edf1cfa57b752ce5600aaf89e",
+      "format": "image",
+      "dimensions": [
+        512,
+        512
+      ],
+      "publicPath": "/tts/resource-d63a743e1dca66f0.png"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2386431085924677128/2BCE15403718FB3754D9F4E9C2B4EDC6CE326DC5/",
+      "kind": "PDFUrl",
+      "bytes": 137164,
+      "content_type": "application/octet-stream",
+      "sha256": "0f1f955803f2dc3c4b2d6d3b71d74dc2c40804aba57b13f9c8b57999e7b19dd2",
+      "format": "pdf",
+      "dimensions": null
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/1009312139317893946/A19B18CC7CC4F4F4DB3DFA4A9474B7AC2493A5D6/",
+      "kind": "DiffuseURL",
+      "bytes": 511448,
+      "content_type": "image/png",
+      "sha256": "78a31eef86587c75a966d2a81d87da53b1e8975e9e2ff31ff5c8f7699cd73c3b",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-a5ce3cc1bdf82291.png"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2386431085924783955/FC430A67BA10596953BD9E88E6601CEB6F9A9DE5/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 62746,
+      "content_type": "image/png",
+      "sha256": "c59ac076556e3fad20a82db21b1f8cc169b8abe1e9083b4a1c0137a68a5075f6",
+      "format": "image",
+      "dimensions": [
+        195,
+        196
+      ],
+      "publicPath": "/tts/resource-9986c0bf166bec72.png"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2386431085924780983/49E212D082110F2F2D38ACCE5279D9332DDCA49A/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 59854,
+      "content_type": "image/png",
+      "sha256": "0b500139c5a968f62fa79dfad84e5b165fd3351ae616e99d827bee5eb62704f6",
+      "format": "image",
+      "dimensions": [
+        191,
+        194
+      ],
+      "publicPath": "/tts/resource-5eb0627d8c107611.png"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2313225941497881443/C91905610285E1F679BAB4C9AC8D01F925C9D002/",
+      "kind": "FaceURL",
+      "bytes": 7048832,
+      "content_type": "image/png",
+      "sha256": "edeeff7a2f22e3d7341aa890d4b726b39dce00f86350f90fbc88ac9b7a5f7bc7",
+      "format": "image",
+      "dimensions": [
+        3750,
+        3676
+      ]
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2313225941497886555/CF1F8EE0B6AEE1C8DA63CB6B850CFA28F6F31608/",
+      "kind": "FaceURL",
+      "bytes": 3282916,
+      "content_type": "image/png",
+      "sha256": "29d3e169a89c49746f3b07bb6278d93e670f8921a25ffbb80b65f92b0ca788c0",
+      "format": "image",
+      "dimensions": [
+        3750,
+        3676
+      ]
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876959174/CEF16A7B85CBDB79E0723B073CD15DF854E5EE3C/",
+      "kind": "ImageURL",
+      "bytes": 8581,
+      "content_type": "image/jpeg",
+      "sha256": "ab442c7a2079bfe2bef3045c873bdc3f961a3a2e87e6b9aa359aeb802019e5d3",
+      "format": "image",
+      "dimensions": [
+        129,
+        130
+      ],
+      "publicPath": "/tts/resource-4c3d630f05392937.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/13390947389750787421/F96DFF8BE6335D0CEBDA4F37F928F9416B635827/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 5380072,
+      "content_type": "image/jpeg",
+      "sha256": "cbc172541adad788106566927271a09a3398e72222b2c66e9eab2026689f664a",
+      "format": "image",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "publicPath": "/tts/resource-8a8e76a573a83615.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2386431085924846245/9DAFBD0BF2C073898F4CCC7BDD940A2625FC0135/",
+      "kind": "ImageURL",
+      "bytes": 64112,
+      "content_type": "image/png",
+      "sha256": "d706ec621d98817cdd9333d1c4477b437e1750ed5adef16c7a75be85658d638b",
+      "format": "image",
+      "dimensions": [
+        194,
+        196
+      ],
+      "publicPath": "/tts/resource-32e929495fd367db.png"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/946221812876935981/A54AA091E49897BF5BB974B4A7F48365A9918C9C/",
+      "kind": "ImageURL",
+      "bytes": 9469,
+      "content_type": "image/jpeg",
+      "sha256": "e9fd8654fac565410dedaade4788bfa1b0002e43c9f5bbbaf67bbd1c82574f90",
+      "format": "image",
+      "dimensions": [
+        130,
+        129
+      ],
+      "publicPath": "/tts/resource-46624b43a6c5f004.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/12932180886811468120/1B5236BA833B4C35CFF8B154B371EEB95A6052FA/",
+      "kind": "ImageSecondaryURL",
+      "bytes": 19203117,
+      "content_type": "image/jpeg",
+      "sha256": "54f6018574b6ec1ceab4e10a5ca3ae39eb6d6e0cf24692c4476601a3d609cc93",
+      "format": "image",
+      "dimensions": [
+        8000,
+        8000
+      ],
+      "publicPath": "/tts/resource-c5ac1476f28ee995.jpg"
+    },
+    {
+      "url": "https://steamusercontent-a.akamaihd.net/ugc/2386431085924847623/DA47984D092DC7310029957B49038224728A1D36/",
+      "kind": "ImageURL",
+      "bytes": 66313,
+      "content_type": "image/png",
+      "sha256": "1555376a5795c88f203ad7a57707175880643dd86851b33d39a9eafb75fe6e09",
+      "format": "image",
+      "dimensions": [
+        195,
+        196
+      ],
+      "publicPath": "/tts/resource-28d84ed373d1179e.png"
+    }
+  ],
+  "chineseSource": {
+    "id": "667733815",
+    "status": "Old Traditional Chinese mod: Imgur HTTP 429; replaced by verified Simplified Chinese mod 2793711137."
+  },
+  "officialRules": {
+    "url": "https://www.gmtgames.com/nnts/TS_Rules-2015.pdf",
+    "localOnly": "assets/source/TS_Rules-2015.pdf"
+  },
+  "chinese": {
+    "workshop": {
+      "id": "2793711137",
+      "url": "https://steamcommunity.com/sharedfiles/filedetails/?id=2793711137",
+      "language": "zh-CN"
+    },
+    "coverage": {
+      "cards": 110,
+      "missingCardNumbers": [],
+      "imageFiles": 55,
+      "otherFiles": 2,
+      "allDownloadedResources": 57
+    },
+    "sheets": {
+      "43": {
+        "url": "/tts/zh-sheet-43.jpg",
+        "columns": 10,
+        "rows": 7
+      },
+      "42": {
+        "url": "/tts/zh-sheet-42.jpg",
+        "columns": 10,
+        "rows": 7
+      },
+      "48": {
+        "url": "/tts/zh-sheet-48.jpg",
+        "columns": 10,
+        "rows": 7
+      },
+      "46": {
+        "url": "/tts/zh-sheet-46.jpg",
+        "columns": 10,
+        "rows": 7
+      }
+    },
+    "cards": {
+      "1": {
+        "sheet": "43",
+        "index": 0
+      },
+      "2": {
+        "sheet": "43",
+        "index": 1
+      },
+      "3": {
+        "sheet": "43",
+        "index": 2
+      },
+      "4": {
+        "sheet": "43",
+        "index": 3
+      },
+      "5": {
+        "sheet": "43",
+        "index": 4
+      },
+      "6": {
+        "sheet": "43",
+        "index": 5
+      },
+      "7": {
+        "sheet": "43",
+        "index": 6
+      },
+      "8": {
+        "sheet": "43",
+        "index": 7
+      },
+      "9": {
+        "sheet": "43",
+        "index": 8
+      },
+      "10": {
+        "sheet": "43",
+        "index": 9
+      },
+      "11": {
+        "sheet": "43",
+        "index": 10
+      },
+      "12": {
+        "sheet": "43",
+        "index": 11
+      },
+      "13": {
+        "sheet": "43",
+        "index": 12
+      },
+      "14": {
+        "sheet": "43",
+        "index": 13
+      },
+      "15": {
+        "sheet": "43",
+        "index": 14
+      },
+      "16": {
+        "sheet": "43",
+        "index": 15
+      },
+      "17": {
+        "sheet": "43",
+        "index": 16
+      },
+      "18": {
+        "sheet": "43",
+        "index": 17
+      },
+      "19": {
+        "sheet": "43",
+        "index": 18
+      },
+      "20": {
+        "sheet": "43",
+        "index": 19
+      },
+      "21": {
+        "sheet": "43",
+        "index": 20
+      },
+      "22": {
+        "sheet": "43",
+        "index": 21
+      },
+      "23": {
+        "sheet": "43",
+        "index": 22
+      },
+      "24": {
+        "sheet": "43",
+        "index": 23
+      },
+      "25": {
+        "sheet": "43",
+        "index": 24
+      },
+      "26": {
+        "sheet": "43",
+        "index": 25
+      },
+      "27": {
+        "sheet": "43",
+        "index": 26
+      },
+      "28": {
+        "sheet": "43",
+        "index": 27
+      },
+      "29": {
+        "sheet": "43",
+        "index": 28
+      },
+      "30": {
+        "sheet": "43",
+        "index": 29
+      },
+      "31": {
+        "sheet": "43",
+        "index": 30
+      },
+      "32": {
+        "sheet": "43",
+        "index": 31
+      },
+      "33": {
+        "sheet": "43",
+        "index": 32
+      },
+      "34": {
+        "sheet": "43",
+        "index": 33
+      },
+      "35": {
+        "sheet": "43",
+        "index": 34
+      },
+      "36": {
+        "sheet": "42",
+        "index": 0
+      },
+      "37": {
+        "sheet": "42",
+        "index": 1
+      },
+      "38": {
+        "sheet": "42",
+        "index": 2
+      },
+      "39": {
+        "sheet": "42",
+        "index": 3
+      },
+      "40": {
+        "sheet": "42",
+        "index": 4
+      },
+      "41": {
+        "sheet": "42",
+        "index": 5
+      },
+      "42": {
+        "sheet": "42",
+        "index": 6
+      },
+      "43": {
+        "sheet": "42",
+        "index": 7
+      },
+      "44": {
+        "sheet": "42",
+        "index": 8
+      },
+      "45": {
+        "sheet": "42",
+        "index": 9
+      },
+      "46": {
+        "sheet": "42",
+        "index": 10
+      },
+      "47": {
+        "sheet": "42",
+        "index": 11
+      },
+      "48": {
+        "sheet": "42",
+        "index": 12
+      },
+      "49": {
+        "sheet": "42",
+        "index": 13
+      },
+      "50": {
+        "sheet": "42",
+        "index": 14
+      },
+      "51": {
+        "sheet": "42",
+        "index": 15
+      },
+      "52": {
+        "sheet": "42",
+        "index": 16
+      },
+      "53": {
+        "sheet": "42",
+        "index": 17
+      },
+      "54": {
+        "sheet": "42",
+        "index": 18
+      },
+      "55": {
+        "sheet": "42",
+        "index": 19
+      },
+      "56": {
+        "sheet": "42",
+        "index": 20
+      },
+      "57": {
+        "sheet": "42",
+        "index": 21
+      },
+      "58": {
+        "sheet": "42",
+        "index": 22
+      },
+      "59": {
+        "sheet": "42",
+        "index": 23
+      },
+      "60": {
+        "sheet": "42",
+        "index": 24
+      },
+      "61": {
+        "sheet": "42",
+        "index": 25
+      },
+      "62": {
+        "sheet": "42",
+        "index": 26
+      },
+      "63": {
+        "sheet": "42",
+        "index": 27
+      },
+      "64": {
+        "sheet": "42",
+        "index": 28
+      },
+      "65": {
+        "sheet": "42",
+        "index": 29
+      },
+      "66": {
+        "sheet": "42",
+        "index": 30
+      },
+      "67": {
+        "sheet": "42",
+        "index": 31
+      },
+      "68": {
+        "sheet": "42",
+        "index": 32
+      },
+      "69": {
+        "sheet": "42",
+        "index": 33
+      },
+      "70": {
+        "sheet": "42",
+        "index": 34
+      },
+      "71": {
+        "sheet": "42",
+        "index": 35
+      },
+      "72": {
+        "sheet": "42",
+        "index": 36
+      },
+      "73": {
+        "sheet": "42",
+        "index": 37
+      },
+      "74": {
+        "sheet": "42",
+        "index": 38
+      },
+      "75": {
+        "sheet": "42",
+        "index": 39
+      },
+      "76": {
+        "sheet": "42",
+        "index": 40
+      },
+      "77": {
+        "sheet": "42",
+        "index": 41
+      },
+      "78": {
+        "sheet": "42",
+        "index": 42
+      },
+      "79": {
+        "sheet": "42",
+        "index": 43
+      },
+      "80": {
+        "sheet": "42",
+        "index": 44
+      },
+      "81": {
+        "sheet": "42",
+        "index": 45
+      },
+      "82": {
+        "sheet": "48",
+        "index": 0
+      },
+      "83": {
+        "sheet": "48",
+        "index": 1
+      },
+      "84": {
+        "sheet": "48",
+        "index": 2
+      },
+      "85": {
+        "sheet": "48",
+        "index": 3
+      },
+      "86": {
+        "sheet": "48",
+        "index": 4
+      },
+      "87": {
+        "sheet": "48",
+        "index": 5
+      },
+      "88": {
+        "sheet": "48",
+        "index": 6
+      },
+      "89": {
+        "sheet": "48",
+        "index": 7
+      },
+      "90": {
+        "sheet": "48",
+        "index": 8
+      },
+      "91": {
+        "sheet": "48",
+        "index": 9
+      },
+      "92": {
+        "sheet": "48",
+        "index": 10
+      },
+      "93": {
+        "sheet": "48",
+        "index": 11
+      },
+      "94": {
+        "sheet": "48",
+        "index": 12
+      },
+      "95": {
+        "sheet": "48",
+        "index": 13
+      },
+      "96": {
+        "sheet": "48",
+        "index": 14
+      },
+      "97": {
+        "sheet": "48",
+        "index": 15
+      },
+      "98": {
+        "sheet": "48",
+        "index": 16
+      },
+      "99": {
+        "sheet": "48",
+        "index": 17
+      },
+      "100": {
+        "sheet": "48",
+        "index": 18
+      },
+      "101": {
+        "sheet": "48",
+        "index": 19
+      },
+      "102": {
+        "sheet": "48",
+        "index": 20
+      },
+      "103": {
+        "sheet": "43",
+        "index": 35
+      },
+      "104": {
+        "sheet": "46",
+        "index": 0
+      },
+      "105": {
+        "sheet": "46",
+        "index": 1
+      },
+      "106": {
+        "sheet": "46",
+        "index": 2
+      },
+      "107": {
+        "sheet": "46",
+        "index": 3
+      },
+      "108": {
+        "sheet": "46",
+        "index": 4
+      },
+      "109": {
+        "sheet": "46",
+        "index": 5
+      },
+      "110": {
+        "sheet": "46",
+        "index": 6
+      }
+    },
+    "board": "/tts/zh-resource-2a2094f37e503dc7.jpg",
+    "boardDimensions": [
+      9182,
+      5940
+    ],
+    "resources": [
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173365184640946/F3465B72EC0E8DFFAD3F6DF08AA722234C3251EE/",
+        "kind": "TableURL",
+        "bytes": 17893808,
+        "content_type": "image/jpeg",
+        "sha256": "a4237c6f8966e37793d7b36bba50a632e5b3fb61c3d3aa2fa8cbed165acb35e5",
+        "format": "image",
+        "dimensions": [
+          9182,
+          5940
+        ],
+        "publicPath": "/tts/zh-resource-2a2094f37e503dc7.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1009312085870774195/4473102B90D606EB2A918D49731EDEABB5CF1ADA/",
+        "kind": "MeshURL",
+        "bytes": 2271,
+        "content_type": "application/octet-stream",
+        "sha256": "1cbbc434aea9417347206d73e0f3819f13eaadd384eabb54a0bf9315816f7ca9",
+        "format": "other",
+        "dimensions": null
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173079363335735/C2D298D50677D60E1070985088B2B3329133A89C/",
+        "kind": "DiffuseURL",
+        "bytes": 180453,
+        "content_type": "image/png",
+        "sha256": "748c4e6814dbb8669f6a2340487d3f32e1be5120a6c82fe0229fae449b9f4758",
+        "format": "image",
+        "dimensions": [
+          2048,
+          2048
+        ],
+        "publicPath": "/tts/zh-resource-1053740bf03616f8.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173079363326738/329C7183DFEDE446A1B9A54119925E0AB3BC9456/",
+        "kind": "DiffuseURL",
+        "bytes": 235716,
+        "content_type": "image/png",
+        "sha256": "8c673abce5495dfd08ef6891630fd45b6a07f5ddf36ca43865df894063dd4139",
+        "format": "image",
+        "dimensions": [
+          2048,
+          2048
+        ],
+        "publicPath": "/tts/zh-resource-3c32348fc3639ec1.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1300927578541313383/E22447DBDAC6284CDF26111C9870A5A7277C698D/",
+        "kind": "ImageURL",
+        "bytes": 126397,
+        "content_type": "application/octet-stream",
+        "sha256": "c4681ffdd65bb300eb708cb929038638b031aeeed3b42d9a15371f7fac08e463",
+        "format": "image",
+        "dimensions": [
+          864,
+          480
+        ],
+        "publicPath": "/tts/zh-resource-3a459bf5b452eb62.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562352577704/44B6EF9C5A37D2067C3118BFCA0B307405194613/",
+        "kind": "ImageURL",
+        "bytes": 816066,
+        "content_type": "image/png",
+        "sha256": "02e00c979ce4c63cbd2996123e979ad7271f6432316ab2fd07055791d5cf335a",
+        "format": "image",
+        "dimensions": [
+          1987,
+          2004
+        ],
+        "publicPath": "/tts/zh-resource-38633353b459e449.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562352577793/83B95DDC28B3371AC1DA0F833DB3C016188FA1D9/",
+        "kind": "DiffuseURL",
+        "bytes": 48114,
+        "content_type": "image/png",
+        "sha256": "212997f32d6cf2611d09a0a504a5d1662c814e64079d558daadfa8198f57c58c",
+        "format": "image",
+        "dimensions": [
+          2048,
+          2048
+        ],
+        "publicPath": "/tts/zh-resource-4148fc9aea80b790.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562352578072/31CF4574B079E40E8028FBBE649D0FCAAAAE8121/",
+        "kind": "DiffuseURL",
+        "bytes": 55057,
+        "content_type": "image/png",
+        "sha256": "72126e1f2044ddb6a18a4d66e9a6ed216ddcbd0eaf41a0276e1919c0a58e8928",
+        "format": "image",
+        "dimensions": [
+          2048,
+          2048
+        ],
+        "publicPath": "/tts/zh-resource-4c688ddf4793b034.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562352578339/6AD395F9CD1ECC3ED51D40BA45EBF36FF17A8826/",
+        "kind": "DiffuseURL",
+        "bytes": 252215,
+        "content_type": "image/png",
+        "sha256": "66d576b23d4a93371bc7e321a1cdaffe93f876d959f7f608db2dec06040a6540",
+        "format": "image",
+        "dimensions": [
+          2048,
+          2048
+        ],
+        "publicPath": "/tts/zh-resource-fb4f3656816a3547.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562352578250/8FA9EC03C24E3E0D8A78E391BD00A1BBD613B606/",
+        "kind": "DiffuseURL",
+        "bytes": 183982,
+        "content_type": "image/png",
+        "sha256": "edcd6f9691f2d3b56e38c78364f17ab63f64707a26159d90c73b71524b651a9a",
+        "format": "image",
+        "dimensions": [
+          2048,
+          2048
+        ],
+        "publicPath": "/tts/zh-resource-47d03f578971803c.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1009312085870836852/77577ADDE33595FBC1168966A0293831DF6DE0C2/",
+        "kind": "DiffuseURL",
+        "bytes": 176510,
+        "content_type": "image/jpeg",
+        "sha256": "1d7065f6f9e95b18c285ec98c9e42e1dbe3cf3cbda0de9d2a4e06d65575dbd91",
+        "format": "image",
+        "dimensions": [
+          2048,
+          2048
+        ],
+        "publicPath": "/tts/zh-resource-737ef6ebec2b6786.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562352577420/972B2B9CF6EF36EAFCDCFB62007D67C9ACF309A0/",
+        "kind": "DiffuseURL",
+        "bytes": 510745,
+        "content_type": "image/png",
+        "sha256": "0b4b4551d8a21bc8955ce6bc4823263a3c333044443050cb2d0e64a4d501b8f2",
+        "format": "image",
+        "dimensions": [
+          2048,
+          2048
+        ],
+        "publicPath": "/tts/zh-resource-df85ac7c8de2806d.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562352577964/D68468619B51A62DF1A4665282C678B926A292C1/",
+        "kind": "DiffuseURL",
+        "bytes": 57358,
+        "content_type": "image/png",
+        "sha256": "4d41f2cbd8e479f915963bcb536e856c5e0fcef84e5263efb6c06ab82c1b6dd8",
+        "format": "image",
+        "dimensions": [
+          2048,
+          2048
+        ],
+        "publicPath": "/tts/zh-resource-afb9818ae933a5e1.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562352577878/911E000E7021383D0D0AE6235ACF87B4C93BD604/",
+        "kind": "DiffuseURL",
+        "bytes": 55974,
+        "content_type": "image/png",
+        "sha256": "a6b6c8881924d7b615b93e6033b5e536ca6af4fc416cfa39a3709489826694c8",
+        "format": "image",
+        "dimensions": [
+          2048,
+          2048
+        ],
+        "publicPath": "/tts/zh-resource-7138896f25967d27.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562348868760/9EC1B352989B91BD4604E612C7C16C95011C96D1/",
+        "kind": "BackURL",
+        "bytes": 197843,
+        "content_type": "image/png",
+        "sha256": "e3335d80640e8000f04aabd65814d41d5cd909c6df6e73bf2a766c35dbf1c30e",
+        "format": "image",
+        "dimensions": [
+          2419,
+          787
+        ],
+        "publicPath": "/tts/zh-resource-507eb0db80324c24.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562348816602/A85DA6D5EE16807C743453DE423DA209A897478C/",
+        "kind": "BackURL",
+        "bytes": 1184778,
+        "content_type": "image/png",
+        "sha256": "45dfba6bb191fdb5a11d608f12e20810fe6e705ef4587572443480b0cf5ea16e",
+        "format": "image",
+        "dimensions": [
+          3200,
+          1832
+        ],
+        "publicPath": "/tts/zh-resource-d45cb60d7dc9dfe1.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1843673943731782687/1419334A311B8706800027623898DF6B1A4509D5/",
+        "kind": "FaceURL",
+        "bytes": 8606168,
+        "content_type": "image/jpeg",
+        "sha256": "759855e347a7d6fb073215bf3f30cb4a50b421e258dea05fbf577212468bc730",
+        "format": "image",
+        "dimensions": [
+          9305,
+          9126
+        ],
+        "publicPath": "/tts/zh-resource-047bc92a01c6230a.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173365184686804/20A95791DD5F10D18F72FAB9122081355D349412/",
+        "kind": "BackURL",
+        "bytes": 257490,
+        "content_type": "image/jpeg",
+        "sha256": "695ebe6dd9fe77d778a68f4479108617026dd8e1c843629228ac9e1ef589acf0",
+        "format": "image",
+        "dimensions": [
+          931,
+          1303
+        ],
+        "publicPath": "/tts/zh-resource-e9873c3cbaff955e.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173470675057389/C6D58B7652779131921AB82964CE44307453CEF6/",
+        "kind": "FaceURL",
+        "bytes": 955533,
+        "content_type": "image/jpeg",
+        "sha256": "db45967df17e54e794486601a9cc35cdc490bc61000be4f38b3ca1069595d14d",
+        "format": "image",
+        "dimensions": [
+          1912,
+          2614
+        ],
+        "publicPath": "/tts/zh-resource-700f89e32883918a.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173470675013095/2D9A6B6831750820898B74EB9AE1F07A02A74042/",
+        "kind": "BackURL",
+        "bytes": 273134,
+        "content_type": "image/jpeg",
+        "sha256": "97262b173bcca36389214d554bd7b552e2dc85bf303c84bebb644efe62d42fe1",
+        "format": "image",
+        "dimensions": [
+          931,
+          1303
+        ],
+        "publicPath": "/tts/zh-resource-afa1be46d0b96f68.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844797164154890744/20E03A58297421A7B313B0FCEED19CF304842E05/",
+        "kind": "FaceURL",
+        "bytes": 17348996,
+        "content_type": "image/jpeg",
+        "sha256": "b5313c04a72db500c82b2aaa0c035b16d9be74e39bb004362f76be185fc02f49",
+        "format": "image",
+        "dimensions": [
+          9305,
+          9126
+        ],
+        "publicPath": "/tts/zh-resource-31b658a366d4085a.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844797164154888286/C97AA664621B9DC9722E40FA13CA30FD31B67F48/",
+        "kind": "FaceURL",
+        "bytes": 4082635,
+        "content_type": "image/jpeg",
+        "sha256": "63d7e7a37e572e0f54e8fa7a3c6496f451c3fa6a525bd9d007bbfc270f107239",
+        "format": "image",
+        "dimensions": [
+          9308,
+          9122
+        ],
+        "publicPath": "/tts/zh-resource-308d0beb2dc6e71d.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844797164154888176/F6EA770FDEA812BD63900D1C2F567F3B505131EB/",
+        "kind": "FaceURL",
+        "bytes": 4521285,
+        "content_type": "image/jpeg",
+        "sha256": "ea3c225903373848cb32182bb9136913c490469bc6ce8a14b0968593223b9862",
+        "format": "image",
+        "dimensions": [
+          9308,
+          9122
+        ],
+        "publicPath": "/tts/zh-resource-e4f3eeb2b949ca3d.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844797164155707604/434C23EA7F80DFBF0C1431A631FE7CC395FD5486/",
+        "kind": "ImageURL",
+        "bytes": 14037,
+        "content_type": "image/png",
+        "sha256": "75e2b9867a8f1e83977c44d825c1c1841f768a0e8fe19f55bdcd8d9a12900338",
+        "format": "image",
+        "dimensions": [
+          951,
+          157
+        ],
+        "publicPath": "/tts/zh-resource-caa0046b8b8fb4f5.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173470675327778/223B23A67CEE02105857DF2EFE08D3E6E16E782A/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 98173,
+        "content_type": "image/png",
+        "sha256": "253bbe438483bfa90555a91d715fe86716e2f55c8b324ecb345ae5860f05ea5c",
+        "format": "image",
+        "dimensions": [
+          931,
+          931
+        ],
+        "publicPath": "/tts/zh-resource-ba8c071ad9769d16.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173470675328032/CFFAE59338A092DAB1BAF18EFBF7862E847B1DBC/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 293973,
+        "content_type": "image/png",
+        "sha256": "09579749993e75a9dee42157e38d307df7cab5535e0db7670b5bab792d8238aa",
+        "format": "image",
+        "dimensions": [
+          709,
+          1049
+        ],
+        "publicPath": "/tts/zh-resource-3f412af63da13e19.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173470675327932/F56E843E3A60D1202BFEC2A7379B77A84B3B0432/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 519799,
+        "content_type": "image/png",
+        "sha256": "dfd37df6b34c988cb84caaae230c78d69aed10d7925a6d9071b3391b8381b45c",
+        "format": "image",
+        "dimensions": [
+          931,
+          1122
+        ],
+        "publicPath": "/tts/zh-resource-25cf48822e89feff.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173470675366038/7C5ED99441E2DE51E7A33562005D0451894012DB/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 500091,
+        "content_type": "image/png",
+        "sha256": "c2bf3e491687f273bf514db0db92db96ff97bd3a0528a4162c79a4da56ee75dd",
+        "format": "image",
+        "dimensions": [
+          1436,
+          715
+        ],
+        "publicPath": "/tts/zh-resource-9224c3dd50bf8097.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173470675328124/60C6A829CE5A0684EBA928EF7B59902FE68B1A35/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 227783,
+        "content_type": "image/png",
+        "sha256": "4d0f8af78304d7428480ef9cfe7df87d5be522385ea240fd3d9a3c9129c081e1",
+        "format": "image",
+        "dimensions": [
+          922,
+          414
+        ],
+        "publicPath": "/tts/zh-resource-ab8706164fa2f097.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173470675328308/C0768BB45A3C05862BEB96E64B2DE0E117D7C538/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 133451,
+        "content_type": "image/png",
+        "sha256": "cc53f454076775b5a064f3f39f999ef3254efdafdbf5910de197d7c8c971af95",
+        "format": "image",
+        "dimensions": [
+          707,
+          691
+        ],
+        "publicPath": "/tts/zh-resource-201acd047d6d7c94.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562344704775/08066EC5A80C8B4DAE720CA67EE53FA419A3D3C5/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 274229,
+        "content_type": "image/png",
+        "sha256": "aff037f9b6898c398406113aca4a0ee615f260717e80b22d81da068f1e065506",
+        "format": "image",
+        "dimensions": [
+          1425,
+          696
+        ],
+        "publicPath": "/tts/zh-resource-abc2751f242f5494.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562343667968/A4F71C25E9908DFD1E4308CC9BF38FD9229C34D9/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 336438,
+        "content_type": "image/png",
+        "sha256": "0c8f79923a9d935257ac1eec8b53ad5256db38709ba908162c8b167a4aa8befc",
+        "format": "image",
+        "dimensions": [
+          892,
+          600
+        ],
+        "publicPath": "/tts/zh-resource-2b02e87e228926f1.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562343667678/6B1D0654FA88691BD9BA0C467E4A3668CC61448D/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 292937,
+        "content_type": "image/png",
+        "sha256": "00ae0617f9e8017b072834b74d2d185a4f3e821705fc9fa4bb96e417ab7d74a9",
+        "format": "image",
+        "dimensions": [
+          922,
+          414
+        ],
+        "publicPath": "/tts/zh-resource-6e4591aa4956429f.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562343668028/09526DAF85791B16E65AFF9F4590CA3ECB184BC9/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 141630,
+        "content_type": "image/png",
+        "sha256": "c8d25e5054e8083bce22b4455f3a26d313608827d96ab30dfa581c8813ef7080",
+        "format": "image",
+        "dimensions": [
+          607,
+          580
+        ],
+        "publicPath": "/tts/zh-resource-2ef7cd85f96fe7e7.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562343667904/C356063AB94189D5AECF7BEF90301BA68FC7C851/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 402387,
+        "content_type": "image/png",
+        "sha256": "108bd82cbd25fd63f74a66385f7d971d6869a4f8d09b46d7355ff7a1c1713b1f",
+        "format": "image",
+        "dimensions": [
+          800,
+          555
+        ],
+        "publicPath": "/tts/zh-resource-0a48a2e20e1ad659.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562343667845/102CD2C3A4D9B801EC0A7888BD5614743ADF04D2/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 960405,
+        "content_type": "image/png",
+        "sha256": "198decf888e3cb8663687e40026df6632021458f96015d412a0cecce3112ddec",
+        "format": "image",
+        "dimensions": [
+          1116,
+          740
+        ],
+        "publicPath": "/tts/zh-resource-9d6bd303397114b2.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562343668152/591AC2FDD36B081C035F9E6EA165CD270E6EAA2F/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 860389,
+        "content_type": "image/png",
+        "sha256": "a6a5656455f33f0001846b2dd25a5a15fe204e5570f906a1ab09a1662b7c3b0f",
+        "format": "image",
+        "dimensions": [
+          706,
+          1105
+        ],
+        "publicPath": "/tts/zh-resource-ae6819af7dcbed62.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562343667766/DE43ED619A103B81C1C379BD1261C60E8DDFB5B5/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 242498,
+        "content_type": "image/png",
+        "sha256": "7985de952d65c553f224bd403cd73b4fdebeab728fdb08bca3de3633543a28a9",
+        "format": "image",
+        "dimensions": [
+          1097,
+          366
+        ],
+        "publicPath": "/tts/zh-resource-e00402b1f11f7a2e.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562344705191/8A141306678255841B7876DE09A0E1D410547898/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 373635,
+        "content_type": "image/png",
+        "sha256": "2822f87338b18745c77f4078ca226b8649a6b0d55f0469fe24de1c064c6c0e66",
+        "format": "image",
+        "dimensions": [
+          628,
+          863
+        ],
+        "publicPath": "/tts/zh-resource-57320e9bf35d4878.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562344704908/F010B0767F55F50DE1545904268C9451135DABDA/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 693820,
+        "content_type": "image/png",
+        "sha256": "f911f49c9bd27beec488a375e9a7f5f018570848a8fbc56decb3cb1720e32829",
+        "format": "image",
+        "dimensions": [
+          511,
+          1145
+        ],
+        "publicPath": "/tts/zh-resource-b9f10ec0503d4f0c.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562344704835/A17215906B0353C3E499C6272BC6FBAFC3D6634B/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 793618,
+        "content_type": "image/png",
+        "sha256": "f845d02610336ac58b0ff496fc5b81adb0aa056be6701391f5d6965f219da129",
+        "format": "image",
+        "dimensions": [
+          1330,
+          1071
+        ],
+        "publicPath": "/tts/zh-resource-4e6e77b695fcd21e.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562344704986/283373370D29F05F07B2BACD9D08CF5725BC31A1/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 167575,
+        "content_type": "image/png",
+        "sha256": "a8233b733b3b0c2dd362ca9ea76f1f0c2a8688341b38f2888b0d42ff5382152e",
+        "format": "image",
+        "dimensions": [
+          595,
+          419
+        ],
+        "publicPath": "/tts/zh-resource-a1807db5559136da.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562344704675/7975448971D9D529F531615188D127A3102C9A3C/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 2382917,
+        "content_type": "image/png",
+        "sha256": "d8c0ad8a5176fcda2c55aa5321e80bca4092056887c8468f3fca41dac99207cc",
+        "format": "image",
+        "dimensions": [
+          3000,
+          1204
+        ],
+        "publicPath": "/tts/zh-resource-3211997dab4dd037.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562344705122/9347AC81909C1597F74FD1C79CFFC57D70E19054/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 2804050,
+        "content_type": "image/png",
+        "sha256": "3857d2fd427ea64065f223b8173de30bb5f6c7cd8dae75eaa92a74de41c589a2",
+        "format": "image",
+        "dimensions": [
+          1807,
+          1899
+        ],
+        "publicPath": "/tts/zh-resource-4fd23afb970da025.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562344705050/1EC35891D33BDE6B896BFD62CBDC81B80666231D/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 476468,
+        "content_type": "image/png",
+        "sha256": "05833a47310c9669d2837634381d2c45ceddc2a6a12ab5bc4a302bb062f0f402",
+        "format": "image",
+        "dimensions": [
+          1426,
+          548
+        ],
+        "publicPath": "/tts/zh-resource-12fbbb7ef78df25b.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844797164155707461/1A95F999944D7E1807A08646851BCF75B0D97A53/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 1524971,
+        "content_type": "image/png",
+        "sha256": "a54369e03c8de41cba96e17b9d126f4a8d65680973a14652f2a60114a5f59861",
+        "format": "image",
+        "dimensions": [
+          1151,
+          1602
+        ],
+        "publicPath": "/tts/zh-resource-c47a7e0c5a686ebf.png"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1666858152071990826/9AD455F2CBAEC01B2CBCDDB8B6DC4CE48D14B545/",
+        "kind": "MeshURL",
+        "bytes": 1006,
+        "content_type": "application/octet-stream",
+        "sha256": "200966a2fa0593cf55ceeb904edf23a997a3349a0434fed49ec21a89cd58ce47",
+        "format": "other",
+        "dimensions": null
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844798566730657651/453BCEE1E294F0B41303DC2EE60C72DD4BCEDAE6/",
+        "kind": "FaceURL",
+        "bytes": 4907274,
+        "content_type": "image/jpeg",
+        "sha256": "448a1b61d54e29a21b44c971b4ffecf7317e16a9fa03f9b31fc6c13bfeb06c77",
+        "format": "image",
+        "dimensions": [
+          6222,
+          2678
+        ],
+        "publicPath": "/tts/zh-resource-27c34f2c7171c2b0.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844798566730674905/C3B7CBDF3A410FF82728D8E0E8B48D0E5F8A877C/",
+        "kind": "BackURL",
+        "bytes": 182328,
+        "content_type": "image/jpeg",
+        "sha256": "a79f4db7f5935276199f8e216a3caa38748973af570f0308f7315154534e9288",
+        "format": "image",
+        "dimensions": [
+          1037,
+          1339
+        ],
+        "publicPath": "/tts/zh-resource-e1a9ad668d313db1.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844798566730657755/CC3ABD92F5005FF1A908340FB28E3EF021CB17FB/",
+        "kind": "FaceURL",
+        "bytes": 1865595,
+        "content_type": "image/jpeg",
+        "sha256": "0739a0279ccf3ab00b053b8ba0f1fdc4e6373743718ba30e4b3e3205f8f68adc",
+        "format": "image",
+        "dimensions": [
+          5000,
+          2000
+        ],
+        "publicPath": "/tts/zh-resource-6ec94225dae8a5a0.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844798566730659298/E20531500E86CD4FE111947F95F6E47BA3CFF702/",
+        "kind": "BackURL",
+        "bytes": 408221,
+        "content_type": "image/jpeg",
+        "sha256": "059802687a36f9980fff7088a3bdc2483e20b774ad945bfbf1dea49174432e6b",
+        "format": "image",
+        "dimensions": [
+          851,
+          851
+        ],
+        "publicPath": "/tts/zh-resource-ecbd84fc243c13bb.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844798566730657839/526EFF8C9519B20B6BA3D173C069EC480F5CC598/",
+        "kind": "FaceURL",
+        "bytes": 1820364,
+        "content_type": "image/jpeg",
+        "sha256": "19c9053f24a4a33fcbb3c29ca145a246b98efa3d817b4ac000f99f2928bb838f",
+        "format": "image",
+        "dimensions": [
+          5000,
+          2000
+        ],
+        "publicPath": "/tts/zh-resource-24371c238de038f9.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844798566730659382/6A36C43467980D9142F6DA0488B20A88B43322C4/",
+        "kind": "BackURL",
+        "bytes": 320259,
+        "content_type": "image/jpeg",
+        "sha256": "63331a29756f85de58e266e686641ed23671f97471a2a160330836e4824d25c9",
+        "format": "image",
+        "dimensions": [
+          851,
+          851
+        ],
+        "publicPath": "/tts/zh-resource-3c15d9e746b16de8.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844798879848145282/D85AC2F449194D6C01E64553BEECB797D4770C8B/",
+        "kind": "FaceURL",
+        "bytes": 912037,
+        "content_type": "image/jpeg",
+        "sha256": "b66a049f159c802b3d59a26a39b980c5003fa41280ada7c2f26fc50a78b3dacc",
+        "format": "image",
+        "dimensions": [
+          1862,
+          2608
+        ],
+        "publicPath": "/tts/zh-resource-09cf56fcf1890288.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844798879848144282/88C1E208E0FDCB7092C4C1123FAF72B78077AA33/",
+        "kind": "ImageSecondaryURL",
+        "bytes": 243330,
+        "content_type": "image/jpeg",
+        "sha256": "572429ba0a4344f96bee289b5f824de3d839b7b7d73fca5a10863e6de3c4d29b",
+        "format": "image",
+        "dimensions": [
+          1037,
+          1339
+        ],
+        "publicPath": "/tts/zh-resource-1e765b506ffc1c91.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1844797164154890488/0C9E75958711FC181A7A6B1D343B8BF97289E646/",
+        "kind": "FaceURL",
+        "bytes": 14004054,
+        "content_type": "image/jpeg",
+        "sha256": "05140441d02338deea74f82d53a0d597f5b9f5dd2d7010793fc9ac4aeda17c9d",
+        "format": "image",
+        "dimensions": [
+          9305,
+          9127
+        ],
+        "publicPath": "/tts/zh-resource-941b0f7c5695711d.jpg"
+      },
+      {
+        "url": "https://cdn.steamusercontent.com/ugc/1848173562352574984/B33333128106DBA58F6ACBDA8D82ABE892CA6065/",
+        "kind": "BackURL",
+        "bytes": 1074,
+        "content_type": "image/png",
+        "sha256": "cd245177ebd0c31ca95b386522d99989cde054c8525e7f028060622ee4743997",
+        "format": "image",
+        "dimensions": [
+          486,
+          238
+        ],
+        "publicPath": "/tts/zh-resource-a90e7509dd8804fb.png"
+      }
+    ]
+  }
+}
