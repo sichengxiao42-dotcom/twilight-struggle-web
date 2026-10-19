@@ -22,6 +22,10 @@ export function useOnline() {
   const [hasPending,setHasPending]=useState(false);
   const sendPending=useRef<()=>void>(()=>{});
   const remember=(s:Session)=>{identity.current=s;setSession(s);try{sessionStorage.setItem(KEY,JSON.stringify(s));}catch{/* Session still works until refresh. */}};
+  const joined=(timeout:Error|null,reply:Reply<Session>)=>{
+    setBusy(false);if(timeout||!reply?.ok){setError(timeout?'创建/加入超时，请重试':!reply?.ok?reply?.error??'加入失败':'加入失败');return;}
+    remember(reply.data);setReady(true);setError('');
+  };
   useEffect(()=>{
     const client:Socket<ServerToClient,ClientToServer>=io(import.meta.env.VITE_SERVER_URL||undefined,{autoConnect:false,reconnection:true});
     socket.current=client;
@@ -33,12 +37,20 @@ export function useOnline() {
         remember(reply.data);setReady(true);setError('');if(pending.current)sendPending.current();
       });
     };
-    client.on('connect',()=>{if(identity.current)restore(identity.current);});
+    const prior=saved();
+    // An invite link (#room=…&side=…) joins on first connect; a saved session in this tab takes precedence.
+    const invite=new URLSearchParams(location.hash.slice(1)),inviteRoom=invite.get('room')?.trim().toUpperCase(),inviteSide=invite.get('side');
+    let autoJoin=!prior&&inviteRoom&&(inviteSide==='US'||inviteSide==='USSR')?{roomId:inviteRoom,side:inviteSide as Side}:null;
+    client.on('connect',()=>{
+      if(identity.current)restore(identity.current);
+      else if(autoJoin){const request=autoJoin;autoJoin=null;setBusy(true);client.timeout(8000).emit('join',request,joined);}
+    });
     client.on('disconnect',()=>{setReady(false);setBusy(false);});
     client.on('connect_error',()=>{setReady(false);setBusy(false);setError('无法连接游戏服务器，请确认服务已启动；连接将自动重试。');});
     client.on('error',message=>{setError(message);setReady(false);});
     client.on('state',incoming=>{if(identity.current?.roomId===incoming.roomId&&identity.current?.side===incoming.side)setSnapshot(incoming as Snapshot);});
-    const prior=saved();if(prior){remember(prior);client.connect();}
+    if(prior){remember(prior);client.connect();}
+    else if(autoJoin)client.connect();
     return ()=>{client.removeAllListeners();client.disconnect();socket.current=null;};
   },[]);
   sendPending.current=()=>{
@@ -55,13 +67,9 @@ export function useOnline() {
     if(identity.current){setError('请先返回本地，再加入其他房间');return;}
     const client=socket.current;if(!client)return;
     setBusy(true);setError('');
-    const ack=(timeout:Error|null,reply:Reply<Session>)=>{
-      setBusy(false);if(timeout||!reply?.ok){setError(timeout?'创建/加入超时，请重试':!reply?.ok?reply?.error??'加入失败':'加入失败');return;}
-      remember(reply.data);setReady(true);setError('');
-    };
     client.connect();
-    if(roomId)client.timeout(8000).emit('join',{roomId:roomId.trim().toUpperCase(),side},ack);
-    else client.timeout(8000).emit('create',{side},ack);
+    if(roomId)client.timeout(8000).emit('join',{roomId:roomId.trim().toUpperCase(),side},joined);
+    else client.timeout(8000).emit('create',{side},joined);
   };
   const send=(action:Action)=>{
     if(!ready||!snapshot||!socket.current?.connected){setError('等待房间连接恢复');return;}

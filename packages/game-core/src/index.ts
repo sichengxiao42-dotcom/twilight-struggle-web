@@ -9,3 +9,4 @@ export * from './data/adjacency';
 export * from './scoring';
 export * from './data/descriptions';
 export * from './view';
+export * from './logText';

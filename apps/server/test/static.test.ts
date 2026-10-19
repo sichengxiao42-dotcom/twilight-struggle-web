@@ -12,7 +12,9 @@ test('production HTTP serves frontend, assets, HEAD, SPA links and Socket.IO fro
   await writeFile(join(root,'index.html'),'<html>Twilight test</html>');
   await writeFile(join(root,'assets','index-abcdefgh.js'),'console.log("game")');
   await writeFile(join(temp,'secret.txt'),'outside secret');
-  await symlink(join(temp,'secret.txt'),join(root,'escape.txt'));
+  await mkdir(join(temp,'outside'));await writeFile(join(temp,'outside','secret.txt'),'outside secret');
+  // A directory junction needs no special privilege on Windows; elsewhere the type is ignored.
+  await symlink(join(temp,'outside'),join(root,'escape'),'junction');
   const server=createGameServer(undefined,{webRoot:root});
   await new Promise<void>(resolve=>server.http.listen(0,'127.0.0.1',resolve));
   const address=server.http.address();assert.ok(address&&typeof address==='object');
@@ -32,7 +34,7 @@ test('production HTTP serves frontend, assets, HEAD, SPA links and Socket.IO fro
   assert.equal((await get('/','POST')).status,405);
   assert.equal((await get('/%zz')).status,400);assert.equal((await get('/%00')).status,400);
   assert.equal((await get('/../secret.txt')).status,403);assert.equal((await get('/%2e%2e%2fsecret.txt')).status,403);
-  assert.equal((await get('/.env')).status,404);assert.equal((await get('/escape.txt')).status,403);
+  assert.equal((await get('/.env')).status,404);assert.equal((await get('/escape/secret.txt')).status,403);
   await new Promise<void>((resolve,reject)=>{client.once('connect',resolve);client.once('connect_error',reject);client.connect();});
   const reply=await client.timeout(3000).emitWithAck('create',{side:'US'});assert.equal(reply.ok,true);
 });

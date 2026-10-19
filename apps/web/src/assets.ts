@@ -2,7 +2,8 @@ import type { CSSProperties } from 'react';
 
 /** tools/import-tts-assets.mjs 生成的清单格式。 */
 export interface TtsManifest {
-  sheets: Record<string, { url: string; columns: number; rows: number }>;
+  /** webUrl：tools/make-web-sheets.mjs 生成的缩小图集，优先使用。 */
+  sheets: Record<string, { url: string; webUrl?: string; columns: number; rows: number }>;
   cards: Record<string, { sheet: string; index: number }>;
 }
 
@@ -22,7 +23,7 @@ export function cardSprite(cardId: number): CSSProperties | null {
   return {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
-    backgroundImage: `url(${sheet.url})`,
+    backgroundImage: `url(${sheet.webUrl ?? sheet.url})`,
     backgroundSize: `${sheet.columns * CARD_WIDTH}px ${sheet.rows * CARD_HEIGHT}px`,
     backgroundPosition: `-${col * CARD_WIDTH}px -${row * CARD_HEIGHT}px`,
   };

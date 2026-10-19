@@ -6,25 +6,29 @@
     "note": "Chinese mod card art; translation and event text not independently verified"
   },
   "sheets": {
-    "43": {
-      "url": "/tts/zh-resource-941b0f7c5695711d.jpg",
-      "columns": 10,
-      "rows": 7
-    },
     "42": {
       "url": "/tts/zh-resource-31b658a366d4085a.jpg",
       "columns": 10,
-      "rows": 7
+      "rows": 7,
+      "webUrl": "/tts/web/sheet-42.webp"
     },
-    "48": {
-      "url": "/tts/zh-resource-047bc92a01c6230a.jpg",
+    "43": {
+      "url": "/tts/zh-resource-941b0f7c5695711d.jpg",
       "columns": 10,
-      "rows": 7
+      "rows": 7,
+      "webUrl": "/tts/web/sheet-43.webp"
     },
     "46": {
       "url": "/tts/zh-resource-308d0beb2dc6e71d.jpg",
       "columns": 10,
-      "rows": 7
+      "rows": 7,
+      "webUrl": "/tts/web/sheet-46.webp"
+    },
+    "48": {
+      "url": "/tts/zh-resource-047bc92a01c6230a.jpg",
+      "columns": 10,
+      "rows": 7,
+      "webUrl": "/tts/web/sheet-48.webp"
     }
   },
   "cards": {

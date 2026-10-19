@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Region, Side } from '@ts/shared';
-import { ADJACENCY, CARD_BY_ID, COUNTRIES, EVENT_SUMMARIES, activeSide, apply, controller, createGame, legalTargets, type Action, type OpsMode } from '@ts/game-core';
+import { ADJACENCY, CARD_BY_ID, COUNTRIES, EVENT_SUMMARIES, activeSide, apply, controller, createGame, formatLog, legalTargets, type Action, type OpsMode } from '@ts/game-core';
 import { CardView } from './CardView';
 import { displayState, useOnline } from './useOnline';
 const labels: Record<Region, string> = { EUROPE: '欧洲', ASIA: '亚洲', MIDDLE_EAST: '中东', AFRICA: '非洲', CENTRAL_AMERICA: '中美洲', SOUTH_AMERICA: '南美洲' };
@@ -27,6 +27,7 @@ export function App() {
   const [error, setError] = useState('');
   const [revealed, setRevealed] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
+  const log=formatLog(state.log);
   const actor=activeSide(state),side=online.session?.side??actor,p=state.phase;
   const onlineActive=Boolean(online.session);
   const canAct=!onlineActive||Boolean(online.ready&&!online.busy&&online.snapshot&&actor===side&&online.snapshot.seats.US.occupied&&online.snapshot.seats.USSR.occupied);
@@ -85,14 +86,11 @@ export function App() {
         </g>;
       })}
     </svg></div>
-    {side && <section className="play-panel"><h2>{sides[side]}手牌 · {state.hands[side].length} 张</h2>
-      {!revealed ? <button onClick={()=>setRevealed(true)}>{onlineActive?'显示我的手牌':'交给'+sides[side]+'玩家 · 显示手牌'}</button> : <>
-        <button onClick={()=>setRevealed(false)}>隐藏手牌</button>
-
-        {p.kind === 'HEADLINE' && state.space[side]>=4 && state.space[side==='US'?'USSR':'US']<4 && state.headlines[side==='US'?'USSR':'US']!==undefined && <p>太空特权：对方头条为 {CARD_BY_ID.get(state.headlines[side==='US'?'USSR':'US']!)!.nameZh}</p>}
-        {p.kind === 'DECISION' && canAct && <div className="decision-panel">
+    {side && <section className="play-panel">
+      {/* Decisions stay visible while the hand is hidden, otherwise hot-seat players see no buttons after a hand-off. */}
+      {p.kind === 'DECISION' && canAct && <div className="decision-panel">
           <h2>{p.decision.prompt}</h2>
-          {p.decision.kind === 'REVEAL' && <><div className="hand">{p.decision.cards.map(id=><CardView key={id} card={CARD_BY_ID.get(id)!}/>)}</div><button onClick={()=>dispatch({type:'CHOOSE',value:'confirm'})}>已查看 · 继续</button></>}
+          {p.decision.kind === 'REVEAL' && (revealed ? <><div className="hand">{p.decision.cards.map(id=><CardView key={id} card={CARD_BY_ID.get(id)!}/>)}</div><button onClick={()=>dispatch({type:'CHOOSE',value:'confirm'})}>已查看 · 继续</button></> : <p>这是{sides[side]}的秘密信息，请先点击下方“显示手牌”再查看。</p>)}
           {p.decision.kind === 'CHOICE' && p.decision.options.map(o=><button key={o.id} onClick={()=>dispatch({type:'CHOOSE',value:o.id})}>{o.label}</button>)}
           {p.decision.kind === 'INFLUENCE' && <><p>点击金色边框的国家 · 剩余 {p.decision.remaining} 点/次</p>{p.decision.optional && <button onClick={()=>dispatch({type:'CHOOSE',value:'done'})}>移除完毕 · 进入重新放置</button>}</>}
           {p.decision.kind === 'OPS_MODE' && <>
@@ -100,6 +98,11 @@ export function App() {
             <button onClick={()=>dispatch({type:'CHOOSE',value:'skip'})}>放弃这些 OPS</button>
           </>}
         </div>}
+      <h2>{sides[side]}手牌 · {state.hands[side].length} 张</h2>
+      {!revealed ? <button onClick={()=>setRevealed(true)}>{onlineActive?'显示我的手牌':'交给'+sides[side]+'玩家 · 显示手牌'}</button> : <>
+        <button onClick={()=>setRevealed(false)}>隐藏手牌</button>
+
+        {p.kind === 'HEADLINE' && state.space[side]>=4 && state.space[side==='US'?'USSR':'US']<4 && state.headlines[side==='US'?'USSR':'US']!==undefined && <p>太空特权：对方头条为 {CARD_BY_ID.get(state.headlines[side==='US'?'USSR':'US']!)!.nameZh}</p>}
         {(p.kind === 'ACTION_ROUND' || p.kind === 'HEADLINE' || p.kind === 'SETUP_PLACEMENT') && <>
           {p.kind === 'ACTION_ROUND' && state.mode==='PRACTICE' && state.hands[side].every(id=>CARD_BY_ID.get(id)!.scoring) && <button onClick={()=>dispatch({type:'PASS_PRACTICE'})}>无 OPS 牌 · 跳过练习行动</button>}
           {canAct && p.kind==='ACTION_ROUND' && state.mode==='EARLY_WAR' && !state.hands[side].length && <button onClick={()=>dispatch({type:'PASS_EMPTY'})}>手牌用尽 · 跳过行动</button>}
@@ -121,6 +124,6 @@ export function App() {
       </>}
     </section>}
     {online.snapshot&&<p>对方手牌：{online.snapshot.view.handCounts[side==='US'?'USSR':'US']} 张 · 牌库：{online.snapshot.view.deckCount} 张 · 局面版本 {online.snapshot.revision}</p>}
-    <details open><summary>对局日志 · {state.log.length} 条</summary><ol className="log">{state.log.map((line,i)=><li key={i}>{line}</li>)}</ol></details>
+    <details open><summary>对局日志 · {log.length} 条</summary><ol className="log">{log.map((line,i)=><li key={i}>{line}</li>)}</ol></details>
   </main>;
 }

@@ -10,3 +10,4 @@ assets/*
 apps/web/public/tts/*
 !apps/web/public/tts/zh-resource-*.jpg
 !apps/web/public/tts/zh-resource-*.png
+!apps/web/public/tts/web/
