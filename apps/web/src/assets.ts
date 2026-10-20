@@ -5,6 +5,9 @@ export interface TtsManifest {
   /** webUrl：tools/make-web-sheets.mjs 生成的缩小图集，优先使用。 */
   sheets: Record<string, { url: string; webUrl?: string; columns: number; rows: number }>;
   cards: Record<string, { sheet: string; index: number }>;
+  /** 地图原图；boardWeb 为 tools/make-web-sheets.mjs 生成的缩小图，优先使用。 */
+  board?: string;
+  boardWeb?: string;
 }
 
 // 中文清单随仓库提交；不存在时 glob 为空，前端自动回退为文字卡。
@@ -27,4 +30,9 @@ export function cardSprite(cardId: number): CSSProperties | null {
     backgroundSize: `${sheet.columns * CARD_WIDTH}px ${sheet.rows * CARD_HEIGHT}px`,
     backgroundPosition: `-${col * CARD_WIDTH}px -${row * CARD_HEIGHT}px`,
   };
+}
+
+/** 地图图片地址；清单里没有地图时返回 null，棋盘回退为示意图。 */
+export function boardImage(): string | null {
+  return manifest?.boardWeb ?? manifest?.board ?? null;
 }

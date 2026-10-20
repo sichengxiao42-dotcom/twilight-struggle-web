@@ -1,17 +1,11 @@
 import { useEffect, useState } from 'react';
 import type { Region, Side } from '@ts/shared';
-import { ADJACENCY, CARD_BY_ID, COUNTRIES, EVENT_SUMMARIES, REGION_NAMES, activeSide, apply, canEvent, canPass, controller, createGame, forcedMissileEnvy, formatLog, legalTargets, roundsFor, trapDiscards, trapped, type Action, type Effects, type OpsMode } from '@ts/game-core';
+import { CARD_BY_ID, COUNTRIES, EVENT_SUMMARIES, REGION_NAMES, activeSide, apply, canEvent, canPass, createGame, forcedMissileEnvy, formatLog, legalTargets, roundsFor, trapDiscards, trapped, type Action, type Effects, type OpsMode } from '@ts/game-core';
+import { Board } from './Board';
 import { CardView } from './CardView';
 import { displayState, useOnline } from './useOnline';
-const labels: Record<Region, string> = { EUROPE: '欧洲', ASIA: '亚洲', MIDDLE_EAST: '中东', AFRICA: '非洲', CENTRAL_AMERICA: '中美洲', SOUTH_AMERICA: '南美洲' };
 const sides: Record<Side, string> = { USSR: '苏联', US: '美国' };
 const modes: Record<OpsMode, string> = { INFLUENCE: '放置影响力', REALIGNMENT: '调整', COUP: '政变' };
-// Region panels form an original schematic board; connections are board links, not geographic borders.
-const origins: Record<Region, [number, number]> = { CENTRAL_AMERICA: [12, 12], SOUTH_AMERICA: [12, 330], EUROPE: [410, 12], AFRICA: [410, 430], MIDDLE_EAST: [808, 12], ASIA: [808, 330] };
-const positions = Object.fromEntries(COUNTRIES.map(c => {
-  const group = COUNTRIES.filter(x => x.region === c.region), i = group.indexOf(c), [x, y] = origins[c.region];
-  return [c.id, [x + (i % 3) * 128, y + 42 + Math.floor(i / 3) * 48]];
-}));
 const EFFECT_NAMES: Partial<Record<keyof Effects, string>> = {
   containment: '遏制政策', vietnam: '越南起义', cia: '中央情报局', nato: '北约', warsaw: '华约', marshall: '马歇尔计划', deGaulle: '戴高乐', japan: '美日安保',
   formosan: '台湾决议案', norad: '北美防空', cmc: '古巴导弹危机', nuclearSubs: '核潜艇', salt: '限制战略武器谈判', brezhnev: '勃列日涅夫主义', u2: 'U-2 事件',
@@ -45,7 +39,6 @@ export function App() {
   const [regional, setRegional] = useState<'NONE'|'ASIA'|'SEA'>('NONE');
   const [error, setError] = useState('');
   const [revealed, setRevealed] = useState(false);
-  const [hover, setHover] = useState<string | null>(null);
   const log=formatLog(state.log);
   const opsMode=state.phase.kind==='DECISION'&&state.phase.decision.kind==='OPS_MODE'?state.phase.decision:null;
   const actor=activeSide(state),side=online.session?.side??actor,p=state.phase;
@@ -94,19 +87,7 @@ export function App() {
     {activeEffects(state.effects).length>0&&<p className="effects">生效中：{activeEffects(state.effects).join('、')}</p>}
     <section className="toolbar"><strong aria-live="polite">{status}</strong>{p.kind === 'OPS' && canAct && <button onClick={() => dispatch({ type: 'END_OPS' })}>结束操作 / 放弃余点</button>}</section>
     {error && <p role="alert" className="error">{error}</p>}
-    <p>金色边框为可操作国家；★ 为战场国。蓝色数字为美国，红色数字为苏联。悬停或聚焦查看相邻连线。</p>
-    <div className="board-scroll"><svg viewBox="0 0 1208 810" className="board" aria-label="世界局势示意地图">
-      {(Object.keys(labels) as Region[]).map(r => { const [x,y] = origins[r]; return <text key={r} x={x+8} y={y+25} className="region-title">{labels[r]}</text>; })}
-      {hover && ADJACENCY[hover].map(id => { const a=positions[hover],b=positions[id]; return <line key={id} x1={a[0]+60} y1={a[1]+20} x2={b[0]+60} y2={b[1]+20} className="connection"/>; })}
-      {COUNTRIES.map(c => {
-        const [x,y]=positions[c.id], inf=state.influence[c.id], ctrl=controller(state,c.id), legal=targets.includes(c.id);
-        const click=()=>dispatch(p.kind === 'DECISION' ? {type:'CHOOSE',value:c.id} : { type: p.kind === 'SETUP_PLACEMENT' ? 'PLACE_SETUP' : 'TARGET', country:c.id });
-        return <g key={c.id} transform={'translate('+x+','+y+')'} className={'country '+(legal?'legal ':'')+(ctrl?'controlled-'+ctrl:'')} role="button" aria-disabled={!legal} aria-label={c.nameZh+' 稳定度'+c.stability+' 美国'+inf.US+' 苏联'+inf.USSR} tabIndex={0} onMouseEnter={()=>setHover(c.id)} onMouseLeave={()=>setHover(null)} onFocus={()=>setHover(c.id)} onBlur={()=>setHover(null)} onClick={()=>{if(legal)click();}} onKeyDown={e=>{if(legal&&(e.key==='Enter'||e.key===' ')){e.preventDefault();click();}}}>
-          <title>{c.nameZh+' · 稳定度 '+c.stability+' · 相邻：'+ADJACENCY[c.id].map(id=>COUNTRIES.find(n=>n.id===id)!.nameZh).join('、')}</title>
-          <rect width="120" height="40" rx="5"/><text x="6" y="15">{c.battleground?'★ ':''}{c.nameZh}</text><text x="6" y="32" className="stability">稳 {c.stability}</text><text x="72" y="32" className="us-value">{inf.US}</text><text x="99" y="32" className="ussr-value">{inf.USSR}</text>
-        </g>;
-      })}
-    </svg></div>
+    <Board state={state} targets={targets} onCountry={id=>dispatch(p.kind === 'DECISION' ? {type:'CHOOSE',value:id} : { type: p.kind === 'SETUP_PLACEMENT' ? 'PLACE_SETUP' : 'TARGET', country:id })}/>
     {side && <section className="play-panel">
       {/* Decisions stay visible while the hand is hidden, otherwise hot-seat players see no buttons after a hand-off. */}
       {p.kind === 'DECISION' && canAct && <div className="decision-panel">

@@ -474,5 +474,6 @@
     }
   },
   "unmatched": [],
-  "board": "/tts/zh-resource-2a2094f37e503dc7.jpg"
+  "board": "/tts/zh-resource-2a2094f37e503dc7.jpg",
+  "boardWeb": "/tts/web/board.webp"
 }

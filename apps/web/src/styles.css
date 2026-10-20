@@ -50,6 +50,21 @@ main { max-width: 1400px; }
 .country.legal rect { stroke:#b39236; stroke-width:2; }
 .country:focus rect,.country:hover rect { stroke:var(--fg); stroke-width:2; }
 .connection { stroke:#bc8a35; stroke-width:2; opacity:.8; }
+.map-board { min-width:1200px; background:#d9d6cf; }
+.map-board .connection { stroke:#f2c14e; stroke-width:18; opacity:.9; stroke-linecap:round; }
+.map-board .country rect.hit { fill:transparent; stroke:none; }
+.map-board .country rect.tint { fill:transparent; stroke:none; }
+.map-board .country.controlled-US rect.tint { fill:#2f5d9e; opacity:.3; }
+.map-board .country.controlled-USSR rect.tint { fill:#b3261e; opacity:.3; }
+.map-board .country.legal rect.hit { fill:rgba(255,204,0,.16); stroke:#ffcc00; stroke-width:30; }
+.map-board .country:focus rect.hit,.map-board .country:hover rect.hit { stroke:#111; stroke-width:16; }
+.map-board .country.legal:focus rect.hit,.map-board .country.legal:hover rect.hit { stroke:#fff; }
+.map-board .country .marker rect { fill:#fff; stroke-width:8; }
+.map-board .country .marker text { font-size:110px; font-weight:800; pointer-events:none; }
+.map-board .country .marker-us rect { stroke:#2f5d9e; } .map-board .country .marker-us text { fill:#2f5d9e; }
+.map-board .country .marker-ussr rect { stroke:#b3261e; } .map-board .country .marker-ussr text { fill:#b3261e; }
+.map-board .country .marker-us.filled rect { fill:#2f5d9e; } .map-board .country .marker-ussr.filled rect { fill:#b3261e; }
+.map-board .country .marker.filled text { fill:#fff; }
 .card-button { background:transparent; color:var(--fg); padding:0; border:none; cursor:pointer; text-align:left; }
 .card-button:disabled { opacity:.5; cursor:default; }
 .card-button:not(:disabled):hover .card { outline:2px solid #b39236; }
