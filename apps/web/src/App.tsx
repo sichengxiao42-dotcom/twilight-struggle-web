@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Region, Side } from '@ts/shared';
-import { CARD_BY_ID, COUNTRIES, EVENT_SUMMARIES, REGION_NAMES, activeSide, apply, influencePlacement, placementCost, canEvent, canPass, createGame, forcedMissileEnvy, formatLog, legalTargets, trapDiscards, trapped, type Action, type Effects, type OpsMode } from '@ts/game-core';
+import { CARD_BY_ID, COUNTRIES, REGION_NAMES, activeSide, apply, influencePlacement, placementCost, canPass, createGame, forcedMissileEnvy, formatLog, legalTargets, trapped, type Action, type Effects, type OpsMode } from '@ts/game-core';
 import { phaseGuide, StageGuide } from './StageGuide';
 import { Board, type PlacementFeedback } from './Board';
-import { CardPlayDialog } from './CardPlayDialog';
+import { CardComposer } from './CardComposer';
+import { cardChoices } from './cardPlay';
 import { CardView } from './CardView';
 import { displayState, useOnline } from './useOnline';
 const sides: Record<Side, string> = { USSR: '苏联', US: '美国' };
@@ -32,7 +33,6 @@ export function App() {
   const handRef = useRef<HTMLElement>(null);
   const actionRef = useRef<HTMLElement>(null);
   const [trackTask, setTrackTask] = useState<string|null>(null);
-  const [cardMenuOpen, setCardMenuOpen] = useState(false);
   const [actionsOpen,setActionsOpen]=useState(false);
   const [zoom, setZoom] = useState(1);
   const [lastPlacement, setLastPlacement] = useState<PlacementFeedback | null>(null);
@@ -45,11 +45,8 @@ export function App() {
   const [roomId,setRoomId]=useState(()=>new URLSearchParams(location.hash.slice(1)).get('room')??'');
   const [seat,setSeat]=useState<Side>(()=>new URLSearchParams(location.hash.slice(1)).get('side')==='US'?'US':'USSR');
   const [copyStatus,setCopyStatus]=useState('');
-  const [mode, setMode] = useState<OpsMode>('INFLUENCE');
   const [selected, setSelected] = useState<number | null>(null);
-  const [use, setUse] = useState<'OPS'|'EVENT'|'SPACE'>('OPS');
-  const [order, setOrder] = useState<'BEFORE'|'AFTER'>('BEFORE');
-  const [regional, setRegional] = useState<'NONE'|'ASIA'|'SEA'>('NONE');
+  const closeCard=useCallback(()=>setSelected(null),[]);
   const [error, setError] = useState('');
   const [revealed, setRevealed] = useState(false);
   const log=formatLog(state.log);
@@ -58,34 +55,36 @@ export function App() {
   const onlineActive=Boolean(online.session);
   const canAct=(!onlineActive||Boolean(online.ready&&!online.busy&&online.snapshot&&actor===side&&online.snapshot.seats.US.occupied&&online.snapshot.seats.USSR.occupied))&&!trackTask;
   const targets=canAct?(online.snapshot?online.snapshot.view.targets:legalTargets(state)):[];
-  useEffect(()=>{setSelected(null);setRegional('NONE');},[online.snapshot?.revision,online.session?.roomId]);
-  useEffect(()=>{setRevealed(false);setCardMenuOpen(false);},[online.session?.roomId]);
-  useEffect(()=>{setCardMenuOpen(false);setSelected(null);},[side]);
-  useEffect(()=>{if(p.kind==='DECISION'||p.kind==='SUBPLAY')setActionsOpen(true);},[p.kind]);
+  useEffect(()=>{setSelected(null);},[online.snapshot?.revision,online.session?.roomId]);
+  useEffect(()=>{setRevealed(false);},[online.session?.roomId]);
+  useEffect(()=>{setSelected(null);setCountrySelection(null);setActionsOpen(false);},[side]);
+  useEffect(()=>{if(p.kind==='DECISION'&&!['INFLUENCE','COUNTRY'].includes(p.decision.kind))setActionsOpen(true);},[p]);
   useEffect(()=>{setLastPlacement(null);setCountrySelection(null);},[state.seed,online.session?.roomId]);
   const invite=online.session?location.origin+location.pathname+'#room='+online.session.roomId+'&side='+(online.session.side==='US'?'USSR':'US'):'';
   const dispatch = (action: Action) => {
     if (!side || !canAct) return;
     const placement=influencePlacement(state,action);
     if(placement){setCountrySelection(placement);setLastPlacement({...placement,before:state.influence[placement.country][placement.side]});}
-    if(onlineActive){setCardMenuOpen(false);online.send(action);return;}
+    if(onlineActive){setSelected(null);online.send(action);return;}
     try {
       const next = apply(state, side, action);
       if (activeSide(next) !== side) setRevealed(false);
       setHistory(previous=>[...previous.slice(-31),{state,action}]);
-      setState(next); setCardMenuOpen(false); setSelected(null); setRegional('NONE'); setError('');
+      setState(next);setSelected(null);setError('');
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
   };
   const canUndo=onlineActive?Boolean(online.ready&&!online.busy&&!online.hasPending&&online.snapshot?.canUndo):history.length>0;
   const undo=(country?:string)=>{
     if(!canUndo)return;
     if(onlineActive)online.send(country?{type:'UNDO_PLACEMENT',country}:{type:'UNDO'});
-    else{setState(history[history.length-1].state);setHistory(previous=>previous.slice(0,-1));setUndoVersion(v=>v+1);}
-    setTrackTask(null);setSelected(null);setCardMenuOpen(false);setLastPlacement(null);setRevealed(false);setError('');
+    else{const restored=history[history.length-1].state;if((activeSide(restored)??restored.phasingSide)!==side)setRevealed(false);setState(restored);setHistory(previous=>previous.slice(0,-1));setUndoVersion(v=>v+1);}
+    if(!country)setCountrySelection(null);
+    setTrackTask(null);setSelected(null);setLastPlacement(null);setError('');
   };
   const blocked = onlineActive ? !online.ready ? '正在恢复房间连接' : online.busy ? '正在确认你的操作' : !online.snapshot || !online.snapshot.seats.US.occupied || !online.snapshot.seats.USSR.occupied ? '等待另一位玩家加入' : online.snapshot.view.phase.kind==='WAITING' ? '等待'+sides[online.snapshot.view.phase.side]+'处理事件' : actor!==side ? '等待'+(actor?sides[actor]:'对方')+'行动' : undefined : undefined;
   const guide = trackTask ? {title:'请摆放轨道标记',detail:trackTask+'。拖到棋盘高亮圈内；键盘可聚焦标记后按 Enter。',focus:'map' as const} : phaseGuide(state, { selected, revealed, targetCount: targets.length, blocked });
   const focusTask = () => {
+    if(p.kind==='SUBPLAY'&&canAct){setRevealed(true);setSelected(p.card);return;}
     if (guide.focus==='hand'&&!revealed) setRevealed(true);
     if (guide.focus==='actions')setActionsOpen(true);
     const ref = guide.focus==='map'?mapRef:guide.focus==='hand'?handRef:actionRef;
@@ -104,26 +103,66 @@ export function App() {
   };
   const onCountry = (id:string) => {
     if (!canAct || !targets.includes(id)) return;
-    if(placingInfluence){setCountrySelection({country:id,side:placementSide});return;}
+    if(placingInfluence){setCountrySelection({country:id,side:placementSide});dispatch(p.kind==='DECISION'?{type:'CHOOSE',value:id}:{type:p.kind==='SETUP_PLACEMENT'?'PLACE_SETUP':'TARGET',country:id});return;}
     dispatch(p.kind === 'DECISION' ? {type:'CHOOSE',value:id} : {type:'TARGET',country:id});
   };
   const deckCount = online.snapshot?.view.deckCount ?? state.deck.length;
-  const cardControls = selected!==null && revealed && !(state.mode==='PRACTICE'&&CARD_BY_ID.get(selected)!.scoring) && (p.kind==='HEADLINE'||p.kind==='ACTION_ROUND') && <section className="card-detail" aria-label="已选卡牌操作">
-            <div className="eyebrow">已选卡牌 · #{selected}</div><h2>{CARD_BY_ID.get(selected)!.nameZh}</h2><p>{EVENT_SUMMARIES[selected]}</p>
-            {p.kind==='HEADLINE' ? <button className="primary" disabled={!canAct||selected===32||selected===6} onClick={()=>dispatch({type:'SELECT_HEADLINE',card:selected})}>确定头条</button> : state.mode==='STANDARD'&&trapped(state,side)&&!CARD_BY_ID.get(selected)!.scoring ? <><p>当前受困：弃置符合条件的手牌，尝试脱困。</p><button className="primary" disabled={!canAct||!trapDiscards(state,side).includes(selected)} onClick={()=>dispatch({type:'TRAP_DISCARD',card:selected})}>弃牌并尝试脱困</button></> : <>
-              {state.mode==='STANDARD' && <label>出牌方式 <select value={selected===6?'OPS':use} onChange={e=>setUse(e.target.value as typeof use)}><option value="OPS" disabled={CARD_BY_ID.get(selected)!.scoring}>OPS 操作</option><option value="EVENT" disabled={selected===6||CARD_BY_ID.get(selected)!.side===(side==='US'?'USSR':'US')}>事件 / 计分</option><option value="SPACE" disabled={selected===6||CARD_BY_ID.get(selected)!.scoring}>太空竞赛</option></select></label>}
-              {(state.mode==='PRACTICE'||use==='OPS'||selected===6) && <><label> OPS 用途 <select value={mode} onChange={e=>setMode(e.target.value as OpsMode)}>{(Object.keys(modes) as OpsMode[]).map(m=><option key={m} value={m}>{modes[m]}</option>)}</select></label>
-                {state.mode==='STANDARD'&&<><label> 对手事件 <select value={order} onChange={e=>setOrder(e.target.value as typeof order)}><option value="BEFORE">OPS 前结算</option><option value="AFTER">OPS 后结算</option></select></label>
-                  <label> 区域奖励 <select value={regional} onChange={e=>setRegional(e.target.value as typeof regional)}><option value="NONE">不限制地区</option>{selected===6&&<option value="ASIA">全部在亚洲 · 中国牌奖励</option>}{side==='USSR'&&state.effects.vietnam&&<option value="SEA">全部在东南亚 · 越南奖励{selected===6?' + 中国牌奖励':''}</option>}</select></label></>}
-              </>}
-              <p className="field-help">{selected===6?'中国牌只用于行动点，使用后交给对方。':CARD_BY_ID.get(selected)!.scoring?'计分牌立即结算对应区域，本回合内必须打出。':use==='SPACE'?'用于太空竞赛不会触发卡牌事件；行动点和尝试次数仍需满足要求。':use==='EVENT'?(canEvent(state,selected,side)?'执行卡牌事件；按提示完成后续选择。':'事件前置条件未满足：打出后事件不生效。'):CARD_BY_ID.get(selected)!.side===(side==='US'?'USSR':'US')?'这张牌属于对方：用于行动点时，对方事件仍会发生，请选择结算顺序。':'使用牌上的行动点执行所选操作。'}</p>
-              <button disabled={!canAct||p.kind!=='ACTION_ROUND'} onClick={()=>dispatch(state.mode==='PRACTICE'||selected===6||use==='OPS'?{type:'PLAY_OPS',card:selected,mode,order,asiaOnly:regional==='ASIA',seaOnly:regional==='SEA'}:use==='EVENT'?{type:'PLAY_EVENT',card:selected}:{type:'SPACE',card:selected})} className="primary">确认出牌</button>
-            </>}
-            {p.kind==='HEADLINE'&&selected===32&&<p className="field-help warning">联合国干预不能作为头条，请换一张牌。</p>}
-          </section>;
   return <main className="command-room board-table">
-    <header className="masthead"><div className="brand"><span className="brand-symbol" aria-hidden="true">✦</span><div><h1>冷战热斗</h1><span className="brand-subtitle">TWILIGHT STRUGGLE · 1945—1989</span></div></div><div className="session-label"><i className={onlineActive?'live-dot online':'live-dot'}/>{onlineActive?'联机房间 · '+online.session!.roomId:'本地双人热座'}<span>{state.mode==='STANDARD'?'标准对局':'行动点练习'}</span></div></header>
+    <header className="masthead"><div className="brand"><h1>冷战热斗</h1><span className={'seat-tag seat-'+side}>{sides[side]}</span><span className="session-label">{onlineActive?'房间 '+online.session!.roomId:'本地热座'}</span></div><nav aria-label="牌桌工具"><button className="secondary" disabled={!canUndo} onClick={()=>undo()}>撤销</button><button className="secondary" aria-controls="table-actions" aria-expanded={actionsOpen} onClick={()=>setActionsOpen(v=>!v)}>{actionsOpen?'收起面板':'菜单与操作'}</button></nav></header>
 
+    <StageGuide guide={guide} side={side} onFocus={focusTask} showFocus={guide.focus==='hand'&&!revealed||guide.focus==='actions'&&selected===null} actionLabel={guide.focus==='hand'&&!revealed?'显示手牌':undefined}>
+      {canAct&&p.kind==='ACTION_ROUND'&&state.mode==='PRACTICE'&&state.hands[side].every(id=>CARD_BY_ID.get(id)!.scoring)&&<button className="secondary" onClick={()=>dispatch({type:'PASS_PRACTICE'})}>跳过练习行动</button>}
+      {canAct&&p.kind==='OPS'&&<button className="secondary" onClick={()=>dispatch({type:'END_OPS'})}>结束行动</button>}
+      {canAct&&p.kind==='DECISION'&&p.decision.kind==='INFLUENCE'&&p.decision.optional&&<button className="secondary" onClick={()=>dispatch({type:'CHOOSE',value:'done'})}>{p.decision.relocation?'移除完毕':'完成选择'}</button>}
+      {canAct&&p.kind==='ACTION_ROUND'&&canPass(state,side)&&<button className="secondary" onClick={()=>dispatch({type:'PASS_EMPTY'})}>跳过本轮</button>}
+    </StageGuide>
+    {(error||online.error)&&<p role="alert" className="error"><strong>操作未完成</strong> · {error||online.error}</p>}
+    <div className="game-layout">
+      <section className="map-panel surface" ref={mapRef} tabIndex={-1} aria-label="世界棋盘">
+        <div className="panel-heading"><div><span className="eyebrow">全球局势</span><h2>世界棋盘</h2></div><div className="map-tools"><span className="target-legend"><i/>{targets.length?targets.length+' 个可选国家':'当前无需选择国家'}</span><button aria-label="缩小地图" disabled={zoom<=1} onClick={()=>setZoom(z=>Math.max(1,z-0.25))}>−</button><button className="zoom-reset" onClick={()=>setZoom(1)} title="重置为同屏适应">{Math.round(zoom*100)}%</button><button aria-label="放大地图" disabled={zoom>=2} onClick={()=>setZoom(z=>Math.min(2,z+0.25))}>＋</button></div></div>
+        {countrySelection&&(placingInfluence||canDecrease)&&<div className="influence-editor" role="group" aria-label="国家影响力调整">
+          <div className="influence-country"><strong>{COUNTRIES.find(c=>c.id===countrySelection.country)!.nameZh}</strong><span>美国 {state.influence[countrySelection.country].US} · 苏联 {state.influence[countrySelection.country].USSR}</span></div>
+          <div className={'influence-stepper seat-'+countrySelection.side}><button aria-label="减少一点刚放置的影响力" disabled={!canDecrease} onClick={()=>undo(countrySelection.country)}>−</button><output aria-live="polite">{state.influence[countrySelection.country][countrySelection.side]}<small>{sides[countrySelection.side]}影响力</small></output><button aria-label="增加一点影响力" disabled={!canIncrease} onClick={placeSelected}>＋</button></div>
+          <p>{canIncrease?(p.kind==='OPS'?'每加 1 点消耗 '+placementCost(state,countrySelection.country,side)+' OPS':'每次增加 1 点影响力'):canDecrease?'本次放置已完成，仍可用减号撤回最后一点':'当前不能继续放置，请按阶段提示操作'}<small>减号仅撤回该国最近的放置；其他误操作用“撤销上一步”。</small></p>
+          <button className="secondary" onClick={()=>setCountrySelection(null)}>收起</button>
+        </div>}
+        <Board selectedCountry={countrySelection?.country} key={(online.session?.roomId??'local-'+state.seed)+'-undo-'+(online.snapshot?.undoVersion??undoVersion)} canInteract={canAct} onAction={dispatch} onTrackTask={setTrackTask} state={state} targets={targets} onCountry={onCountry} scale={zoom} lastPlacement={lastPlacement}/>
+      </section>
+      <aside id="table-actions" className={'action-panel command-dock surface table-actions '+(actionsOpen?'is-open':'')} hidden={!actionsOpen} ref={actionRef} tabIndex={-1} aria-label="操作区">
+        <div className="panel-heading"><div><span className="eyebrow">{sides[side]}指挥席</span><h2>{blocked?'等待对局':p.kind==='SETUP_PLACEMENT'?'开局部署':p.kind==='OPS'?'执行行动':p.kind==='DECISION'||p.kind==='SUBPLAY'?'事件处理':'出牌与行动'}</h2></div><button className="secondary" aria-label="关闭操作区" onClick={()=>setActionsOpen(false)}>×</button></div>
+        <div className="dock-body"><div className="action-content">
+        {(blocked||trackTask)?<div className="empty-action"><span aria-hidden="true">◷</span><h3>{trackTask?'请先摆放轨道标记':blocked}</h3><p>你可以查看地图和自己的手牌。轮到你时，这里会显示可执行的操作。</p></div>:<>
+        {p.kind==='SETUP_PLACEMENT'&&<div className="setup-instructions"><div className="remaining-points"><strong>{p.remaining}</strong><span>点影响力待放置</span></div><progress aria-label="开局布点进度" value={(side==='USSR'?6:7)-p.remaining} max={side==='USSR'?6:7}/><p>点击{p.subRegion==='EASTERN_EUROPE'?'东欧':'西欧'}的高亮国家，部署 1 点影响力。</p><p className="field-help">放完后自动进入下一阶段，无需额外确认。</p></div>}
+        {p.kind==='OPS'&&<div className="ops-instructions"><div className="remaining-points"><strong>{p.remaining}</strong><span>行动点剩余 · {modes[p.mode]}</span></div><p>{p.mode==='INFLUENCE'?'点击高亮国家部署 1 点，也可拖动备用棋子。':'点击地图上的金框国家执行操作。'}</p>{p.mode==='COUP'&&<p className="field-help warning">点击国家即发动政变，消耗全部剩余行动点。请先确认目标。</p>}<button className="secondary" onClick={()=>dispatch({type:'END_OPS'})}>结束操作 / 放弃余点</button></div>}
+      {/* Decisions stay visible while the hand is hidden, otherwise hot-seat players see no buttons after a hand-off. */}
+      {p.kind === 'DECISION' && canAct && <div className="decision-panel">
+          <h2>{p.decision.prompt}</h2>
+          {p.decision.kind === 'REVEAL' && (revealed ? <><div className="hand">{p.decision.cards.map(id=><CardView key={id} card={CARD_BY_ID.get(id)!}/>)}</div><button onClick={()=>dispatch({type:'CHOOSE',value:'confirm'})}>已查看 · 继续</button></> : <p>这是{sides[side]}的秘密信息，请先点击下方“显示手牌”再查看。</p>)}
+          {p.decision.kind === 'CHOICE' && p.decision.options.map(o=><button key={o.id} onClick={()=>dispatch({type:'CHOOSE',value:o.id})}>{o.label}</button>)}
+          {p.decision.kind === 'INFLUENCE' && <><p>点击金色边框的国家 · 剩余 {p.decision.remaining} 点/次</p>{p.decision.optional && <button onClick={()=>dispatch({type:'CHOOSE',value:'done'})}>{p.decision.relocation?'移除完毕 · 进入重新放置':'完成 · 放弃剩余点数'}</button>}</>}
+          {p.decision.kind === 'COUNTRY' && <p>点击金色边框的国家</p>}
+          {p.decision.kind === 'OPS_MODE' && <>
+            <p>可用 {p.decision.base} OPS{p.decision.free?'（免费：不计军事行动，无视 DEFCON 地区限制）':''}</p>
+            {(p.decision.modes??Object.keys(modes) as OpsMode[]).map(m=><span key={m}><button onClick={()=>dispatch({type:'CHOOSE',value:m})}>{modes[m]}</button>{side==='USSR'&&state.effects.vietnam&&!opsMode?.only&&<button onClick={()=>dispatch({type:'CHOOSE',value:m+':SEA'})}>{modes[m]} · 限东南亚奖励</button>}</span>)}
+            <button onClick={()=>dispatch({type:'CHOOSE',value:'skip'})}>放弃这些 OPS</button>
+          </>}
+        </div>}
+      {p.kind==='SUBPLAY'&&canAct&&<div className="decision-panel"><h2>使用抽到的卡牌</h2><button onClick={()=>{setRevealed(true);setSelected(p.card);}}>查看 {CARD_BY_ID.get(p.card)!.nameZh}</button></div>}
+      {p.kind === 'ACTION_ROUND' && canAct && state.effects.cmc===side && <div className="decision-panel">
+          <h2>古巴导弹危机：本回合发动政变会直接输掉游戏</h2>
+          {(side==='USSR'?['cuba']:['west_germany','turkey']).map(id=><button key={id} disabled={state.influence[id][side]<2} onClick={()=>dispatch({type:'CANCEL_CMC',country:id})}>移除{COUNTRIES.find(c=>c.id===id)!.nameZh} 2 点影响力以取消</button>)}
+        </div>}
+
+        {revealed&&<div className="special-actions">          {p.kind === 'ACTION_ROUND' && state.mode==='PRACTICE' && state.hands[side].every(id=>CARD_BY_ID.get(id)!.scoring) && <button onClick={()=>dispatch({type:'PASS_PRACTICE'})}>无 OPS 牌 · 跳过练习行动</button>}
+          {canAct && p.kind==='ACTION_ROUND' && canPass(state,side) && <button onClick={()=>dispatch({type:'PASS_EMPTY'})}>{!state.hands[side].length?'手牌用尽 · 跳过行动':p.round>(state.turn<=3?6:7)?'放弃第 8 个行动轮':'没有可弃或可打的牌 · 跳过行动'}</button>}
+          {canAct&&p.kind==='ACTION_ROUND'&&state.mode==='STANDARD'&&trapped(state,side)&&<p className="notice">点击底部手牌，选择“弃牌尝试脱困”；没有可弃牌时打计分牌或跳过。</p>}
+          {canAct && p.kind==='ACTION_ROUND' && forcedMissileEnvy(state,side) && <p className="notice">导弹嫉妒：本行动轮必须把“导弹嫉妒”用作 OPS。</p>}
+</div>}
+
+        {(p.kind==='HEADLINE'||p.kind==='ACTION_ROUND')&&(selected===null||!revealed)&&<div className="empty-action"><span aria-hidden="true">▤</span><h3>{revealed?'选择一张手牌':'先查看自己的手牌'}</h3><p>{revealed?'点击底部卡头，选择用途后确认出牌。':'热座交接时手牌保持隐藏。确认由'+sides[side]+'玩家操作后，再显示手牌。'}</p><button className="primary" onClick={()=>{setRevealed(true);setActionsOpen(false);}}>查看底部手牌</button></div>}
+        {(p.kind==='GAME_OVER'||p.kind==='M1_COMPLETE')&&<p>{guide.detail}</p>}
+        </>}
+        {targets.length>0&&<details className="target-picker" open={p.kind==='SETUP_PLACEMENT'}><summary>可操作国家 <span>{targets.length}</span></summary><p className="field-help">也可点击下方国名选择国家。</p><div className="target-list">{targets.map(id=><button key={id} onClick={()=>onCountry(id)}>{COUNTRIES.find(c=>c.id===id)!.nameZh}<small>美 {state.influence[id].US} / 苏 {state.influence[id].USSR}</small></button>)}</div></details>}
     <details className="settings-panel">
       <summary>联机与对局设置 <span>邀请朋友 / 切换模式 / 重新开局</span></summary>
       <div className="settings-grid"><section className="online-panel"><h2>双人联机</h2><p className="field-help">创建房间后发送邀请链接。同一局域网内，请使用电脑的局域网地址打开页面。</p>
@@ -145,86 +184,30 @@ export function App() {
       <button disabled={onlineActive} onClick={() => { setHistory([]);setTrackTask(null);setState(createGame((state.seed + 1) >>> 0,state.mode)); setRevealed(false); setSelected(null); setError(''); }}>重新开局</button>
       <p className="field-help">{onlineActive?'联机中不能重开本地对局，请先返回本地。':'本地热座由双方轮流操作同一设备。刷新页面将重开本地对局。'}</p></section></div>
     </details>
+    {activeEffects(state.effects).length>0&&<details className="effects-panel"><summary>生效中的事件 <span>{activeEffects(state.effects).length}</span></summary><div className="effect-chips">{activeEffects(state.effects).map(e=><span key={e}>{e}</span>)}</div></details>}
+    <details className="log-panel"><summary>对局日志 <span>{log.length} 条记录</span></summary>{log.length?<ol className="log">{log.map((line,i)=><li key={i}>{line}</li>)}</ol>:<p className="field-help">对局开始后，布点、出牌和结算记录会显示在这里。</p>}</details>
 
-    <StageGuide guide={guide} side={side} onFocus={focusTask} actionLabel={guide.focus==='hand'&&!revealed?'显示手牌':undefined}/>
-    {(error||online.error)&&<p role="alert" className="error"><strong>操作未完成</strong> · {error||online.error}</p>}
-    <div className="game-layout">
-      <section className="map-panel surface" ref={mapRef} tabIndex={-1} aria-label="世界棋盘">
-        <div className="panel-heading"><div><span className="eyebrow">全球局势</span><h2>世界棋盘</h2></div><div className="map-tools"><button className="action-toggle" aria-controls="table-actions" aria-expanded={actionsOpen} onClick={()=>setActionsOpen(v=>!v)}>{actionsOpen?'收起操作':'操作与帮助'}</button><span className="target-legend"><i/>{targets.length?targets.length+' 个可选国家':'当前无需选择国家'}</span><button aria-label="缩小地图" disabled={zoom<=1} onClick={()=>setZoom(z=>Math.max(1,z-0.25))}>−</button><button className="zoom-reset" onClick={()=>setZoom(1)} title="重置为同屏适应">{Math.round(zoom*100)}%</button><button aria-label="放大地图" disabled={zoom>=2} onClick={()=>setZoom(z=>Math.min(2,z+0.25))}>＋</button></div></div>
-        {countrySelection&&<div className="influence-editor" role="group" aria-label="国家影响力调整">
-          <div className="influence-country"><strong>{COUNTRIES.find(c=>c.id===countrySelection.country)!.nameZh}</strong><span>美国 {state.influence[countrySelection.country].US} · 苏联 {state.influence[countrySelection.country].USSR}</span></div>
-          <div className={'influence-stepper seat-'+countrySelection.side}><button aria-label="减少一点刚放置的影响力" disabled={!canDecrease} onClick={()=>undo(countrySelection.country)}>−</button><output aria-live="polite">{state.influence[countrySelection.country][countrySelection.side]}<small>{sides[countrySelection.side]}影响力</small></output><button aria-label="增加一点影响力" disabled={!canIncrease} onClick={placeSelected}>＋</button></div>
-          <p>{canIncrease?(p.kind==='OPS'?'每加 1 点消耗 '+placementCost(state,countrySelection.country,side)+' OPS':'每次增加 1 点影响力'):canDecrease?'本次放置已完成，仍可用减号撤回最后一点':'当前不能继续放置，请按阶段提示操作'}<small>减号仅撤回该国最近的放置；其他误操作用“撤销上一步”。</small></p>
-          <button className="secondary" onClick={()=>setCountrySelection(null)}>收起</button>
-        </div>}
-        <Board selectedCountry={countrySelection?.country} key={(online.session?.roomId??'local-'+state.seed)+'-undo-'+(online.snapshot?.undoVersion??undoVersion)} canInteract={canAct} onAction={dispatch} onTrackTask={setTrackTask} state={state} targets={targets} onCountry={onCountry} scale={zoom} lastPlacement={lastPlacement}/>
-      </section>
-      <aside id="table-actions" className={'action-panel command-dock surface table-actions '+(actionsOpen?'is-open':'')} hidden={!actionsOpen} ref={actionRef} tabIndex={-1} aria-label="操作区">
-        <div className="panel-heading"><div><span className="eyebrow">{sides[side]}指挥席</span><h2>{blocked?'等待对局':p.kind==='SETUP_PLACEMENT'?'开局部署':p.kind==='OPS'?'执行行动':p.kind==='DECISION'||p.kind==='SUBPLAY'?'事件处理':'出牌与行动'}</h2></div><button className="secondary" aria-label="关闭操作区" onClick={()=>setActionsOpen(false)}>×</button></div>
-        <div className="dock-toolbar"><span>操作与手牌</span><button className="secondary undo-button" disabled={!canUndo} onClick={()=>undo()}>↶ 撤销上一步</button><small>{onlineActive?'可撤回自己最近的连续操作，对方行动后截止':'放错棋子或打错牌，可逐步撤回'}</small></div><div className="dock-body"><div className="action-content">
-        {(blocked||trackTask)?<div className="empty-action"><span aria-hidden="true">◷</span><h3>{trackTask?'请先摆放轨道标记':blocked}</h3><p>你可以查看地图和自己的手牌。轮到你时，这里会显示可执行的操作。</p></div>:<>
-        {p.kind==='SETUP_PLACEMENT'&&<div className="setup-instructions"><div className="remaining-points"><strong>{p.remaining}</strong><span>点影响力待放置</span></div><progress aria-label="开局布点进度" value={(side==='USSR'?6:7)-p.remaining} max={side==='USSR'?6:7}/><p>先选定{p.subRegion==='EASTERN_EUROPE'?'东欧':'西欧'}的金框国家，再点击棋盘上方的 ＋／− 调整。</p><p className="field-help">放完后自动进入下一阶段，无需额外确认。</p></div>}
-        {p.kind==='OPS'&&<div className="ops-instructions"><div className="remaining-points"><strong>{p.remaining}</strong><span>行动点剩余 · {modes[p.mode]}</span></div><p>{p.mode==='INFLUENCE'?'先选国家，再用棋盘上方的 ＋／− 调整影响力。':'点击地图上的金框国家执行操作。'}</p>{p.mode==='COUP'&&<p className="field-help warning">点击国家即发动政变，消耗全部剩余行动点。请先确认目标。</p>}<button className="secondary" onClick={()=>dispatch({type:'END_OPS'})}>结束操作 / 放弃余点</button></div>}
-      {/* Decisions stay visible while the hand is hidden, otherwise hot-seat players see no buttons after a hand-off. */}
-      {p.kind === 'DECISION' && canAct && <div className="decision-panel">
-          <h2>{p.decision.prompt}</h2>
-          {p.decision.kind === 'REVEAL' && (revealed ? <><div className="hand">{p.decision.cards.map(id=><CardView key={id} card={CARD_BY_ID.get(id)!}/>)}</div><button onClick={()=>dispatch({type:'CHOOSE',value:'confirm'})}>已查看 · 继续</button></> : <p>这是{sides[side]}的秘密信息，请先点击下方“显示手牌”再查看。</p>)}
-          {p.decision.kind === 'CHOICE' && p.decision.options.map(o=><button key={o.id} onClick={()=>dispatch({type:'CHOOSE',value:o.id})}>{o.label}</button>)}
-          {p.decision.kind === 'INFLUENCE' && <><p>点击金色边框的国家 · 剩余 {p.decision.remaining} 点/次</p>{p.decision.optional && <button onClick={()=>dispatch({type:'CHOOSE',value:'done'})}>{p.decision.relocation?'移除完毕 · 进入重新放置':'完成 · 放弃剩余点数'}</button>}</>}
-          {p.decision.kind === 'COUNTRY' && <p>点击金色边框的国家</p>}
-          {p.decision.kind === 'OPS_MODE' && <>
-            <p>可用 {p.decision.base} OPS{p.decision.free?'（免费：不计军事行动，无视 DEFCON 地区限制）':''}</p>
-            {(p.decision.modes??Object.keys(modes) as OpsMode[]).map(m=><span key={m}><button onClick={()=>dispatch({type:'CHOOSE',value:m})}>{modes[m]}</button>{side==='USSR'&&state.effects.vietnam&&!opsMode?.only&&<button onClick={()=>dispatch({type:'CHOOSE',value:m+':SEA'})}>{modes[m]} · 限东南亚奖励</button>}</span>)}
-            <button onClick={()=>dispatch({type:'CHOOSE',value:'skip'})}>放弃这些 OPS</button>
-          </>}
-        </div>}
-      {p.kind === 'SUBPLAY' && canAct && <div className="decision-panel">
-          <h2>向苏联出售谷物：打出抽到的牌</h2>
-          <div className="hand"><CardView card={CARD_BY_ID.get(p.card)!}/></div><p>{EVENT_SUMMARIES[p.card]}</p>
-          {CARD_BY_ID.get(p.card)!.side!=='USSR'&&canEvent(state,p.card,'US')&&<button onClick={()=>dispatch({type:'PLAY_EVENT',card:p.card})}>作为事件</button>}
-          {!CARD_BY_ID.get(p.card)!.scoring&&<><label> OPS 用途 <select value={mode} onChange={e=>setMode(e.target.value as OpsMode)}>{(Object.keys(modes) as OpsMode[]).map(m=><option key={m} value={m}>{modes[m]}</option>)}</select></label>
-            <button onClick={()=>dispatch({type:'PLAY_OPS',card:p.card,mode,order})}>作为 OPS{CARD_BY_ID.get(p.card)!.side==='USSR'?'（苏联事件照常发生）':''}</button>
-            <button onClick={()=>dispatch({type:'SPACE',card:p.card})}>用于太空竞赛</button></>}
-        </div>}
-      {p.kind === 'ACTION_ROUND' && canAct && state.effects.cmc===side && <div className="decision-panel">
-          <h2>古巴导弹危机：本回合发动政变会直接输掉游戏</h2>
-          {(side==='USSR'?['cuba']:['west_germany','turkey']).map(id=><button key={id} disabled={state.influence[id][side]<2} onClick={()=>dispatch({type:'CANCEL_CMC',country:id})}>移除{COUNTRIES.find(c=>c.id===id)!.nameZh} 2 点影响力以取消</button>)}
-        </div>}
-
-        {revealed&&<div className="special-actions">          {p.kind === 'ACTION_ROUND' && state.mode==='PRACTICE' && state.hands[side].every(id=>CARD_BY_ID.get(id)!.scoring) && <button onClick={()=>dispatch({type:'PASS_PRACTICE'})}>无 OPS 牌 · 跳过练习行动</button>}
-          {canAct && p.kind==='ACTION_ROUND' && canPass(state,side) && <button onClick={()=>dispatch({type:'PASS_EMPTY'})}>{!state.hands[side].length?'手牌用尽 · 跳过行动':p.round>(state.turn<=3?6:7)?'放弃第 8 个行动轮':'没有可弃或可打的牌 · 跳过行动'}</button>}
-          {canAct && p.kind==='ACTION_ROUND' && state.mode==='STANDARD' && trapped(state,side) && <div className="decision-panel"><h2>{side==='US'?'泥潭':'捕熊陷阱'}：弃一张至少 2 OPS 的牌，掷出 1–4 脱困</h2>
-            {trapDiscards(state,side).map(id=><button key={id} onClick={()=>dispatch({type:'TRAP_DISCARD',card:id})}>弃置 {CARD_BY_ID.get(id)!.nameZh}</button>)}
-            {!trapDiscards(state,side).length&&<p>没有可弃的牌：本行动轮只能打出计分牌。</p>}</div>}
-          {canAct && p.kind==='ACTION_ROUND' && forcedMissileEnvy(state,side) && <p className="notice">导弹嫉妒：本行动轮必须把“导弹嫉妒”用作 OPS。</p>}
-</div>}
-{!cardMenuOpen&&cardControls}
-        {(p.kind==='HEADLINE'||p.kind==='ACTION_ROUND')&&(selected===null||!revealed)&&<div className="empty-action"><span aria-hidden="true">▤</span><h3>{revealed?'选择一张手牌':'先查看自己的手牌'}</h3><p>{revealed?'点击手牌即可在牌面弹窗中出牌；也可以改用操作区。':'热座交接时手牌保持隐藏。确认由'+sides[side]+'玩家操作后，再显示手牌。'}</p><button className="primary" onClick={()=>handRef.current?.scrollIntoView({behavior:'smooth',block:'start'})}>前往手牌 ↓</button></div>}
-        {(p.kind==='GAME_OVER'||p.kind==='M1_COMPLETE')&&<p>{guide.detail}</p>}
-        </>}
-        {targets.length>0&&<details className="target-picker" open={p.kind==='SETUP_PLACEMENT'}><summary>可操作国家 <span>{targets.length}</span></summary><p className="field-help">也可点击下方国名选择国家。</p><div className="target-list">{targets.map(id=><button key={id} onClick={()=>onCountry(id)}>{COUNTRIES.find(c=>c.id===id)!.nameZh}<small>美 {state.influence[id].US} / 苏 {state.influence[id].USSR}</small></button>)}</div></details>}
         <details className="quick-help"><summary>玩法速查</summary><dl><dt>行动点（OPS）</dt><dd>用于放置影响力、调整或政变。选择用途后，再点击合法目标。</dd><dt>事件与头条</dt><dd>头条只结算事件。行动轮用对方牌的行动点时，对方事件仍会触发。</dd><dt>计分牌</dt><dd>本回合内必须打出。留到回合末会判负。</dd><dt>地图标记</dt><dd>蓝色代表美国，红色代表苏联；实心影响力标记表示控制。金框代表当前合法目标。</dd></dl></details>
         </div>
 
         </div>
       </aside>
       <section className="hand-panel hand-dock" ref={handRef} tabIndex={-1} aria-label="我的手牌">
-        <div className="panel-heading"><div><span className="eyebrow">{onlineActive?'仅自己可见':'热座交接 · 请保护手牌'}</span><h2>{sides[side]}手牌 <small>{state.hands[side].length} 张{state.mode==='STANDARD'&&p.kind==='ACTION_ROUND'&&state.chinaCard.holder===side&&state.chinaCard.faceUp?' ＋ 中国牌':''}</small></h2></div><button className={revealed?'secondary':'primary'} onClick={()=>setRevealed(r=>!r)}>{revealed?'隐藏手牌':'显示手牌'}</button></div>
+        <div className="panel-heading"><div><span className="eyebrow">{onlineActive?'仅自己可见':'热座交接 · 请保护手牌'}</span><h2>{sides[side]}手牌 <small>{state.hands[side].length} 张{state.mode==='STANDARD'&&p.kind==='ACTION_ROUND'&&state.chinaCard.holder===side&&state.chinaCard.faceUp?' ＋ 中国牌':''}</small></h2></div><button className={revealed?'secondary':'primary'} onClick={()=>{setSelected(null);setRevealed(r=>!r);}}>{revealed?'隐藏手牌':'显示手牌'}</button></div>
         {!revealed?<div className="hand-curtain"><div className="card-backs" aria-hidden="true"><i/><i/><i/></div><div><h3>手牌暂时隐藏</h3><p>{onlineActive?'点击“显示手牌”查看自己的卡牌。':'请交给'+sides[side]+'玩家，再点击“显示手牌”。'}</p></div></div>:<>
         {p.kind==='HEADLINE'&&state.space[side]>=4&&state.space[side==='US'?'USSR':'US']<4&&state.headlines[side==='US'?'USSR':'US']!==undefined&&<p className="notice">太空特权：对方头条为 {CARD_BY_ID.get(state.headlines[side==='US'?'USSR':'US']!)!.nameZh}</p>}
         <p className="hand-hint">{!canAct?'等待对方行动；你仍可查看自己的手牌。':p.kind==='SETUP_PLACEMENT'?'当前先完成地图布点，进入头条或行动轮后可选牌。':p.kind==='HEADLINE'?'点击手牌，在牌面弹窗中确认头条。':p.kind==='ACTION_ROUND'?'点击手牌，直接在牌面弹窗中选择用途并打出。':'正在结算行动，完成当前任务后再选择下一张牌。'}</p>
-        <div className="hand hand-fan">{[...state.hands[side],...(state.mode==='STANDARD'&&p.kind==='ACTION_ROUND'&&state.chinaCard.holder===side&&state.chinaCard.faceUp?[6]:[])].map(id=>{const card=CARD_BY_ID.get(id)!;const selectable=canAct&&(p.kind==='HEADLINE'||p.kind==='ACTION_ROUND')&&!(state.mode==='PRACTICE'&&card.scoring);return <button className={'card-button '+(selected===id?'selected':'')} key={id} aria-label={card.nameZh+(card.scoring?'，计分牌':'，'+card.ops+' 行动点')} aria-pressed={selected===id} title={card.nameZh+' · 点击展开查看'+(selectable?'并出牌':'')} onClick={()=>{setSelected(id);setCardMenuOpen(true);setRegional('NONE');setUse(card.scoring?'EVENT':'OPS');}}><span className={'card-head side-'+card.side}><b>{card.scoring?'计分':card.ops}</b><span>{card.nameZh}<small>{card.starred?'一次性事件':card.scoring?'区域计分':sides[card.side as Side]??'中立事件'}</small></span></span><CardView card={card}/><span className="card-caption">{card.nameZh}<small>{card.scoring?'计分牌':card.ops+' OPS'}</small></span></button>;})}</div>
+        <div className="hand hand-fan">{[...state.hands[side],...(state.mode==='STANDARD'&&p.kind==='ACTION_ROUND'&&state.chinaCard.holder===side&&state.chinaCard.faceUp?[6]:[])].map(id=>{const card=CARD_BY_ID.get(id)!;const playable=canAct&&cardChoices(state,side,id).some(option=>!option.reason);return <button className={'card-button '+(playable?'playable ':'')+(selected===id?'selected':'')} data-hand-card={id} key={id} aria-label={card.nameZh+(card.scoring?'，计分牌':'，'+card.ops+' 行动点')} aria-pressed={selected===id} title={card.nameZh+' · 点击展开查看'+(playable?'并出牌':'')} onClick={()=>{setSelected(current=>current===id?null:id);}}><span className={'card-head side-'+card.side}><b>{card.scoring?'计分':card.ops}</b><span>{card.nameZh}<small>{card.starred?'一次性事件':card.scoring?'区域计分':sides[card.side as Side]??'中立事件'}</small></span></span><CardView card={card}/><span className="card-caption">{card.nameZh}<small>{card.scoring?'计分牌':card.ops+' OPS'}</small></span></button>;})}</div>
         {state.effects.cia && side==='US' && <details><summary>中央情报局：本回合苏联公开手牌</summary><div className="hand">{state.hands.USSR.map(id=><CardView key={id} card={CARD_BY_ID.get(id)!}/>)}</div></details>}
         {state.effects.aldrich && side==='USSR' && <details><summary>奥德里奇·艾姆斯：本回合美国公开手牌</summary><div className="hand">{state.hands.US.map(id=><CardView key={id} card={CARD_BY_ID.get(id)!}/>)}</div></details>}
 
         </>}
         <div className="hand-footer"><span>牌库 {deckCount} 张 · 弃牌 {state.discard.length} 张</span>{online.snapshot&&<span>对方手牌 {online.snapshot.view.handCounts[side==='US'?'USSR':'US']} 张</span>}<span>中国牌 · {sides[state.chinaCard.holder]}持有</span></div>
       </section>
-      {cardMenuOpen&&selected!==null&&revealed&&<CardPlayDialog card={CARD_BY_ID.get(selected)!} onClose={()=>{setCardMenuOpen(false);setSelected(null);}} onSidebar={()=>{setCardMenuOpen(false);setActionsOpen(true);actionRef.current?.scrollIntoView({behavior:'smooth',block:'start'});}}>{cardControls??<section className="card-detail"><div className="eyebrow">卡牌效果 · #{selected}</div><h2>{CARD_BY_ID.get(selected)!.nameZh}</h2><p>{EVENT_SUMMARIES[selected]}</p><p className="field-help">当前可查看卡牌，完成阶段提示后即可出牌。</p></section>}</CardPlayDialog>}
+      {selected!==null&&revealed&&<CardComposer key={selected} id={selected} state={state} side={side} canAct={canAct} blocked={blocked??(trackTask?'请先将轨道标记拖到高亮位置。':undefined)} onPlay={dispatch} onClose={closeCard}/>}
+
 
     </div>
-    {activeEffects(state.effects).length>0&&<details className="effects-panel"><summary>生效中的事件 <span>{activeEffects(state.effects).length}</span></summary><div className="effect-chips">{activeEffects(state.effects).map(e=><span key={e}>{e}</span>)}</div></details>}
-    <details className="log-panel"><summary>对局日志 <span>{log.length} 条记录</span></summary>{log.length?<ol className="log">{log.map((line,i)=><li key={i}>{line}</li>)}</ol>:<p className="field-help">对局开始后，布点、出牌和结算记录会显示在这里。</p>}</details>
     <footer className="table-footer"><span>冷战热斗 · 中文牌桌</span><span>苏联先手 · 美国后手</span></footer>
   </main>;
 }

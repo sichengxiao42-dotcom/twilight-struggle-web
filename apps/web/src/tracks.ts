@@ -21,10 +21,8 @@ export function trackPieces(state: GameState): TrackPiece[] {
       {id:'mil-'+side,owner:side,label,title:`${name}军事行动标记 → ${mil}`,value:mil,at:MIL_OPS_TRACK[mil]},
       {id:'round-'+side,owner:side,label,title:`${name}行动轮标记 → ${round||'待行动'}`,value:round,at:round?ACTION_ROUND_TRACK[round-1]:[1455,465]});
   }
-  return pieces.map(piece=>{
-    const shared=piece.owner!=='neutral'&&pieces.some(other=>other.id!==piece.id&&other.owner!=='neutral'&&other.at[0]===piece.at[0]&&other.at[1]===piece.at[1]);
-    return {...piece,at:[piece.at[0]+(shared?(piece.owner==='USSR'?-0.8:0.8)*TRACK_MARKER_RADIUS:0),piece.at[1]]};
-  });
+  // Keep each side on a fixed lane: an unchanged counter never needs a cosmetic recentering drag.
+  return pieces.map(piece=>({...piece,at:[piece.at[0]+(piece.owner==='neutral'?0:(piece.owner==='USSR'?-0.8:0.8)*TRACK_MARKER_RADIUS),piece.at[1]]}));
 }
 export function trackNeedsMove(placed: TrackPiece | undefined, target: TrackPiece): boolean {
   return Boolean(placed&&(placed.value!==target.value||placed.at[0]!==target.at[0]||placed.at[1]!==target.at[1]));

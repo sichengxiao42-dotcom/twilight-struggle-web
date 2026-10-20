@@ -34,3 +34,10 @@ test('shared military and space markers stay distinct while preserving the autho
   const a=pieces.find(p=>p.id==='mil-US')!,b=pieces.find(p=>p.id==='mil-USSR')!;
   assert.equal(a.value,b.value);assert.notDeepEqual(a.at,b.at);
 });
+
+test('one side advancing never forces the unchanged counter through a cosmetic placement',()=>{
+  const state=createGame(1),before=trackPieces(state);state.space.US=1;
+  const after=trackPieces(state);
+  assert.equal(trackNeedsMove(before.find(p=>p.id==='space-USSR'),after.find(p=>p.id==='space-USSR')!),false);
+  assert.equal(trackNeedsMove(before.find(p=>p.id==='space-US'),after.find(p=>p.id==='space-US')!),true);
+});
