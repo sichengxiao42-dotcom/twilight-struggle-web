@@ -32,6 +32,7 @@ test('lobby seats: sit, refuse a taken side, switch to the free side, stand up',
   const {store,roomId,a,b}=lobby();
   store.seat(roomId,a.key,'a','USSR');
   assert.equal(store.snapshot(roomId,a.key).side,'USSR');assert.equal(store.snapshot(roomId,b.key).seats.USSR.occupied,true);
+  assert.equal(store.snapshot(roomId,a.key).view,null);
   assert.equal(store.snapshot(roomId,a.key).seats.USSR.mine,true);assert.equal(store.snapshot(roomId,b.key).seats.USSR.mine,false);
   assert.throws(()=>store.seat(roomId,b.key,'b','USSR'),/已有玩家/);
   store.seat(roomId,a.key,'a','US');
@@ -182,8 +183,28 @@ test('room codes, host-only restart, reconnect identity and close lifecycle',()=
   assert.throws(()=>store.restart(roomId,a.key,'new-a',revision-1),/已更新/);
   store.restart(roomId,a.key,'new-a',revision);
   const reset=store.snapshot(roomId,a.key);assert.equal(reset.started,false);assert.equal(reset.canUndo,false);assert.equal(reset.side,'USSR');
-  assert.equal((reset.view as PlayerView).influence.poland.USSR,0);
+  assert.equal(reset.view,null);
+  store.start(roomId,a.key,'new-a');assert.equal((store.snapshot(roomId,a.key).view as PlayerView).influence.poland.USSR,0);
   assert.throws(()=>store.close(roomId,b.key,'b'),/只有房主/);
   assert.equal(store.close(roomId,a.key,'new-a').length,2);
   assert.throws(()=>store.join(roomId,'new-b',b.session.token),/不存在/);
+});
+
+test('no seed, shuffle, deal or player view exists until both seated players are online and start',()=>{
+  let deals=0;const store=new RoomStore(()=>{deals++;return 42+deals;});
+  const a=store.create('a'),roomId=a.session.roomId;
+  store.seat(roomId,a.key,'a','USSR');assert.equal(deals,0);assert.equal(store.snapshot(roomId,a.key).view,null);
+  const b=store.join(roomId,'b');store.seat(roomId,b.key,'b','US');
+  assert.equal(deals,0);assert.equal(store.snapshot(roomId,a.key).view,null);assert.equal(store.snapshot(roomId,b.key).view,null);
+  store.disconnect(roomId,b.key,'b');
+  assert.throws(()=>store.start(roomId,a.key,'a'),/双方在线/);assert.equal(deals,0);
+  store.join(roomId,'b2',b.session.token);store.start(roomId,a.key,'a');
+  assert.equal(deals,1);
+  const av=store.snapshot(roomId,a.key).view as PlayerView,bv=store.snapshot(roomId,b.key).view as PlayerView;
+  assert.equal(av.hands.USSR.length,8);assert.equal(bv.hands.US.length,8);
+  assert.deepEqual(av.hands.US,[]);assert.deepEqual(bv.hands.USSR,[]);
+  store.start(roomId,b.key,'b2');assert.equal(deals,1);assert.deepEqual(store.snapshot(roomId,a.key).view,av);
+  store.restart(roomId,a.key,'a',store.snapshot(roomId,a.key).revision);
+  assert.equal(deals,1);assert.equal(store.snapshot(roomId,a.key).view,null);
+  store.start(roomId,b.key,'b2');assert.equal(deals,2);
 });

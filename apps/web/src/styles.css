@@ -227,3 +227,11 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
 .room-entry h3 { width:100%; font-size:14px; }.room-entry form { display:flex; gap:6px; width:100%; }.room-entry input { width:100%; min-width:0; text-transform:uppercase; }
 .room-controls strong { font:700 15px ui-monospace,monospace; letter-spacing:.08em; }.room-controls button,.room-entry button { font-size:12px; }
 .end-action { box-shadow:0 0 0 2px #cda94488; font-weight:800; }
+
+/* Lobby has no hand zone or player-specific controls until the server starts the game. */
+.pre-game .game-layout { grid-template-rows:minmax(0,1fr); grid-template-areas:"map card"; }
+.pre-game .piece-tray { display:none; }
+.pre-game .room-entry { align-items:stretch; padding:18px 14px; gap:16px; border-bottom:0; }
+.pre-game .room-entry>.primary { width:100%; min-height:44px; }
+.pre-game .room-entry form button { white-space:nowrap; }
+@media(max-width:820px) { .pre-game .game-layout { grid-template-rows:minmax(270px,55dvh) auto; grid-template-areas:"map" "card"; } }

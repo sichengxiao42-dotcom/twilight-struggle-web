@@ -5,7 +5,7 @@ import type { ClientToServer, ServerToClient, RoomSnapshot, Session, Side } from
 import { CARD_BY_ID, type Action, type PlayerView } from '@ts/game-core';
 import { createGameServer } from '../src/server';
 import { RoomStore } from '../src/rooms';
-type Snapshot=Omit<RoomSnapshot,'view'>&{view:PlayerView};
+type Snapshot=Omit<RoomSnapshot,'view'>&{view:PlayerView|null};
 class Client {
   socket:Socket<ServerToClient,ClientToServer>;last?:Snapshot;
   constructor(url:string){this.socket=io(url,{autoConnect:false,transports:['websocket'],reconnection:false});this.socket.on('state',s=>{this.last=s as Snapshot;});}
@@ -35,12 +35,14 @@ test('real Socket.IO clients: lobby seats, separate views, full early-war flow, 
   assert.equal((await b.seat('USSR')).ok,false);
   assert.ok((await b.seat('US')).ok);
   await Promise.all([a.wait(s=>s.side==='USSR'&&s.seats.US.occupied),b.wait(s=>s.side==='US'&&s.seats.USSR.occupied)]);
+  assert.deepEqual(a.last?.view,null);assert.deepEqual(b.last?.view,null);
   assert.equal((await a.act({type:'PLACE_SETUP',country:'poland'},'early',a.last!.revision)).ok,false);
   assert.ok((await b.start()).ok);
   await Promise.all([a.wait(s=>s.started),b.wait(s=>s.started)]);
   assert.equal((await a.seat('US')).ok,false);
   const r0=a.last!.revision;
-  assert.deepEqual(a.last!.view.hands.US,[]);assert.deepEqual(b.last!.view.hands.USSR,[]);
+  assert.equal(a.last!.view!.hands.USSR.length,8);assert.equal(b.last!.view!.hands.US.length,8);
+  assert.deepEqual(a.last!.view!.hands.US,[]);assert.deepEqual(b.last!.view!.hands.USSR,[]);
   assert.equal((await b.act({type:'PLACE_SETUP',country:'france'},'wrong')).ok,false);
   const first=await a.act({type:'PLACE_SETUP',country:'poland'},'first');assert.ok(first.ok);
   await Promise.all([a.wait(s=>s.revision===r0+1),b.wait(s=>s.revision===r0+1)]);
@@ -51,28 +53,28 @@ test('real Socket.IO clients: lobby seats, separate views, full early-war flow, 
   await Promise.all([reconnected.wait(s=>s.revision===r0+1&&s.side==='USSR'),b.wait(s=>s.seats.USSR.connected)]);
   const clients:Record<Side,Client>={USSR:reconnected,US:b};
   for(let step=0;step<400;step++){
-    const view=b.last!.view;
+    const view:PlayerView=b.last!.view!;
     if(view.phase.kind==='GAME_OVER'||view.turn>=4)break;
-    assert.ok('side' in view.phase);const side=view.phase.side,client=clients[side],p=client.last!.view.phase;
+    assert.ok('side' in view.phase);const side=view.phase.side,client=clients[side],p=client.last!.view!.phase;
     assert.notEqual(p.kind,'WAITING');let action:Action;
     if(p.kind==='CONFIRM_END')action={type:'END_ACTION'};
     else if(p.kind==='SETUP_PLACEMENT')action={type:'PLACE_SETUP',country:side==='USSR'?'poland':'west_germany'};
-    else if(p.kind==='HEADLINE')action={type:'SELECT_HEADLINE',card:client.last!.view.hands[side].find(id=>CARD_BY_ID.get(id)!.scoring)??client.last!.view.hands[side].find(id=>id!==32)!};
+    else if(p.kind==='HEADLINE')action={type:'SELECT_HEADLINE',card:client.last!.view!.hands[side].find(id=>CARD_BY_ID.get(id)!.scoring)??client.last!.view!.hands[side].find(id=>id!==32)!};
     else if(p.kind==='ACTION_ROUND'){
-      const id=client.last!.view.hands[side].find(id=>CARD_BY_ID.get(id)!.scoring)??client.last!.view.hands[side][0];
+      const id=client.last!.view!.hands[side].find(id=>CARD_BY_ID.get(id)!.scoring)??client.last!.view!.hands[side][0];
       action=id===undefined?{type:'PASS_EMPTY'}:CARD_BY_ID.get(id)!.scoring?{type:'PLAY_EVENT',card:id}:{type:'PLAY_OPS',card:id,mode:'INFLUENCE'};
     }else if(p.kind==='OPS')action={type:'END_OPS'};
     else if(p.kind==='DECISION'){
-      const d=p.decision;action={type:'CHOOSE',value:d.kind==='REVEAL'?'confirm':d.kind==='OPS_MODE'?'skip':d.kind==='CHOICE'?d.options[0].id:client.last!.view.targets[0]??'done'};
+      const d=p.decision;action={type:'CHOOSE',value:d.kind==='REVEAL'?'confirm':d.kind==='OPS_MODE'?'skip':d.kind==='CHOICE'?d.options[0].id:client.last!.view!.targets[0]??'done'};
     }else throw new Error('unexpected phase '+p.kind);
     const next=client.last!.revision+1;const reply=await client.act(action,'step_'+step);assert.ok(reply.ok,reply.ok?'':reply.error);
     await Promise.all([b.wait(s=>s.revision===next),reconnected.wait(s=>s.revision===next)]);
     for(const c of [b,reconnected]){
-      assert.ok(!('seed' in c.last!.view));assert.ok(!('deck' in c.last!.view));assert.ok(!('tasks' in c.last!.view));
-      const enemy=c.last!.side==='US'?'USSR':'US';if(!(c.last!.side==='US'&&c.last!.view.effects.cia)&&!(c.last!.side==='USSR'&&c.last!.view.effects.aldrich))assert.deepEqual(c.last!.view.hands[enemy],[]);
+      assert.ok(!('seed' in c.last!.view!));assert.ok(!('deck' in c.last!.view!));assert.ok(!('tasks' in c.last!.view!));
+      const enemy=c.last!.side==='US'?'USSR':'US';if(!(c.last!.side==='US'&&c.last!.view!.effects.cia)&&!(c.last!.side==='USSR'&&c.last!.view!.effects.aldrich))assert.deepEqual(c.last!.view!.hands[enemy],[]);
     }
   }
-  assert.equal(b.last!.view.turn,4);assert.equal(b.last!.view.handCounts.US,9);
+  assert.equal(b.last!.view!.turn,4);assert.equal(b.last!.view!.handCounts.US,9);
 });
 
 test('socket room management keeps seats on restart and broadcasts close to both members',{timeout:15000},async t=>{
@@ -91,6 +93,7 @@ test('socket room management keeps seats on restart and broadcasts close to both
   await restored.wait(s=>s.side==='USSR'&&s.started);
   assert.ok((await restored.socket.timeout(3000).emitWithAck('restart',{expectedRevision:restored.last!.revision})).ok);
   await Promise.all([restored.wait(s=>!s.started&&s.side==='USSR'),b.wait(s=>!s.started&&s.side==='US')]);
+  assert.deepEqual(restored.last?.view,null);assert.deepEqual(b.last?.view,null);
   assert.equal((await b.socket.timeout(3000).emitWithAck('close',{})).ok,false);
   const closed=(client:Client)=>new Promise<string>(resolve=>client.socket.once('closed',message=>resolve(message.roomId)));
   const notifications=Promise.all([closed(restored),closed(b)]);

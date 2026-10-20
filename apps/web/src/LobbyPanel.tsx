@@ -7,7 +7,7 @@ export function LobbyPanel({ snapshot, roomId, invite, busy, copyStatus, onCopy,
   snapshot: Pick<RoomSnapshot, 'side' | 'seats' | 'members'> | null; roomId: string; invite: string; busy: boolean; copyStatus: string;
   onCopy: () => void; onSeat: (side: SeatChoice) => void; onStart: () => void;
 }) {
-  const mine = snapshot?.side ?? null, both = Boolean(snapshot?.seats.US.occupied && snapshot?.seats.USSR.occupied);
+  const mine = snapshot?.side ?? null, both = Boolean(snapshot?.seats.US.occupied && snapshot?.seats.USSR.occupied), connected=Boolean(snapshot?.seats.US.connected&&snapshot?.seats.USSR.connected);
   return <section className="lobby-panel" aria-label="房间大厅">
     <header><h2>房间 {roomId}</h2><span>{snapshot ? snapshot.members + ' / 2 名玩家' : '正在连接…'}</span></header>
     <div className="lobby-invite"><input aria-label="邀请链接" readOnly value={invite} onFocus={e => e.currentTarget.select()}/><button onClick={onCopy}>复制邀请链接</button>{copyStatus && <small>{copyStatus}</small>}</div>
@@ -24,8 +24,8 @@ export function LobbyPanel({ snapshot, roomId, invite, busy, copyStatus, onCopy,
     })}</div>
     <div className="lobby-actions">
       <button className="secondary" disabled={busy || !snapshot || both && !mine} onClick={() => onSeat('RANDOM')}>随机分配阵营</button>
-      <button className="primary" disabled={busy || !both || !mine} onClick={onStart}>开始对局</button>
+      <button className="primary" disabled={busy || !both || !connected || !mine} onClick={onStart}>开始对局</button>
     </div>
-    <p className="field-help">{!mine ? '请先选择一边坐下。' : !both ? '等待另一名玩家入座。' : '双方已入座，可以开始。开局后阵营不能再更换。'}</p>
+    <p className="field-help">{!mine ? '请先选择一边坐下。' : !both ? '等待另一名玩家入座。' : !connected ? '等待另一位玩家重新连接。' : '双方已入座，开始后才发牌。开局后阵营不能再更换。'}</p>
   </section>;
 }

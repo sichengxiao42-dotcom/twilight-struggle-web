@@ -104,14 +104,8 @@ const INITIAL_INFLUENCE: Record<Side, Record<string, number>> = {
   },
 };
 
-export function createGame(seed: number, mode: GameState['mode'] = 'STANDARD'): GameState {
-  const rng = createRng(seed);
-  let rngCalls = 0;
-  const counted = () => { rngCalls++; return rng(); };
-
-  const earlyWar = CARDS.filter((c) => c.period === 'EARLY' && c.id !== CHINA_CARD_ID).map((c) => c.id);
-  const deck = shuffle(earlyWar, counted);
-
+/** Static opening board only: no shuffle, deal, random seed or active local game. */
+export function createBoardPreview():GameState {
   const influence: Record<string, Influence> = {};
   for (const country of COUNTRIES) {
     influence[country.id] = {
@@ -120,12 +114,10 @@ export function createGame(seed: number, mode: GameState['mode'] = 'STANDARD'): 
     };
   }
 
-  const hands: Record<Side, number[]> = { USSR: deck.splice(0, HAND_SIZE.early), US: deck.splice(0, HAND_SIZE.early) };
-
   return {
-    mode, tasks: [], effects: { purge: {} }, headlines: {}, spaceAttempts: { USSR: 0, US: 0 }, phasingSide: 'USSR', actionStartInfluence: null, noradPending: false,
-    seed,
-    rngCalls,
+    mode:'STANDARD', tasks: [], effects: { purge: {} }, headlines: {}, spaceAttempts: { USSR: 0, US: 0 }, phasingSide: 'USSR', actionStartInfluence: null, noradPending: false,
+    seed:0,
+    rngCalls:0,
     turn: 1,
     // 苏联先在东欧自由放置 6 点，然后美国在西欧放置 7 点。
     phase: { kind: 'SETUP_PLACEMENT', side: 'USSR', remaining: 6, subRegion: 'EASTERN_EUROPE' },
@@ -134,11 +126,19 @@ export function createGame(seed: number, mode: GameState['mode'] = 'STANDARD'): 
     milOps: { USSR: 0, US: 0 },
     space: { USSR: 0, US: 0 },
     influence,
-    hands,
-    deck,
+    hands:{USSR:[],US:[]},
+    deck:[],
     discard: [],
     removed: [],
     chinaCard: { holder: 'USSR', faceUp: true },
-    log: [`Game created with seed ${seed}`],
+    log: [],
   };
+}
+
+export function createGame(seed:number,mode:GameState['mode']='STANDARD'):GameState {
+  const rng=createRng(seed);let rngCalls=0;
+  const counted=()=>{rngCalls++;return rng();};
+  const deck=shuffle(CARDS.filter(c=>c.period==='EARLY'&&c.id!==CHINA_CARD_ID).map(c=>c.id),counted);
+  const hands={USSR:deck.splice(0,HAND_SIZE.early),US:deck.splice(0,HAND_SIZE.early)};
+  return {...createBoardPreview(),mode,seed,rngCalls,hands,deck,log:[`Game created with seed ${seed}`]};
 }

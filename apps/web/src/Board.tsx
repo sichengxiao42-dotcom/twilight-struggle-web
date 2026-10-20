@@ -76,7 +76,7 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
   };
   const delta = lastPlacement ? state.influence[lastPlacement.country][lastPlacement.side] - lastPlacement.before : 0;
   const receipt = lastPlacement && delta > 0 ? `已在${nameOf(lastPlacement.country)}部署 ${delta} 点${lastPlacement.side === 'USSR' ? '苏联' : '美国'}影响力` : '';
-  const feedback = <div className="map-interaction"><span>{hover ? nameOf(hover) + ' · ' + hint(hover) : placing ? '点击高亮国家部署；也可拖动备用棋子' : '金框国家可直接点击选择'}</span><span className="map-feedback" role="status" aria-live="polite">{dragMessage||changeSummary||receipt}</span></div>;
+  const feedback = <div className="map-interaction"><span>{!canInteract?'当前为棋盘预览，等待对局开始或玩家行动':hover ? nameOf(hover) + ' · ' + hint(hover) : placing ? '点击高亮国家部署；也可拖动备用棋子' : '金框国家可直接点击选择'}</span><span className="map-feedback" role="status" aria-live="polite">{dragMessage||changeSummary||receipt}</span></div>;
   const country = (c: Country, [x, y]: number[], body: ReactNode) => {
     const inf = state.influence[c.id], ctrl = controller(state, c.id), legal = targets.includes(c.id);
     const dropReady=gesture.drag&&draggedPiece&&canInteract?Boolean(influenceDrop(state,draggedPiece,{kind:'country',id:c.id},targets)):false;

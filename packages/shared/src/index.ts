@@ -8,7 +8,7 @@ export const opponent = (side: Side): Side => (side === 'USSR' ? 'US' : 'USSR');
 
 export interface SeatStatus { occupied: boolean; connected: boolean; mine: boolean }
 export interface RoomSnapshot {
-  /** side is null until this member sits down in the lobby; view is null while unseated. */
+  /** side is null until this member sits down in the lobby; view is null throughout the lobby, including after choosing a side. */
   roomId: string; side: Side | null; started: boolean; members: number; revision: number;
   isHost?: boolean;
   canUndo?: boolean; undoVersion?: number;
