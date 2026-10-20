@@ -58,7 +58,7 @@ function TrackMarkers({ state }: { state: GameState }) {
   </g>;
 }
 
-export function Board({ state, targets, onCountry }: { state: GameState; targets: string[]; onCountry: (id: string) => void }) {
+export function Board({ state, targets, onCountry, scale = 1 }: { state: GameState; targets: string[]; onCountry: (id: string) => void; scale?: number }) {
   const [hover, setHover] = useState<string | null>(null);
   const country = (c: Country, [x, y]: number[], body: ReactNode) => {
     const inf = state.influence[c.id], ctrl = controller(state, c.id), legal = targets.includes(c.id);
@@ -69,8 +69,8 @@ export function Board({ state, targets, onCountry }: { state: GameState; targets
   };
   if (map) {
     const centre = (id: string) => [MAP_POSITIONS[id][0] + BOX_WIDTH / 2, MAP_POSITIONS[id][1] + BOX_HEIGHT / 2];
-    return <><p>金色边框为可操作国家；国名栏为深色的是战场国。蓝色标记为美国（左半格），红色标记为苏联（右半格），实心表示控制。各轨道上的圆形标记显示回合、行动轮、DEFCON、胜利分、太空竞赛与军事行动。悬停或聚焦查看相邻连线。</p>
-      <div className="board-scroll"><svg viewBox={'0 0 ' + MAP_WIDTH + ' ' + MAP_HEIGHT} className="board map-board" aria-label="世界局势地图">
+    return <>
+      <div className="board-scroll"><svg viewBox={'0 0 ' + MAP_WIDTH + ' ' + MAP_HEIGHT} className="board map-board" style={{width: `${scale * 100}%`}} aria-label="世界局势地图">
         <image href={map} width={MAP_WIDTH} height={MAP_HEIGHT}/>
         {hover && ADJACENCY[hover].map(id => { const a = centre(hover), b = centre(id); return <line key={id} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} className="connection"/>; })}
         {COUNTRIES.map(c => {
@@ -83,15 +83,15 @@ export function Board({ state, targets, onCountry }: { state: GameState; targets
           </>);
         })}
         <TrackMarkers state={state}/>
-      </svg></div></>;
+      </svg></div><p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>悬停或聚焦查看相邻连线 · 放大后可横向滚动</span></p></>;
   }
-  return <><p>金色边框为可操作国家；★ 为战场国。蓝色数字为美国，红色数字为苏联。悬停或聚焦查看相邻连线。</p>
-    <div className="board-scroll"><svg viewBox="0 0 1208 810" className="board" aria-label="世界局势示意地图">
+  return <>
+    <div className="board-scroll"><svg viewBox="0 0 1208 810" className="board" style={{width: `${scale * 100}%`}} aria-label="世界局势示意地图">
       {(Object.keys(labels) as Region[]).map(r => { const [x, y] = origins[r]; return <text key={r} x={x + 8} y={y + 25} className="region-title">{labels[r]}</text>; })}
       {hover && ADJACENCY[hover].map(id => { const a = positions[hover], b = positions[id]; return <line key={id} x1={a[0] + 60} y1={a[1] + 20} x2={b[0] + 60} y2={b[1] + 20} className="connection"/>; })}
       {COUNTRIES.map(c => {
         const inf = state.influence[c.id];
         return country(c, positions[c.id], <><rect width="120" height="40" rx="5"/><text x="6" y="15">{c.battleground ? '★ ' : ''}{c.nameZh}</text><text x="6" y="32" className="stability">稳 {c.stability}</text><text x="72" y="32" className="us-value">{inf.US}</text><text x="99" y="32" className="ussr-value">{inf.USSR}</text></>);
       })}
-    </svg></div></>;
+    </svg></div><p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>悬停或聚焦查看相邻连线 · 放大后可横向滚动</span></p></>;
 }

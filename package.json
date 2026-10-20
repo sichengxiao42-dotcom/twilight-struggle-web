@@ -16,7 +16,7 @@
     "build": "npm run build --workspaces --if-present",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "node --import tsx --test packages/game-core/test/*.test.ts apps/server/test/*.test.ts",
+    "test": "node --import tsx --test packages/game-core/test/*.test.ts apps/server/test/*.test.ts apps/web/test/*.test.ts",
     "check": "npm run typecheck && npm run lint && npm test && npm run build",
     "assets:import": "node tools/import-tts-assets.mjs",
     "assets:web": "node tools/make-web-sheets.mjs",
