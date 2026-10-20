@@ -33,6 +33,7 @@ export function App() {
   const actionRef = useRef<HTMLElement>(null);
   const [trackTask, setTrackTask] = useState<string|null>(null);
   const [cardMenuOpen, setCardMenuOpen] = useState(false);
+  const [actionsOpen,setActionsOpen]=useState(false);
   const [zoom, setZoom] = useState(1);
   const [lastPlacement, setLastPlacement] = useState<PlacementFeedback | null>(null);
   const [localState, setState] = useState(() => createGame(1));
@@ -58,7 +59,9 @@ export function App() {
   const canAct=(!onlineActive||Boolean(online.ready&&!online.busy&&online.snapshot&&actor===side&&online.snapshot.seats.US.occupied&&online.snapshot.seats.USSR.occupied))&&!trackTask;
   const targets=canAct?(online.snapshot?online.snapshot.view.targets:legalTargets(state)):[];
   useEffect(()=>{setSelected(null);setRegional('NONE');},[online.snapshot?.revision,online.session?.roomId]);
-  useEffect(()=>{setRevealed(false);},[online.session?.roomId]);
+  useEffect(()=>{setRevealed(false);setCardMenuOpen(false);},[online.session?.roomId]);
+  useEffect(()=>{setCardMenuOpen(false);setSelected(null);},[side]);
+  useEffect(()=>{if(p.kind==='DECISION'||p.kind==='SUBPLAY')setActionsOpen(true);},[p.kind]);
   useEffect(()=>{setLastPlacement(null);setCountrySelection(null);},[state.seed,online.session?.roomId]);
   const invite=online.session?location.origin+location.pathname+'#room='+online.session.roomId+'&side='+(online.session.side==='US'?'USSR':'US'):'';
   const dispatch = (action: Action) => {
@@ -84,6 +87,7 @@ export function App() {
   const guide = trackTask ? {title:'请摆放轨道标记',detail:trackTask+'。拖到棋盘高亮圈内；键盘可聚焦标记后按 Enter。',focus:'map' as const} : phaseGuide(state, { selected, revealed, targetCount: targets.length, blocked });
   const focusTask = () => {
     if (guide.focus==='hand'&&!revealed) setRevealed(true);
+    if (guide.focus==='actions')setActionsOpen(true);
     const ref = guide.focus==='map'?mapRef:guide.focus==='hand'?handRef:actionRef;
     ref.current?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
     ref.current?.focus({preventScroll:true});
@@ -104,7 +108,7 @@ export function App() {
     dispatch(p.kind === 'DECISION' ? {type:'CHOOSE',value:id} : {type:'TARGET',country:id});
   };
   const deckCount = online.snapshot?.view.deckCount ?? state.deck.length;
-  const cardControls = selected!==null && revealed && (p.kind==='HEADLINE'||p.kind==='ACTION_ROUND') && <section className="card-detail" aria-label="已选卡牌操作">
+  const cardControls = selected!==null && revealed && !(state.mode==='PRACTICE'&&CARD_BY_ID.get(selected)!.scoring) && (p.kind==='HEADLINE'||p.kind==='ACTION_ROUND') && <section className="card-detail" aria-label="已选卡牌操作">
             <div className="eyebrow">已选卡牌 · #{selected}</div><h2>{CARD_BY_ID.get(selected)!.nameZh}</h2><p>{EVENT_SUMMARIES[selected]}</p>
             {p.kind==='HEADLINE' ? <button className="primary" disabled={!canAct||selected===32||selected===6} onClick={()=>dispatch({type:'SELECT_HEADLINE',card:selected})}>确定头条</button> : state.mode==='STANDARD'&&trapped(state,side)&&!CARD_BY_ID.get(selected)!.scoring ? <><p>当前受困：弃置符合条件的手牌，尝试脱困。</p><button className="primary" disabled={!canAct||!trapDiscards(state,side).includes(selected)} onClick={()=>dispatch({type:'TRAP_DISCARD',card:selected})}>弃牌并尝试脱困</button></> : <>
               {state.mode==='STANDARD' && <label>出牌方式 <select value={selected===6?'OPS':use} onChange={e=>setUse(e.target.value as typeof use)}><option value="OPS" disabled={CARD_BY_ID.get(selected)!.scoring}>OPS 操作</option><option value="EVENT" disabled={selected===6||CARD_BY_ID.get(selected)!.side===(side==='US'?'USSR':'US')}>事件 / 计分</option><option value="SPACE" disabled={selected===6||CARD_BY_ID.get(selected)!.scoring}>太空竞赛</option></select></label>}
@@ -117,7 +121,7 @@ export function App() {
             </>}
             {p.kind==='HEADLINE'&&selected===32&&<p className="field-help warning">联合国干预不能作为头条，请换一张牌。</p>}
           </section>;
-  return <main className="command-room">
+  return <main className="command-room board-table">
     <header className="masthead"><div className="brand"><span className="brand-symbol" aria-hidden="true">✦</span><div><h1>冷战热斗</h1><span className="brand-subtitle">TWILIGHT STRUGGLE · 1945—1989</span></div></div><div className="session-label"><i className={onlineActive?'live-dot online':'live-dot'}/>{onlineActive?'联机房间 · '+online.session!.roomId:'本地双人热座'}<span>{state.mode==='STANDARD'?'标准对局':'行动点练习'}</span></div></header>
 
     <details className="settings-panel">
@@ -146,7 +150,7 @@ export function App() {
     {(error||online.error)&&<p role="alert" className="error"><strong>操作未完成</strong> · {error||online.error}</p>}
     <div className="game-layout">
       <section className="map-panel surface" ref={mapRef} tabIndex={-1} aria-label="世界棋盘">
-        <div className="panel-heading"><div><span className="eyebrow">全球局势</span><h2>世界棋盘</h2></div><div className="map-tools"><span className="target-legend"><i/>{targets.length?targets.length+' 个可选国家':'当前无需选择国家'}</span><button aria-label="缩小地图" disabled={zoom<=1} onClick={()=>setZoom(z=>Math.max(1,z-0.25))}>−</button><button className="zoom-reset" onClick={()=>setZoom(1)} title="重置为同屏适应">{Math.round(zoom*100)}%</button><button aria-label="放大地图" disabled={zoom>=2} onClick={()=>setZoom(z=>Math.min(2,z+0.25))}>＋</button></div></div>
+        <div className="panel-heading"><div><span className="eyebrow">全球局势</span><h2>世界棋盘</h2></div><div className="map-tools"><button className="action-toggle" aria-controls="table-actions" aria-expanded={actionsOpen} onClick={()=>setActionsOpen(v=>!v)}>{actionsOpen?'收起操作':'操作与帮助'}</button><span className="target-legend"><i/>{targets.length?targets.length+' 个可选国家':'当前无需选择国家'}</span><button aria-label="缩小地图" disabled={zoom<=1} onClick={()=>setZoom(z=>Math.max(1,z-0.25))}>−</button><button className="zoom-reset" onClick={()=>setZoom(1)} title="重置为同屏适应">{Math.round(zoom*100)}%</button><button aria-label="放大地图" disabled={zoom>=2} onClick={()=>setZoom(z=>Math.min(2,z+0.25))}>＋</button></div></div>
         {countrySelection&&<div className="influence-editor" role="group" aria-label="国家影响力调整">
           <div className="influence-country"><strong>{COUNTRIES.find(c=>c.id===countrySelection.country)!.nameZh}</strong><span>美国 {state.influence[countrySelection.country].US} · 苏联 {state.influence[countrySelection.country].USSR}</span></div>
           <div className={'influence-stepper seat-'+countrySelection.side}><button aria-label="减少一点刚放置的影响力" disabled={!canDecrease} onClick={()=>undo(countrySelection.country)}>−</button><output aria-live="polite">{state.influence[countrySelection.country][countrySelection.side]}<small>{sides[countrySelection.side]}影响力</small></output><button aria-label="增加一点影响力" disabled={!canIncrease} onClick={placeSelected}>＋</button></div>
@@ -155,8 +159,8 @@ export function App() {
         </div>}
         <Board selectedCountry={countrySelection?.country} key={(online.session?.roomId??'local-'+state.seed)+'-undo-'+(online.snapshot?.undoVersion??undoVersion)} canInteract={canAct} onAction={dispatch} onTrackTask={setTrackTask} state={state} targets={targets} onCountry={onCountry} scale={zoom} lastPlacement={lastPlacement}/>
       </section>
-      <aside className="action-panel command-dock surface" ref={actionRef} tabIndex={-1} aria-label="操作区">
-        <div className="panel-heading"><div><span className="eyebrow">{sides[side]}指挥席</span><h2>{blocked?'等待对局':p.kind==='SETUP_PLACEMENT'?'开局部署':p.kind==='OPS'?'执行行动':p.kind==='DECISION'||p.kind==='SUBPLAY'?'事件处理':'出牌与行动'}</h2></div><span className={'seat-tag seat-'+side}>{sides[side]}</span></div>
+      <aside id="table-actions" className={'action-panel command-dock surface table-actions '+(actionsOpen?'is-open':'')} hidden={!actionsOpen} ref={actionRef} tabIndex={-1} aria-label="操作区">
+        <div className="panel-heading"><div><span className="eyebrow">{sides[side]}指挥席</span><h2>{blocked?'等待对局':p.kind==='SETUP_PLACEMENT'?'开局部署':p.kind==='OPS'?'执行行动':p.kind==='DECISION'||p.kind==='SUBPLAY'?'事件处理':'出牌与行动'}</h2></div><button className="secondary" aria-label="关闭操作区" onClick={()=>setActionsOpen(false)}>×</button></div>
         <div className="dock-toolbar"><span>操作与手牌</span><button className="secondary undo-button" disabled={!canUndo} onClick={()=>undo()}>↶ 撤销上一步</button><small>{onlineActive?'可撤回自己最近的连续操作，对方行动后截止':'放错棋子或打错牌，可逐步撤回'}</small></div><div className="dock-body"><div className="action-content">
         {(blocked||trackTask)?<div className="empty-action"><span aria-hidden="true">◷</span><h3>{trackTask?'请先摆放轨道标记':blocked}</h3><p>你可以查看地图和自己的手牌。轮到你时，这里会显示可执行的操作。</p></div>:<>
         {p.kind==='SETUP_PLACEMENT'&&<div className="setup-instructions"><div className="remaining-points"><strong>{p.remaining}</strong><span>点影响力待放置</span></div><progress aria-label="开局布点进度" value={(side==='USSR'?6:7)-p.remaining} max={side==='USSR'?6:7}/><p>先选定{p.subRegion==='EASTERN_EUROPE'?'东欧':'西欧'}的金框国家，再点击棋盘上方的 ＋／− 调整。</p><p className="field-help">放完后自动进入下一阶段，无需额外确认。</p></div>}
@@ -201,21 +205,22 @@ export function App() {
         {targets.length>0&&<details className="target-picker" open={p.kind==='SETUP_PLACEMENT'}><summary>可操作国家 <span>{targets.length}</span></summary><p className="field-help">也可点击下方国名选择国家。</p><div className="target-list">{targets.map(id=><button key={id} onClick={()=>onCountry(id)}>{COUNTRIES.find(c=>c.id===id)!.nameZh}<small>美 {state.influence[id].US} / 苏 {state.influence[id].USSR}</small></button>)}</div></details>}
         <details className="quick-help"><summary>玩法速查</summary><dl><dt>行动点（OPS）</dt><dd>用于放置影响力、调整或政变。选择用途后，再点击合法目标。</dd><dt>事件与头条</dt><dd>头条只结算事件。行动轮用对方牌的行动点时，对方事件仍会触发。</dd><dt>计分牌</dt><dd>本回合内必须打出。留到回合末会判负。</dd><dt>地图标记</dt><dd>蓝色代表美国，红色代表苏联；实心影响力标记表示控制。金框代表当前合法目标。</dd></dl></details>
         </div>
-      <section className="hand-panel" ref={handRef} tabIndex={-1} aria-label="我的手牌">
+
+        </div>
+      </aside>
+      <section className="hand-panel hand-dock" ref={handRef} tabIndex={-1} aria-label="我的手牌">
         <div className="panel-heading"><div><span className="eyebrow">{onlineActive?'仅自己可见':'热座交接 · 请保护手牌'}</span><h2>{sides[side]}手牌 <small>{state.hands[side].length} 张{state.mode==='STANDARD'&&p.kind==='ACTION_ROUND'&&state.chinaCard.holder===side&&state.chinaCard.faceUp?' ＋ 中国牌':''}</small></h2></div><button className={revealed?'secondary':'primary'} onClick={()=>setRevealed(r=>!r)}>{revealed?'隐藏手牌':'显示手牌'}</button></div>
         {!revealed?<div className="hand-curtain"><div className="card-backs" aria-hidden="true"><i/><i/><i/></div><div><h3>手牌暂时隐藏</h3><p>{onlineActive?'点击“显示手牌”查看自己的卡牌。':'请交给'+sides[side]+'玩家，再点击“显示手牌”。'}</p></div></div>:<>
         {p.kind==='HEADLINE'&&state.space[side]>=4&&state.space[side==='US'?'USSR':'US']<4&&state.headlines[side==='US'?'USSR':'US']!==undefined&&<p className="notice">太空特权：对方头条为 {CARD_BY_ID.get(state.headlines[side==='US'?'USSR':'US']!)!.nameZh}</p>}
         <p className="hand-hint">{!canAct?'等待对方行动；你仍可查看自己的手牌。':p.kind==='SETUP_PLACEMENT'?'当前先完成地图布点，进入头条或行动轮后可选牌。':p.kind==='HEADLINE'?'点击手牌，在牌面弹窗中确认头条。':p.kind==='ACTION_ROUND'?'点击手牌，直接在牌面弹窗中选择用途并打出。':'正在结算行动，完成当前任务后再选择下一张牌。'}</p>
-        <div className="hand">{[...state.hands[side],...(state.mode==='STANDARD'&&p.kind==='ACTION_ROUND'&&state.chinaCard.holder===side&&state.chinaCard.faceUp?[6]:[])].map(id=>{const card=CARD_BY_ID.get(id)!;const selectable=canAct&&(p.kind==='HEADLINE'||p.kind==='ACTION_ROUND')&&!(state.mode==='PRACTICE'&&card.scoring);return <button className={'card-button '+(selected===id?'selected':'')} key={id} aria-label={card.nameZh+(card.scoring?'，计分牌':'，'+card.ops+' 行动点')} aria-pressed={selected===id} disabled={!selectable} title={!selectable?'当前阶段不能选择这张牌':card.nameZh} onClick={()=>{setSelected(id);setCardMenuOpen(true);setRegional('NONE');setUse(card.scoring?'EVENT':'OPS');}}><CardView card={card}/><span className="card-caption">{card.nameZh}<small>{card.scoring?'计分牌':card.ops+' OPS'}</small></span></button>;})}</div>
+        <div className="hand hand-fan">{[...state.hands[side],...(state.mode==='STANDARD'&&p.kind==='ACTION_ROUND'&&state.chinaCard.holder===side&&state.chinaCard.faceUp?[6]:[])].map(id=>{const card=CARD_BY_ID.get(id)!;const selectable=canAct&&(p.kind==='HEADLINE'||p.kind==='ACTION_ROUND')&&!(state.mode==='PRACTICE'&&card.scoring);return <button className={'card-button '+(selected===id?'selected':'')} key={id} aria-label={card.nameZh+(card.scoring?'，计分牌':'，'+card.ops+' 行动点')} aria-pressed={selected===id} title={card.nameZh+' · 点击展开查看'+(selectable?'并出牌':'')} onClick={()=>{setSelected(id);setCardMenuOpen(true);setRegional('NONE');setUse(card.scoring?'EVENT':'OPS');}}><span className={'card-head side-'+card.side}><b>{card.scoring?'计分':card.ops}</b><span>{card.nameZh}<small>{card.starred?'一次性事件':card.scoring?'区域计分':sides[card.side as Side]??'中立事件'}</small></span></span><CardView card={card}/><span className="card-caption">{card.nameZh}<small>{card.scoring?'计分牌':card.ops+' OPS'}</small></span></button>;})}</div>
         {state.effects.cia && side==='US' && <details><summary>中央情报局：本回合苏联公开手牌</summary><div className="hand">{state.hands.USSR.map(id=><CardView key={id} card={CARD_BY_ID.get(id)!}/>)}</div></details>}
         {state.effects.aldrich && side==='USSR' && <details><summary>奥德里奇·艾姆斯：本回合美国公开手牌</summary><div className="hand">{state.hands.US.map(id=><CardView key={id} card={CARD_BY_ID.get(id)!}/>)}</div></details>}
 
         </>}
         <div className="hand-footer"><span>牌库 {deckCount} 张 · 弃牌 {state.discard.length} 张</span>{online.snapshot&&<span>对方手牌 {online.snapshot.view.handCounts[side==='US'?'USSR':'US']} 张</span>}<span>中国牌 · {sides[state.chinaCard.holder]}持有</span></div>
       </section>
-        </div>
-      </aside>
-      {cardMenuOpen&&selected!==null&&revealed&&canAct&&(p.kind==='HEADLINE'||p.kind==='ACTION_ROUND')&&<CardPlayDialog card={CARD_BY_ID.get(selected)!} onClose={()=>{setCardMenuOpen(false);setSelected(null);}} onSidebar={()=>{setCardMenuOpen(false);actionRef.current?.scrollIntoView({behavior:'smooth',block:'start'});}}>{cardControls}</CardPlayDialog>}
+      {cardMenuOpen&&selected!==null&&revealed&&<CardPlayDialog card={CARD_BY_ID.get(selected)!} onClose={()=>{setCardMenuOpen(false);setSelected(null);}} onSidebar={()=>{setCardMenuOpen(false);setActionsOpen(true);actionRef.current?.scrollIntoView({behavior:'smooth',block:'start'});}}>{cardControls??<section className="card-detail"><div className="eyebrow">卡牌效果 · #{selected}</div><h2>{CARD_BY_ID.get(selected)!.nameZh}</h2><p>{EVENT_SUMMARIES[selected]}</p><p className="field-help">当前可查看卡牌，完成阶段提示后即可出牌。</p></section>}</CardPlayDialog>}
 
     </div>
     {activeEffects(state.effects).length>0&&<details className="effects-panel"><summary>生效中的事件 <span>{activeEffects(state.effects).length}</span></summary><div className="effect-chips">{activeEffects(state.effects).map(e=><span key={e}>{e}</span>)}</div></details>}
