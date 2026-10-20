@@ -15,7 +15,7 @@ export function displayState(v:PlayerView):GameState {
 export function useOnline() {
   const socket=useRef<Socket<ServerToClient,ClientToServer>|null>(null);
   const identity=useRef<Session|null>(null);
-  const pending=useRef<{id:string;expectedRevision:number;action:Action}|null>(null);
+  const pending=useRef<{id:string;expectedRevision:number;action:Action|{type:'UNDO'}|{type:'UNDO_PLACEMENT';country:string}}|null>(null);
   const [session,setSession]=useState<Session|null>(null);
   const [snapshot,setSnapshot]=useState<Snapshot|null>(null);
   const [ready,setReady]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
@@ -71,7 +71,7 @@ export function useOnline() {
     if(roomId)client.timeout(8000).emit('join',{roomId:roomId.trim().toUpperCase(),side},joined);
     else client.timeout(8000).emit('create',{side},joined);
   };
-  const send=(action:Action)=>{
+  const send=(action:Action|{type:'UNDO'}|{type:'UNDO_PLACEMENT';country:string})=>{
     if(!ready||!snapshot||!socket.current?.connected){setError('等待房间连接恢复');return;}
     if(pending.current){setError('有待确认操作，请先重试或等待恢复');return;}
     pending.current={id:globalThis.crypto?.randomUUID?.()??Date.now().toString(36)+'_'+Math.random().toString(36).slice(2),expectedRevision:snapshot.revision,action};setHasPending(true);sendPending.current();

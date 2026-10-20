@@ -9,6 +9,8 @@ export const opponent = (side: Side): Side => (side === 'USSR' ? 'US' : 'USSR');
 export interface SeatStatus { occupied: boolean; connected: boolean }
 export interface RoomSnapshot {
   roomId: string; side: Side; revision: number;
+  canUndo?: boolean; undoVersion?: number;
+  undoPlacement?: {country:string;side:Side};
   seats: Record<Side,SeatStatus>;
   // The concrete PlayerView is defined by game-core, which depends on this package.
   view: unknown;

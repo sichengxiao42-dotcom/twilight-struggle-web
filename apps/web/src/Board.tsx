@@ -27,7 +27,7 @@ const trackColours = { US: ['#2f5d9e', '#fff'], USSR: ['#b3261e', '#fff'], neutr
 
 export interface PlacementFeedback { country: string; side: Side; before: number }
 
-export function Board({state,targets,onCountry,onAction,canInteract,scale=1,lastPlacement,onTrackTask}:{state:GameState;targets:string[];onCountry:(id:string)=>void;onAction:(action:Action)=>void;canInteract:boolean;scale?:number;lastPlacement?:PlacementFeedback|null;onTrackTask:(task:string|null)=>void}) {
+export function Board({selectedCountry,state,targets,onCountry,onAction,canInteract,scale=1,lastPlacement,onTrackTask}:{selectedCountry?:string;state:GameState;targets:string[];onCountry:(id:string)=>void;onAction:(action:Action)=>void;canInteract:boolean;scale?:number;lastPlacement?:PlacementFeedback|null;onTrackTask:(task:string|null)=>void}) {
   const [hover, setHover] = useState<string | null>(null);
   const svgRef=useRef<SVGSVGElement>(null);
   const tracks=trackPieces(state);
@@ -50,7 +50,7 @@ export function Board({state,targets,onCountry,onAction,canInteract,scale=1,last
     const action=canInteract&&drop?influenceDrop(state,piece,drop,targets):null;
     if(!action){setDragMessage('落点不合法，棋子已返回原位');return;}
     setDragMessage('');
-    if(action.type==='PLACE_SETUP'||action.type==='TARGET')onCountry(action.country);else onAction(action);
+    onAction(action);
   });
   const draggedPiece=gesture.drag?.piece;
   const draggedTrackId=draggedPiece?.kind==='track'?draggedPiece.id:null;
@@ -67,18 +67,18 @@ export function Board({state,targets,onCountry,onAction,canInteract,scale=1,last
   const placing = p.kind === 'SETUP_PLACEMENT' || (p.kind === 'OPS' && p.mode === 'INFLUENCE');
   const hint = (id: string) => {
     if (!targets.includes(id)) return '当前不可操作';
-    if (p.kind === 'SETUP_PLACEMENT') return `点击部署 1 点${p.side === 'USSR' ? '苏联' : '美国'}影响力`;
-    if (p.kind === 'OPS' && p.mode === 'INFLUENCE') return `点击部署 1 点影响力 · 消耗 ${placementCost(state, id, p.side)} 行动点`;
+    if (p.kind === 'SETUP_PLACEMENT') return `选择国家，用 ＋／− 调整${p.side === 'USSR' ? '苏联' : '美国'}影响力`;
+    if (p.kind === 'OPS' && p.mode === 'INFLUENCE') return `选择国家，用 ＋／− 调整 · 每点消耗 ${placementCost(state, id, p.side)} 行动点`;
     return '点击选择这个国家';
   };
   const delta = lastPlacement ? state.influence[lastPlacement.country][lastPlacement.side] - lastPlacement.before : 0;
   const receipt = lastPlacement && delta > 0 ? `已在${nameOf(lastPlacement.country)}部署 ${delta} 点${lastPlacement.side === 'USSR' ? '苏联' : '美国'}影响力` : '';
-  const feedback = <div className="map-interaction"><span>{hover ? nameOf(hover) + ' · ' + hint(hover) : placing ? '从备用区拖动棋子到金框国家；也可直接点击国家' : '金框国家可直接点击选择'}</span><span className="map-feedback" role="status" aria-live="polite">{dragMessage||receipt}</span></div>;
+  const feedback = <div className="map-interaction"><span>{hover ? nameOf(hover) + ' · ' + hint(hover) : placing ? '先选国家，再用 ＋／− 调整；也可拖动备用棋子' : '金框国家可直接点击选择'}</span><span className="map-feedback" role="status" aria-live="polite">{dragMessage||receipt}</span></div>;
   const country = (c: Country, [x, y]: number[], body: ReactNode) => {
     const inf = state.influence[c.id], ctrl = controller(state, c.id), legal = targets.includes(c.id);
     const dropReady=gesture.drag&&draggedPiece&&draggedPiece.kind!=='track'&&canInteract?Boolean(influenceDrop(state,draggedPiece,{kind:'country',id:c.id},targets)):false;
     const pieceSide=p.kind==='DECISION'&&p.decision.kind==='INFLUENCE'?p.decision.affected:('side' in p?p.side:'USSR');
-    return <g key={c.id} data-country-id={c.id} transform={'translate(' + x + ',' + y + ')'} className={'country '+(dropReady?'drop-ready ':'') + (legal ? 'legal ' : '') + (ctrl ? 'controlled-' + ctrl : '')} role="button" {...(inf[pieceSide]>0?gesture.bindings({kind:'influence',side:pieceSide,country:c.id}):{})} aria-disabled={!legal} aria-label={c.nameZh + ' 稳定度' + c.stability + ' 美国' + inf.US + ' 苏联' + inf.USSR} tabIndex={0} onMouseEnter={() => setHover(c.id)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(c.id)} onBlur={() => setHover(null)} onClick={() => { if (legal&&!gesture.suppressClick()) onCountry(c.id); }} onKeyDown={e => { if (legal && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onCountry(c.id); } }}>
+    return <g key={c.id} data-country-id={c.id} transform={'translate(' + x + ',' + y + ')'} className={'country '+(selectedCountry===c.id?'selected-country ':'')+(dropReady?'drop-ready ':'') + (legal ? 'legal ' : '') + (ctrl ? 'controlled-' + ctrl : '')} role="button" {...(inf[pieceSide]>0?gesture.bindings({kind:'influence',side:pieceSide,country:c.id}):{})} aria-disabled={!legal} aria-label={c.nameZh + ' 稳定度' + c.stability + ' 美国' + inf.US + ' 苏联' + inf.USSR} tabIndex={0} onMouseEnter={() => setHover(c.id)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(c.id)} onBlur={() => setHover(null)} onClick={() => { if (legal&&!gesture.suppressClick()) onCountry(c.id); }} onKeyDown={e => { if (legal && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onCountry(c.id); } }}>
       <title>{c.nameZh + ' · ' + hint(c.id) + ' · 稳定度 ' + c.stability + ' · 相邻：' + ADJACENCY[c.id].map(nameOf).join('、')}</title>
       {body}
     </g>;

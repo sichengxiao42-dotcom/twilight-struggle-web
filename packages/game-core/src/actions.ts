@@ -24,6 +24,14 @@ export type Action =
   | { type: 'TRAP_DISCARD'; card: number }
   /** Cuban Missile Crisis: remove 2 own influence (USSR: Cuba; US: West Germany or Turkey) to cancel it. */
   | { type: 'CANCEL_CMC'; country: string };
+/** Identify a one-point placement so the UI can offer a precise undo. */
+export function influencePlacement(state: GameState, action: Action): {country:string;side:Side}|null {
+  const p=state.phase;
+  if(p.kind==='SETUP_PLACEMENT'&&action.type==='PLACE_SETUP')return {country:action.country,side:p.side};
+  if(p.kind==='OPS'&&p.mode==='INFLUENCE'&&action.type==='TARGET')return {country:action.country,side:p.side};
+  if(p.kind==='DECISION'&&p.decision.kind==='INFLUENCE'&&p.decision.operation==='ADD'&&action.type==='CHOOSE'&&COUNTRY_BY_ID.has(action.value))return {country:action.value,side:p.decision.affected};
+  return null;
+}
 export function activeSide(state: GameState): Side | null {
   return 'side' in state.phase ? state.phase.side : null;
 }
