@@ -65,6 +65,7 @@ export function App() {
   const blocked = onlineActive ? !online.ready ? '正在恢复房间连接' : online.busy ? '正在确认你的操作' : !online.snapshot || !online.snapshot.seats.US.occupied || !online.snapshot.seats.USSR.occupied ? '等待另一位玩家加入' : online.snapshot.view.phase.kind==='WAITING' ? '等待'+sides[online.snapshot.view.phase.side]+'处理事件' : actor!==side ? '等待'+(actor?sides[actor]:'对方')+'行动' : undefined : undefined;
   const guide = phaseGuide(state, { selected, revealed, targetCount: targets.length, blocked });
   const focusTask = () => {
+    if (guide.focus==='hand'&&!revealed) setRevealed(true);
     const ref = guide.focus==='map'?mapRef:guide.focus==='hand'?handRef:actionRef;
     ref.current?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
     ref.current?.focus({preventScroll:true});
@@ -96,15 +97,7 @@ export function App() {
       <p className="field-help">{onlineActive?'联机中不能重开本地对局，请先返回本地。':'本地热座由双方轮流操作同一设备。刷新页面将重开本地对局。'}</p></section></div>
     </details>
 
-    <section className="situation-bar" aria-label="全球局势">
-      <div><span>战争时期</span><strong>{state.turn<=3?'冷战早期':state.turn<=7?'冷战中期':'冷战后期'} <small>第 {state.turn} / 10 回合</small></strong></div>
-      <div className={state.defcon<=2?'danger-metric':''}><span>核威胁 · DEFCON</span><strong>{state.defcon} <small>{state.defcon>=4?'局势缓和':state.defcon===3?'局势紧张':'核危机'}</small></strong></div>
-      <div><span>胜利分 · VP</span><strong>{state.vp===0?'势均力敌':(state.vp>0?'美国 +':'苏联 +')+Math.abs(state.vp)}<small> / 20</small></strong></div>
-      <div><span>军事行动</span><strong><em className="ink-ussr">苏 {state.milOps.USSR}</em><small> / </small><em className="ink-us">美 {state.milOps.US}</em></strong></div>
-      <div><span>太空竞赛</span><strong><em className="ink-ussr">苏 {state.space.USSR}</em><small> / </small><em className="ink-us">美 {state.space.US}</em></strong></div>
-      <div><span>中国牌</span><strong>{sides[state.chinaCard.holder]} <small>{state.chinaCard.faceUp?'可用':'背面待翻转'}</small></strong></div>
-    </section>
-    <StageGuide guide={guide} side={side} onFocus={focusTask}/>
+    <StageGuide guide={guide} side={side} onFocus={focusTask} actionLabel={guide.focus==='hand'&&!revealed?'显示手牌':undefined}/>
     {(error||online.error)&&<p role="alert" className="error"><strong>操作未完成</strong> · {error||online.error}</p>}
     <div className="game-layout">
       <section className="map-panel surface" ref={mapRef} tabIndex={-1} aria-label="世界棋盘">
