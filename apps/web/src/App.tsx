@@ -110,8 +110,12 @@ export function App() {
     dispatch(p.kind === 'DECISION' ? {type:'CHOOSE',value:id} : {type:'TARGET',country:id});
   };
   const deckCount = online.snapshot?.view?.deckCount ?? state.deck.length;
+  const turnActor = inLobby || p.kind === 'GAME_OVER' || p.kind === 'M1_COMPLETE' ? null : actor;
+  const turnLabel = p.kind === 'GAME_OVER' ? '对局已结束' : inLobby ? '等待对局开始' : turnActor ? sides[turnActor] + '正在行动' : '等待下一阶段';
+  const turnDetail = turnActor ? onlineActive ? !online.ready ? '连接恢复中' : online.busy ? '操作确认中' : turnActor === online.snapshot?.side ? '轮到你行动' : '等待对方行动' : '请由' + sides[turnActor] + '玩家操作' : '';
+
   return <main className="command-room board-table">
-    <header className="masthead"><div className="brand"><h1>冷战热斗</h1><span className={'seat-tag seat-'+side}>{inLobby&&!online.snapshot?.side?'未入座':sides[side]}</span><span className="session-label">{onlineActive?'房间 '+online.session!.roomId:'本地热座'}</span></div><nav aria-label="牌桌工具"><button className="secondary" disabled={!canUndo} onClick={()=>undo()}>撤销</button><button className="secondary" aria-controls="table-actions" aria-expanded={actionsOpen} onClick={()=>setActionsOpen(v=>!v)}>{actionsOpen?'收起面板':'菜单与操作'}</button></nav></header>
+    <header className="masthead"><div className="brand"><h1>冷战热斗</h1><span className={'seat-tag seat-'+side}>{inLobby&&!online.snapshot?.side?'未入座':sides[side]}</span><span className="session-label">{onlineActive?'房间 '+online.session!.roomId:'本地热座'}</span></div><div className={'turn-indicator '+(turnActor?'turn-'+turnActor:'turn-idle')} role="status" aria-live="polite" aria-atomic="true"><i aria-hidden="true"/><div><strong>{turnLabel}</strong>{turnDetail&&<small>{turnDetail}</small>}</div></div><nav aria-label="牌桌工具"><button className="secondary" disabled={!canUndo} onClick={()=>undo()}>撤销</button><button className="secondary" aria-controls="table-actions" aria-expanded={actionsOpen} onClick={()=>setActionsOpen(v=>!v)}>{actionsOpen?'收起面板':'菜单与操作'}</button></nav></header>
 
 
     {(error||online.error)&&<p role="alert" className="error"><strong>操作未完成</strong> · {error||online.error}</p>}

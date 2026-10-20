@@ -1,3 +1,4 @@
+import { RelatedCards } from './RelatedCards';
 import { useEffect, useRef, useState } from 'react';
 import { CARD_BY_ID, EVENT_SUMMARIES, type Action, type GameState } from '@ts/game-core';
 import { opponent, type Side } from '@ts/shared';
@@ -25,6 +26,7 @@ export function CardComposer({id,state,side,canAct,blocked,onPlay,onClose}:{id:n
     {/* The card art already carries the printed text; a written summary is only the fallback when no art is available. */}
     <div className="composer-art"><CardView card={card}/></div>
     <div className="composer-content">{!hasArt&&<header><h2>{card.nameZh}</h2><p className="card-effect">{EVENT_SUMMARIES[id]}</p></header>}
+      <RelatedCards key={id} id={id} state={state}/>
       {choices.length>0&&canAct?<><div className="play-choices" role="group" aria-label="选择卡牌用途">{choices.map(option=><button key={option.id} className={'play-choice '+(use===option.id?'chosen':'')} aria-pressed={use===option.id} disabled={Boolean(option.reason)} onClick={()=>{setUse(option.id);setRegion('NONE');}}><strong>{option.label}</strong><small>{option.reason??option.detail}</small></button>)}</div>
         {ops&&enemy&&<fieldset className="play-extra"><legend>对方事件仍会触发</legend><label><input type="radio" name="event-order" checked={order==='BEFORE'} onChange={()=>setOrder('BEFORE')}/>先结算事件</label><label><input type="radio" name="event-order" checked={order==='AFTER'} onChange={()=>setOrder('AFTER')}/>先使用行动点</label></fieldset>}
         {ops&&(id===6||vietnam)&&<fieldset className="play-extra"><legend>区域奖励</legend><label><input type="radio" name="region-bonus" checked={region==='NONE'} onChange={()=>setRegion('NONE')}/>不限制地区</label>{id===6&&<label><input type="radio" name="region-bonus" checked={region==='ASIA'} onChange={()=>setRegion('ASIA')}/>仅亚洲 +1</label>}{vietnam&&<label><input type="radio" name="region-bonus" checked={region==='SEA'} onChange={()=>setRegion('SEA')}/>仅东南亚 {id===6?'+2':'+1'}</label>}</fieldset>}

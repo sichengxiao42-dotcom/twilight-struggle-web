@@ -1,4 +1,5 @@
-import { useEffect, useState, type ReactNode, type CSSProperties } from 'react';
+import { boardChanges, type CountryChange } from './boardChanges';
+import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from 'react';
 import type { Region, Side } from '@ts/shared';
 import { ADJACENCY, COUNTRIES, controller, placementCost, type Action, type Country, type GameState } from '@ts/game-core';
 import { boardImage } from './assets';
@@ -29,6 +30,23 @@ export interface PlacementFeedback { country: string; side: Side; before: number
 
 export function Board({selectedCountry,state,targets,onCountry,onAction,canInteract,scale=1,lastPlacement}:{selectedCountry?:string;state:GameState;targets:string[];onCountry:(id:string)=>void;onAction:(action:Action)=>void;canInteract:boolean;scale?:number;lastPlacement?:PlacementFeedback|null}) {
   const [hover, setHover] = useState<string | null>(null);
+  const previous = useRef(state);
+  const sequence = useRef(0);
+  const [changes, setChanges] = useState<(CountryChange & { sequence: number })[]>([]);
+  const [changeSummary, setChangeSummary] = useState('');
+  useEffect(() => {
+    const next = boardChanges(previous.current, state);
+    previous.current = state;
+    if (!next.length) return;
+    const id = ++sequence.current;
+    setChanges(current => [...current.filter(c => !next.some(n => n.country === c.country)), ...next.map(c => ({ ...c, sequence: id }))]);
+    setChangeSummary(next.map(c => c.label).join('；'));
+  }, [state]);
+  useEffect(() => {
+    if (!changes.length) return;
+    const timer = setTimeout(() => setChanges([]), 2400);
+    return () => clearTimeout(timer);
+  }, [changes]);
   const tracks=trackPieces(state);
   const [dragMessage,setDragMessage]=useState('');
   useEffect(()=>{setDragMessage('');},[state]);
@@ -58,7 +76,7 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
   };
   const delta = lastPlacement ? state.influence[lastPlacement.country][lastPlacement.side] - lastPlacement.before : 0;
   const receipt = lastPlacement && delta > 0 ? `已在${nameOf(lastPlacement.country)}部署 ${delta} 点${lastPlacement.side === 'USSR' ? '苏联' : '美国'}影响力` : '';
-  const feedback = <div className="map-interaction"><span>{hover ? nameOf(hover) + ' · ' + hint(hover) : placing ? '点击高亮国家部署；也可拖动备用棋子' : '金框国家可直接点击选择'}</span><span className="map-feedback" role="status" aria-live="polite">{dragMessage||receipt}</span></div>;
+  const feedback = <div className="map-interaction"><span>{hover ? nameOf(hover) + ' · ' + hint(hover) : placing ? '点击高亮国家部署；也可拖动备用棋子' : '金框国家可直接点击选择'}</span><span className="map-feedback" role="status" aria-live="polite">{dragMessage||changeSummary||receipt}</span></div>;
   const country = (c: Country, [x, y]: number[], body: ReactNode) => {
     const inf = state.influence[c.id], ctrl = controller(state, c.id), legal = targets.includes(c.id);
     const dropReady=gesture.drag&&draggedPiece&&canInteract?Boolean(influenceDrop(state,draggedPiece,{kind:'country',id:c.id},targets)):false;
@@ -66,6 +84,17 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
     return <g key={c.id} data-country-id={c.id} transform={'translate(' + x + ',' + y + ')'} className={'country '+(selectedCountry===c.id?'selected-country ':'')+(dropReady?'drop-ready ':'') + (legal ? 'legal ' : '') + (ctrl ? 'controlled-' + ctrl : '')} role="button" {...(inf[pieceSide]>0?gesture.bindings({kind:'influence',side:pieceSide,country:c.id}):{})} aria-disabled={!legal} aria-label={c.nameZh + ' 稳定度' + c.stability + ' 美国' + inf.US + ' 苏联' + inf.USSR} tabIndex={legal?0:-1} onMouseEnter={() => setHover(c.id)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(c.id)} onBlur={() => setHover(null)} onClick={() => { if (legal&&!gesture.suppressClick()) onCountry(c.id); }} onKeyDown={e => { if (legal && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onCountry(c.id); } }}>
       <title>{c.nameZh + ' · ' + hint(c.id) + ' · 稳定度 ' + c.stability + ' · 相邻：' + ADJACENCY[c.id].map(nameOf).join('、')}</title>
       {body}
+      {changes.filter(change => change.country === c.id).map(change => {
+        const width = map ? BOX_WIDTH : 120, height = map ? BOX_HEIGHT : 40;
+        return <g key={change.sequence} className="board-change" pointerEvents="none" aria-hidden="true">
+          <rect className={'change-outline' + (change.controlChanged ? ' control-change' : '')} width={width} height={height} rx={map ? 10 : 5}/>
+          {change.deltas.map(d => <g key={d.side} className={'change-badge change-' + d.side} transform={`translate(${width * (d.side === 'US' ? .25 : .75)},${height * .6})`}>
+            <rect x={-width * .21} y={-height * .17} width={width * .42} height={height * .34} rx={height * .06}/>
+            <text textAnchor="middle" dominantBaseline="central" style={{fontSize:height * .23}}>{d.amount > 0 ? '+' : '−'}{Math.abs(d.amount)}</text>
+          </g>)}
+          {change.controlChanged && <text className="control-change-label" x={width / 2} y={height * .22} textAnchor="middle" style={{fontSize:height * .14}}>{change.control ? (change.control === 'US' ? '美国控制' : '苏联控制') : '失去控制'}</text>}
+        </g>;
+      })}
     </g>;
   };
   if (map) {

@@ -187,3 +187,38 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
 .lobby-seat>div { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }.lobby-seat strong { font-size:15px; color:var(--fg); }.lobby-seat small { font-size:11px; }
 .lobby-seat button { flex:none; font-size:12px; min-width:84px; }
 .lobby-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }.lobby-actions button { font-size:13px; }
+
+/* Authoritative board changes: badges never capture clicks or drag targets. */
+.board .country .board-change { pointer-events:none; animation:board-change-fade 2.4s ease-out both; }
+.board .country .board-change .change-outline { fill:none; stroke:#ffdf70; stroke-width:3px; vector-effect:non-scaling-stroke; }
+.board .country .board-change .control-change { stroke:#fff2b0; stroke-width:5px; }
+.board .country .board-change .change-badge rect { stroke:#fff8eb; stroke-width:1px; vector-effect:non-scaling-stroke; }
+.board .country .board-change .change-US rect { fill:#235e9c; }
+.board .country .board-change .change-USSR rect { fill:#a62c29; }
+.board .country .board-change .change-badge text { fill:#fff; font-weight:800; }
+.board .country .board-change .control-change-label { fill:#fff; stroke:#28271f; stroke-width:3px; paint-order:stroke; font-weight:800; }
+@keyframes board-change-fade { 0% { opacity:0; } 10%,78% { opacity:1; } 100% { opacity:0; } }
+@media(prefers-reduced-motion:reduce) { .board .country .board-change { animation:none; } }
+
+.related-cards { margin:10px 0; border:1px solid var(--line); border-radius:5px; padding:8px 10px; }
+.related-cards h3 { font-size:13px; margin:0 0 6px; }
+.related-cards details+details { border-top:1px solid var(--line); }
+.related-cards summary { cursor:pointer; padding:8px 0; font-size:13px; font-weight:700; }
+.related-cards summary span { float:right; font-size:10px; font-weight:400; color:var(--muted); }
+.related-cards p { font-size:12px; line-height:1.65; margin:6px 0; }
+.related-card-preview { width:min(100%,240px); margin:10px auto; }
+.related-card-preview>.card { width:100%; height:auto; aspect-ratio:7/10; }
+.related-cards .related-condition { font-weight:700; }
+.related-condition.available { color:#41652c; }.related-condition.unavailable { color:#a03228; }
+
+/* Persistent ownership cue: stays visible for the entire step, including event handoffs. */
+.turn-indicator { display:flex; align-items:center; justify-content:center; gap:9px; flex:none; padding:4px 14px; border:2px solid currentColor; border-radius:6px; background:#fff9ed; }
+.turn-indicator>div { display:flex; flex-direction:column; gap:1px; }
+.turn-indicator strong { font-size:14px; line-height:1.25; }.turn-indicator small { font-size:10px; line-height:1.2; }
+.turn-US { color:#235e9c; }.turn-USSR { color:#a62c29; }.turn-idle { color:var(--muted); }
+.turn-indicator i { display:block; width:9px; height:9px; background:currentColor; border-radius:50%; animation:turn-beacon 1.8s ease-in-out infinite; }
+.turn-idle i { animation:none; }
+@keyframes turn-beacon { 0%,100% { opacity:1; box-shadow:0 0 0 0 currentColor; } 50% { opacity:.55; box-shadow:0 0 0 3px transparent; } }
+@media(max-width:820px) { .turn-indicator { padding:3px 7px; gap:5px; }.turn-indicator strong { font-size:12px; }.turn-indicator small { font-size:9px; }.brand .session-label { display:none; } }
+@media(max-width:520px) { .masthead { flex-wrap:wrap; gap:6px; }.turn-indicator { margin-left:auto; }.masthead nav { width:100%; justify-content:flex-end; }.turn-indicator strong { font-size:12px; } }
+@media(prefers-reduced-motion:reduce) { .turn-indicator i { animation:none; } }
