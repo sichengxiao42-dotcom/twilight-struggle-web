@@ -256,3 +256,75 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
 .influence-editor p { flex:1; min-width:180px; font-size:12px; line-height:1.6; }.influence-editor p small { display:block; color:var(--muted); font-size:10px; margin-top:4px; }
 .country.selected-country .hit { stroke:#21807c; stroke-width:18px; fill:#21807c12; }.country.selected-country>rect:first-child { stroke:#21807c; }
 @media(max-width:600px) { .influence-editor { gap:12px; padding:12px; }.influence-country { flex:1; }.influence-editor p { flex-basis:100%; order:3; }.influence-editor>.secondary { order:4; }.influence-stepper button { width:44px; height:44px; } }
+
+/* Keep the complete board and the hand on the same desktop table. */
+@media (min-width:821px) {
+  .command-room { height:100dvh; display:flex; flex-direction:column; padding-bottom:8px; gap:6px; }
+  .command-room>header,.command-room>details,.command-room>.stage-guide,.command-room>.error { flex:none; }
+  .masthead { padding-block:6px; }
+  .brand h1 { font-size:23px; }.brand-symbol { font-size:28px; }
+  .brand-subtitle { margin-top:2px; }
+  .settings-panel>summary { padding:6px 12px; }
+  .settings-panel[open] { max-height:35dvh; overflow:auto; }
+  .stage-guide { position:static; margin:0; }
+  .guide-main { padding:7px 12px; gap:10px; }.side-seal { width:30px; height:36px; font-size:20px; }
+  .guide-main h2 { font-size:15px; margin-bottom:2px; }.guide-main p { font-size:11px; }
+  .guide-next { padding:6px 12px; }.guide-next button { min-height:30px; padding-block:4px; }
+  .game-layout { flex:1; min-height:0; grid-template-rows:minmax(0,1fr) 212px; gap:8px; align-items:stretch; }
+  .map-panel { display:flex; flex-direction:column; min-height:0; }
+  .map-panel>.panel-heading { padding:4px 12px; flex:none; }
+  .map-panel>.panel-heading .eyebrow { display:none; }.map-panel h2 { font-size:14px; }
+  .piece-tray { padding:4px 12px; gap:10px; flex:none; }.reserve-counter { min-height:28px; padding:3px 9px; }
+  .map-panel>.board-scroll { flex:1; min-height:0; container-type:size; }
+  .map-panel .board { width:calc(min(100cqw, 154.579cqh) * var(--board-zoom,1)) !important; height:auto; max-width:none; margin-inline:auto; }
+  .map-panel .board:not(.map-board) { width:calc(min(100cqw, 149.136cqh) * var(--board-zoom,1)) !important; }
+  .map-interaction { flex:none; padding:3px 12px; font-size:10px; min-height:22px; }
+  .map-caption { display:none; }
+  .influence-editor { flex:none; gap:10px; padding:5px 12px; }
+  .influence-country strong { font-size:15px; }.influence-stepper { gap:8px; }
+  .influence-stepper button { width:32px; height:32px; font-size:23px; }.influence-stepper output { font-size:23px; }
+  .influence-editor p { font-size:10px; }.influence-editor p small { display:none; }
+  .action-panel.command-dock { min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+  .command-dock>.panel-heading { display:none; }
+  .dock-toolbar { flex:none; padding:3px 12px; gap:8px; font-size:11px; }
+  .dock-toolbar button { min-height:28px; padding:3px 10px; font-size:11px; }
+  .dock-toolbar small { font-size:10px; }
+  .dock-body { flex:1; min-height:0; grid-template-columns:240px minmax(0,1fr); }
+  .dock-body>.action-content { min-height:0; max-height:none; overflow:auto; padding:8px 12px; }
+  .command-dock .hand-panel { min-height:0; display:flex; flex-direction:column; overflow:auto; }
+  .command-dock .hand-panel>.panel-heading { flex:none; padding:3px 12px; }
+  .hand-panel>.panel-heading .eyebrow { display:none; }.hand-panel h2 { font-size:14px; }
+  .hand-panel>.panel-heading button { min-height:26px; padding:3px 9px; font-size:11px; }
+  .command-dock .hand-hint { flex:none; padding:2px 12px; font-size:10px; line-height:1.4; }
+  .command-dock .hand-panel>.hand { flex:1 0 108px; min-height:108px; padding:4px 12px 6px; gap:10px; }
+  .command-dock .hand-panel>.hand .card-button { flex:0 0 74px; }
+  .command-dock .hand-panel>.hand .card { transform:scale(.45); transform-origin:top left; margin-right:-77px; margin-bottom:-110px; }
+  .command-dock .card-caption { margin-top:3px; font-size:10px; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .command-dock .card-caption small { display:none; }
+  .command-dock .hand-curtain { flex:1; min-height:0; padding:8px 12px; gap:16px; }
+  .command-dock .card-backs { transform:scale(.6); }
+  .command-dock .hand-footer { flex:none; padding:3px 12px; font-size:9px; }
+  .empty-action { padding:3px; }.empty-action>span { display:none; }.empty-action h3 { font-size:13px; margin-bottom:4px; }
+  .empty-action p { font-size:11px; margin-bottom:6px; }.empty-action button { min-height:28px; padding:4px 9px; }
+  .remaining-points strong { font-size:25px; }.setup-instructions p,.ops-instructions p { font-size:11px; }
+  .log-panel,.effects-panel { margin:0; }.log-panel>summary,.effects-panel>summary { padding:3px 12px; font-size:11px; }
+  .log-panel[open],.effects-panel[open] { max-height:20dvh; overflow:auto; }
+  .table-footer { display:none; }
+}
+
+@media (min-width:821px) {
+  .game-layout { grid-template-columns:minmax(0,1fr) 300px; grid-template-rows:minmax(0,1fr); grid-template-areas:"map actions"; }
+  .dock-toolbar { flex-wrap:nowrap; }.dock-toolbar small { display:none; }
+  .dock-body { display:flex; flex-direction:column; }
+  .dock-body>.action-content { flex:0 1 auto; max-height:80px; border-right:0; border-bottom:1px solid var(--line); }
+  .command-dock .hand-panel { flex:1; overflow:hidden; }
+  .command-dock .hand-panel>.hand { flex:1; min-height:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-content:start; grid-auto-rows:104px; overflow:auto; gap:4px 5px; }
+  .command-dock .hand-panel>.hand .card-button { width:100%; height:104px; min-width:0; padding:0 2px; }
+  .command-dock .hand-panel>.hand .card { transform:scale(.45); margin-right:-77px; margin-bottom:-110px; }
+  .command-dock .card-caption { font-size:9px; }
+  .command-dock .hand-hint { padding-block:5px; }
+  .command-dock .hand-curtain { flex-direction:column; text-align:center; gap:4px; }
+  .command-dock .hand-curtain h3 { font-size:14px; }
+  .command-dock .hand-footer { gap:2px; font-size:9px; }
+  .command-dock .hand-panel>details { max-height:40%; overflow:auto; }
+}

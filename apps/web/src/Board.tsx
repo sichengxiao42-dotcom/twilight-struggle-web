@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from 'react';
 import type { Region, Side } from '@ts/shared';
 import { ADJACENCY, COUNTRIES, controller, placementCost, type Action, type Country, type GameState } from '@ts/game-core';
 import { boardImage } from './assets';
@@ -86,7 +86,7 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
   if (map) {
     const centre = (id: string) => [MAP_POSITIONS[id][0] + BOX_WIDTH / 2, MAP_POSITIONS[id][1] + BOX_HEIGHT / 2];
     return <>
-      {reserves}{gestureLayer}<div className="board-scroll"><svg ref={svgRef} viewBox={'0 0 ' + MAP_WIDTH + ' ' + MAP_HEIGHT} className="board map-board" style={{width: `${scale * 100}%`}} aria-label="世界局势地图">
+      {reserves}{gestureLayer}<div className="board-scroll"><svg ref={svgRef} viewBox={'0 0 ' + MAP_WIDTH + ' ' + MAP_HEIGHT} className="board map-board" style={{width: `${scale * 100}%`, '--board-zoom':scale} as CSSProperties} aria-label="世界局势地图">
         <image href={map} width={MAP_WIDTH} height={MAP_HEIGHT} pointerEvents="none"/>
         {hover && ADJACENCY[hover].map(id => { const a = centre(hover), b = centre(id); return <line key={id} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} className="connection"/>; })}
         {COUNTRIES.map(c => {
@@ -103,7 +103,7 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
       </svg></div>{feedback}<p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>放大后可横向滚动</span></p></>;
   }
   return <>
-    {reserves}{gestureLayer}<div className="board-scroll"><svg ref={svgRef} viewBox="0 0 1208 810" className="board" style={{width: `${scale * 100}%`}} aria-label="世界局势示意地图">
+    {reserves}{gestureLayer}<div className="board-scroll"><svg ref={svgRef} viewBox="0 0 1208 810" className="board" style={{width: `${scale * 100}%`, '--board-zoom':scale} as CSSProperties} aria-label="世界局势示意地图">
       {(Object.keys(labels) as Region[]).map(r => { const [x, y] = origins[r]; return <text key={r} x={x + 8} y={y + 25} className="region-title">{labels[r]}</text>; })}
       {hover && ADJACENCY[hover].map(id => { const a = positions[hover], b = positions[id]; return <line key={id} x1={a[0] + 60} y1={a[1] + 20} x2={b[0] + 60} y2={b[1] + 20} className="connection"/>; })}
       {COUNTRIES.map(c => {
