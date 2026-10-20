@@ -1,11 +1,11 @@
+import { readSession, writeSession, forgetSession } from './roomSession';
 import { useEffect, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import type { ClientToServer, Reply, RoomSnapshot, SeatChoice, ServerToClient, Session } from '@ts/shared';
 import type { Action, GameState, PlayerView } from '@ts/game-core';
 type Snapshot=Omit<RoomSnapshot,'view'>&{view:PlayerView|null};
-const KEY='twilight-room-session';
-function saved():Session|null {
-  try {const s=JSON.parse(sessionStorage.getItem(KEY)??'null');return s&&typeof s.roomId==='string'&&typeof s.token==='string'?{roomId:s.roomId,token:s.token}:null;}catch{return null;}
+function saved(roomId?:string):Session|null {
+  try{return readSession(sessionStorage,localStorage,roomId);}catch{return null;}
 }
 /** UI-only placeholder fields contain no secrets and are never sent back as state. */
 export function displayState(v:PlayerView):GameState {
@@ -22,7 +22,7 @@ export function useOnline() {
   const [ready,setReady]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
   const [hasPending,setHasPending]=useState(false);
   const sendPending=useRef<()=>void>(()=>{});
-  const remember=(s:Session)=>{identity.current=s;setSession(s);try{sessionStorage.setItem(KEY,JSON.stringify(s));}catch{/* Session still works until refresh. */}};
+  const remember=(s:Session)=>{identity.current=s;setSession(s);try{writeSession(sessionStorage,localStorage,s);}catch{/* Session still works until refresh. */}};
   const joined:Ack<Session>=(timeout,reply)=>{
     setBusy(false);if(timeout||!reply?.ok){setError(timeout?'创建/加入超时，请重试':!reply?.ok?reply?.error??'加入失败':'加入失败');return;}
     remember(reply.data);setReady(true);setError('');
@@ -30,29 +30,44 @@ export function useOnline() {
   useEffect(()=>{
     const client:Socket<ServerToClient,ClientToServer>=io(import.meta.env.VITE_SERVER_URL||undefined,{autoConnect:false,reconnection:true});
     socket.current=client;
+    let restoreTimer:ReturnType<typeof setTimeout>|undefined;
+    let restoring=false;
     const restore=(s:Session)=>{
+      if(restoring)return;restoring=true;
       setBusy(true);
       client.timeout(8000).emit('join',s,(timeout:Error|null,reply:Reply<Session>)=>{
-        setBusy(false);
-        if(timeout||!reply?.ok){setReady(false);setError(timeout?'恢复房间超时，正在等待连接':!reply.ok?reply.error:'恢复失败');return;}
+        if(identity.current?.token!==s.token)return;
+        restoring=false;setBusy(false);
+        if(timeout||!reply?.ok){
+          setReady(false);setError(timeout?'恢复房间超时，正在重试':reply&&!reply.ok?reply.error:'恢复失败');
+          if(timeout&&client.connected)restoreTimer=setTimeout(()=>{if(identity.current)restore(identity.current);},3000);
+          else if(reply&&!reply.ok){try{forgetSession(sessionStorage,localStorage,s.roomId);}catch{/* storage unavailable */}identity.current=null;setSession(null);setSnapshot(null);pending.current=null;setHasPending(false);}
+          return;
+        }
         remember(reply.data);setReady(true);setError('');if(pending.current)sendPending.current();
       });
     };
-    const prior=saved();
-    // An invite link (#room=…) enters the room lobby on first connect; a saved session in this tab takes precedence.
+    const inviteId=new URLSearchParams(location.hash.slice(1)).get('room')?.trim().toUpperCase();
+    const prior=saved(inviteId);
+    // Restore the identity for this invite room, including after the original tab was closed.
     const inviteRoom=new URLSearchParams(location.hash.slice(1)).get('room')?.trim().toUpperCase();
     let autoJoin=!prior&&inviteRoom?{roomId:inviteRoom}:null;
     client.on('connect',()=>{
       if(identity.current)restore(identity.current);
       else if(autoJoin){const request=autoJoin;autoJoin=null;setBusy(true);client.timeout(8000).emit('join',request,joined);}
     });
-    client.on('disconnect',()=>{setReady(false);setBusy(false);});
+    client.on('disconnect',()=>{restoring=false;clearTimeout(restoreTimer);setReady(false);setBusy(false);});
     client.on('connect_error',()=>{setReady(false);setBusy(false);setError('无法连接游戏服务器，请确认服务已启动；连接将自动重试。');});
     client.on('error',message=>{setError(message);setReady(false);});
+    client.on('closed',message=>{
+      if(identity.current?.roomId!==message.roomId)return;
+      try{forgetSession(sessionStorage,localStorage,message.roomId);}catch{/* storage unavailable */}
+      identity.current=null;pending.current=null;setHasPending(false);setSession(null);setSnapshot(null);setReady(false);setBusy(false);setError(message.reason);history.replaceState(null,'',location.pathname+location.search);
+    });
     client.on('state',incoming=>{if(identity.current?.roomId===incoming.roomId)setSnapshot(incoming as Snapshot);});
     if(prior){remember(prior);client.connect();}
     else if(autoJoin)client.connect();
-    return ()=>{client.removeAllListeners();client.disconnect();socket.current=null;};
+    return ()=>{clearTimeout(restoreTimer);client.removeAllListeners();client.disconnect();socket.current=null;};
   },[]);
   sendPending.current=()=>{
     const client=socket.current,request=pending.current;
@@ -69,7 +84,7 @@ export function useOnline() {
     const client=socket.current;if(!client)return;
     setBusy(true);setError('');
     client.connect();
-    if(roomId)client.timeout(8000).emit('join',{roomId:roomId.trim().toUpperCase()},joined);
+    if(roomId){const normalized=roomId.trim().toUpperCase(),prior=saved(normalized);client.timeout(8000).emit('join',prior??{roomId:normalized},joined);}
     else client.timeout(8000).emit('create',{},joined);
   };
   /** Lobby requests (seat, start) are idempotent, so they are sent directly without the action retry queue. */
@@ -79,6 +94,8 @@ export function useOnline() {
     send((timeout,reply)=>{setBusy(false);setError(timeout?'操作超时，请重试':reply?.ok?'':reply?.error??'操作失败');});
   };
   const seat=(side:SeatChoice)=>lobby(ack=>socket.current!.timeout(8000).emit('seat',{side},ack));
+  const restart=()=>{if(snapshot)lobby(ack=>socket.current!.timeout(8000).emit('restart',{expectedRevision:snapshot.revision},ack));};
+  const close=()=>{if(!ready||!socket.current?.connected)return;setBusy(true);socket.current.timeout(8000).emit('close',{},(timeout,reply)=>{setBusy(false);if(timeout||!reply?.ok)setError(timeout?'关闭超时，请重试':reply&&!reply.ok?reply.error:'关闭失败');});};
   const start=()=>lobby(ack=>socket.current!.timeout(8000).emit('start',{},ack));
   const send=(action:Action|{type:'UNDO'}|{type:'UNDO_PLACEMENT';country:string})=>{
     if(!ready||!snapshot||!socket.current?.connected){setError('等待房间连接恢复');return;}
@@ -87,5 +104,5 @@ export function useOnline() {
   };
   const leave=()=>{socket.current?.disconnect();identity.current=null;pending.current=null;setHasPending(false);setSession(null);setSnapshot(null);setReady(false);setBusy(false);setError('');};
   const resume=()=>{const s=saved();if(!s){setError('此标签页没有可恢复的房间');return;}remember(s);socket.current?.connect();};
-  return {session,snapshot,ready,busy,error,hasPending,create:()=>enter(),join:(room:string)=>enter(room),seat,start,send,leave,resume,retry:()=>sendPending.current()};
+  return {session,snapshot,ready,busy,error,hasPending,create:()=>enter(),join:(room:string)=>enter(room),seat,start,restart,close,send,leave,resume,retry:()=>sendPending.current()};
 }

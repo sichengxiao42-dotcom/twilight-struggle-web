@@ -45,13 +45,27 @@ export function createGameServer(store=new RoomStore(),options:{webRoot?:string}
         broadcast(joined.roomId);
       }catch(e){fail(ack,e);}
     });
+    socket.on('restart',(request,ack)=>{
+      try{if(!joined)throw new Error('请先加入房间');
+        const revision=store.restart(joined.roomId,joined.key,socket.id,request?.expectedRevision);
+        if(typeof ack==='function')ack({ok:true,data:{revision}});broadcast(joined.roomId);
+      }catch(e){fail(ack,e);}
+    });
+    socket.on('close',(_request,ack)=>{
+      try{if(!joined)throw new Error('请先加入房间');
+        const roomId=joined.roomId,members=store.close(roomId,joined.key,socket.id);
+        if(typeof ack==='function')ack({ok:true,data:undefined});
+        for(const member of members){io.to(member.clientId).emit('closed',{roomId,reason:'房主已关闭房间'});io.sockets.sockets.get(member.clientId)?.disconnect(true);}
+        joined=null;
+      }catch(e){fail(ack,e);}
+    });
     socket.on('action',(request,ack)=>{
       try{
         if(!joined)throw new Error('请先加入房间');
         const revision=store.execute(joined.roomId,joined.key,socket.id,request);
         if(typeof ack==='function')ack({ok:true,data:{revision}} satisfies Reply<{revision:number}>);
         broadcast(joined.roomId);
-      }catch(e){fail(ack,e);if(joined)socket.emit('state',store.snapshot(joined.roomId,joined.key));}
+      }catch(e){fail(ack,e);if(joined&&store.members(joined.roomId).some(m=>m.clientId===socket.id))socket.emit('state',store.snapshot(joined.roomId,joined.key));}
     });
     socket.on('disconnect',()=>{if(joined){store.disconnect(joined.roomId,joined.key,socket.id);broadcast(joined.roomId);}});
   });

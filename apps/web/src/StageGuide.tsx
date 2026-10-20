@@ -20,6 +20,7 @@ export interface Guide {
 export function phaseGuide(state: GameState, context: GuideContext): Guide {
   const p = state.phase;
   if (context.blocked) return { title: context.blocked, detail: '对方完成后会自动继续。', focus: 'none' };
+  if (p.kind === 'CONFIRM_END') return {title:sides[p.side]+'：等待结束回合',detail:'本次操作已完成。可以先撤销检查，点击“结束回合”后才会继续；确认后不能撤销上轮操作。',focus:'none'};
   if (p.kind === 'SETUP_PLACEMENT') {
     const region = p.subRegion === 'EASTERN_EUROPE' ? '东欧' : '西欧';
     return { title: `${sides[p.side]}：在${region}放置影响力`, detail: `还需放置 ${p.remaining} 点。点击高亮国家放置 1 点；也可拖入同色棋子。`, focus: 'map' };

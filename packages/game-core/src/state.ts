@@ -9,6 +9,7 @@ export type OpsKind = 'INFLUENCE' | 'REALIGNMENT' | 'COUP';
 export interface OpsGrant { only?: string[]; free?: boolean; che?: boolean }
 
 export type Phase =
+  | { kind: 'CONFIRM_END'; side: Side; round: number; context: 'ACTION' | 'SETUP' | 'HEADLINE' }
   | { kind: 'SETUP_PLACEMENT'; side: Side; remaining: number; subRegion: 'EASTERN_EUROPE' | 'WESTERN_EUROPE' }
   | { kind: 'HEADLINE'; side: Side }
   | { kind: 'DECISION'; side: Side; decision: Decision }
@@ -33,7 +34,7 @@ export type Task =
   | { kind: 'DISPOSE'; card: number; event: boolean }
   | ({ kind: 'START_OPS'; side: Side; base: number; mode?: OpsKind; modes?: OpsKind[]; china?: boolean; asiaOnly?: boolean; seaOnly?: boolean } & OpsGrant)
   | { kind: 'SPACE_ROLL'; side: Side }
-  | { kind: 'FINISH_ACTION'; side: Side; round: number }
+  | { kind: 'FINISH_ACTION'; side: Side; round: number; confirmed?: boolean }
   | { kind: 'FINISH_HEADLINES' }
   | { kind: 'END_TURN'; final?: boolean }
   | { kind: 'HELD_DISCARD'; side: Side }
@@ -63,6 +64,8 @@ export interface Effects {
 }
 
 export interface GameState {
+  manualEnd?: boolean;
+  pendingHeadline?: number;
   mode: 'PRACTICE' | 'STANDARD';
   tasks: Task[];
   effects: Effects;

@@ -116,15 +116,18 @@ test('undo restores influence, keeps revisions monotonic and deduplicates retrie
   assert.throws(()=>parseAction({type:'UNDO',state:{}}),/不支持的字段/);
 });
 
-test('undo works after handoff but cannot cross an opponent action',()=>{
+test('finished placement remains undoable until explicit handoff',()=>{
   const j=joined();let revision=j.snap('USSR').revision;
   const act=(side:Side,action:unknown)=>{revision=j.exec(side,{id:'request_'+revision,expectedRevision:revision,action});};
   for(let i=0;i<6;i++)act('USSR',{type:'PLACE_SETUP',country:'poland'});
-  assert.equal(j.view('USSR').phase.kind,'SETUP_PLACEMENT');
+  assert.equal(j.view('USSR').phase.kind,'CONFIRM_END');
+  assert.throws(()=>act('US',{type:'PLACE_SETUP',country:'france'}),/尚未轮到/);
   act('USSR',{type:'UNDO'});
   const phase=j.view('USSR').phase;
   assert.ok('side' in phase);assert.equal(phase.side,'USSR');
   act('USSR',{type:'PLACE_SETUP',country:'poland'});
+  act('USSR',{type:'END_ACTION'});
+  assert.equal(j.snap('USSR').canUndo,false);
   act('US',{type:'PLACE_SETUP',country:'france'});
   assert.equal(j.snap('USSR').canUndo,false);
   assert.throws(()=>act('USSR',{type:'UNDO'}),/只能撤销/);
@@ -136,7 +139,9 @@ test('undoing a headline restores the card and hides it from the opponent',()=>{
   const j=joined();let revision=j.snap('USSR').revision;
   const act=(side:Side,action:unknown)=>{revision=j.exec(side,{id:'card_'+revision,expectedRevision:revision,action});};
   for(let i=0;i<6;i++)act('USSR',{type:'PLACE_SETUP',country:'poland'});
+  act('USSR',{type:'END_ACTION'});
   for(let i=0;i<7;i++)act('US',{type:'PLACE_SETUP',country:'france'});
+  act('US',{type:'END_ACTION'});
   const before=j.view('USSR');
   act('USSR',{type:'SELECT_HEADLINE',card:before.hands.USSR.find(id=>id!==32)!});
   act('USSR',{type:'UNDO'});
@@ -159,4 +164,26 @@ test('country minus only undoes the latest placement in that country and never a
   act({type:'UNDO_PLACEMENT',country:'poland'});
   assert.equal(j.view('USSR').influence.poland.USSR,0);
   assert.equal(j.snap('USSR').undoPlacement,undefined);
+});
+
+test('room codes, host-only restart, reconnect identity and close lifecycle',()=>{
+  const {store,roomId,a,b}=lobby();assert.match(roomId,/^[A-F0-9]{6}$/);
+  assert.equal(store.snapshot(roomId,a.key).isHost,true);
+  assert.equal(store.snapshot(roomId,b.key).isHost,false);
+  store.seat(roomId,a.key,'a','USSR');store.seat(roomId,b.key,'b','US');store.start(roomId,a.key,'a');
+  let revision=store.snapshot(roomId,a.key).revision;
+  revision=store.execute(roomId,a.key,'a',{id:'place-before-loss',expectedRevision:revision,action:{type:'PLACE_SETUP',country:'poland'}});
+  store.disconnect(roomId,a.key,'a');
+  const restored=store.join(roomId.toLowerCase(),'new-a',a.session.token);
+  assert.equal(restored.key,a.key);assert.equal(store.snapshot(roomId,a.key).side,'USSR');
+  assert.equal(store.snapshot(roomId,a.key).revision,revision);
+  assert.throws(()=>store.execute(roomId,a.key,'a',{id:'old-client',expectedRevision:revision,action:{type:'UNDO'}}),/身份无效/);
+  assert.throws(()=>store.restart(roomId,b.key,'b',revision),/只有房主/);
+  assert.throws(()=>store.restart(roomId,a.key,'new-a',revision-1),/已更新/);
+  store.restart(roomId,a.key,'new-a',revision);
+  const reset=store.snapshot(roomId,a.key);assert.equal(reset.started,false);assert.equal(reset.canUndo,false);assert.equal(reset.side,'USSR');
+  assert.equal((reset.view as PlayerView).influence.poland.USSR,0);
+  assert.throws(()=>store.close(roomId,b.key,'b'),/只有房主/);
+  assert.equal(store.close(roomId,a.key,'new-a').length,2);
+  assert.throws(()=>store.join(roomId,'new-b',b.session.token),/不存在/);
 });

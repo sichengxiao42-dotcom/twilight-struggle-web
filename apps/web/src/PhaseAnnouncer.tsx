@@ -18,6 +18,8 @@ const modes = { INFLUENCE: '放置影响力', REALIGNMENT: '调整影响力', CO
 export function phaseAnnouncement(state: GameState): Announcement | null {
   const p = state.phase, turn = '第 ' + state.turn + ' 回合';
   switch (p.kind) {
+    case 'CONFIRM_END':
+      return {key:`confirm|${state.turn}|${p.side}|${p.round}|${p.context}`,side:p.side,kicker:turn,title:'等待结束回合',hint:'可先撤销检查，确认后再交接行动'};
     case 'SETUP_PLACEMENT':
       return { key: `setup|${p.side}|${p.subRegion}`, side: p.side, kicker: '开局', title: '开局部署', hint: `在${p.subRegion === 'EASTERN_EUROPE' ? '东欧' : '西欧'}放置 ${p.remaining} 点影响力` };
     case 'HEADLINE':

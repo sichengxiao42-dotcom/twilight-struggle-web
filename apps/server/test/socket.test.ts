@@ -55,7 +55,8 @@ test('real Socket.IO clients: lobby seats, separate views, full early-war flow, 
     if(view.phase.kind==='GAME_OVER'||view.turn>=4)break;
     assert.ok('side' in view.phase);const side=view.phase.side,client=clients[side],p=client.last!.view.phase;
     assert.notEqual(p.kind,'WAITING');let action:Action;
-    if(p.kind==='SETUP_PLACEMENT')action={type:'PLACE_SETUP',country:side==='USSR'?'poland':'west_germany'};
+    if(p.kind==='CONFIRM_END')action={type:'END_ACTION'};
+    else if(p.kind==='SETUP_PLACEMENT')action={type:'PLACE_SETUP',country:side==='USSR'?'poland':'west_germany'};
     else if(p.kind==='HEADLINE')action={type:'SELECT_HEADLINE',card:client.last!.view.hands[side].find(id=>CARD_BY_ID.get(id)!.scoring)??client.last!.view.hands[side].find(id=>id!==32)!};
     else if(p.kind==='ACTION_ROUND'){
       const id=client.last!.view.hands[side].find(id=>CARD_BY_ID.get(id)!.scoring)??client.last!.view.hands[side][0];
@@ -72,4 +73,28 @@ test('real Socket.IO clients: lobby seats, separate views, full early-war flow, 
     }
   }
   assert.equal(b.last!.view.turn,4);assert.equal(b.last!.view.handCounts.US,9);
+});
+
+test('socket room management keeps seats on restart and broadcasts close to both members',{timeout:15000},async t=>{
+  const server=createGameServer(new RoomStore(()=>42));
+  await new Promise<void>(resolve=>server.http.listen(0,'127.0.0.1',resolve));
+  const addr=server.http.address();assert.ok(addr&&typeof addr==='object');
+  const a=new Client('http://127.0.0.1:'+addr.port),b=new Client('http://127.0.0.1:'+addr.port),restored=new Client('http://127.0.0.1:'+addr.port);
+  t.after(async()=>{for(const c of [a,b,restored])c.socket.disconnect();await new Promise<void>(resolve=>server.io.close(()=>resolve()));});
+  await Promise.all([a.connect(),b.connect()]);const session=await a.create();
+  assert.ok((await b.join({roomId:session.roomId.toLowerCase()})).ok);
+  assert.ok((await a.seat('USSR')).ok);assert.ok((await b.seat('US')).ok);assert.ok((await a.start()).ok);
+  await Promise.all([a.wait(s=>s.started),b.wait(s=>s.started)]);
+  assert.equal((await b.socket.timeout(3000).emitWithAck('restart',{expectedRevision:b.last!.revision})).ok,false);
+  a.socket.disconnect();await b.wait(s=>!s.seats.USSR.connected);
+  await restored.connect();assert.ok((await restored.join(session)).ok);
+  await restored.wait(s=>s.side==='USSR'&&s.started);
+  assert.ok((await restored.socket.timeout(3000).emitWithAck('restart',{expectedRevision:restored.last!.revision})).ok);
+  await Promise.all([restored.wait(s=>!s.started&&s.side==='USSR'),b.wait(s=>!s.started&&s.side==='US')]);
+  assert.equal((await b.socket.timeout(3000).emitWithAck('close',{})).ok,false);
+  const closed=(client:Client)=>new Promise<string>(resolve=>client.socket.once('closed',message=>resolve(message.roomId)));
+  const notifications=Promise.all([closed(restored),closed(b)]);
+  assert.ok((await restored.socket.timeout(3000).emitWithAck('close',{})).ok);
+  assert.deepEqual(await notifications,[session.roomId,session.roomId]);
+  assert.equal(server.store.members(session.roomId).length,0);
 });

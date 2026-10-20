@@ -11,7 +11,7 @@ export function LobbyPanel({ snapshot, roomId, invite, busy, copyStatus, onCopy,
   return <section className="lobby-panel" aria-label="房间大厅">
     <header><h2>房间 {roomId}</h2><span>{snapshot ? snapshot.members + ' / 2 名玩家' : '正在连接…'}</span></header>
     <div className="lobby-invite"><input aria-label="邀请链接" readOnly value={invite} onFocus={e => e.currentTarget.select()}/><button onClick={onCopy}>复制邀请链接</button>{copyStatus && <small>{copyStatus}</small>}</div>
-    <p className="lobby-hint">把链接发给朋友。双方各选一边坐下后，任意一方点击“开始对局”。</p>
+    <p className="lobby-hint">把房间码或邀请链接发给朋友。双方各选一边坐下后，任意一方点击“开始对局”。</p>
     <div className="lobby-seats">{(['USSR', 'US'] as const).map(side => {
       const seat = snapshot?.seats[side], isMine = mine === side;
       const status = isMine ? '你' : seat?.occupied ? (seat.connected ? '对方 · 在线' : '对方 · 离线') : '空位';

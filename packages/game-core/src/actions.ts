@@ -9,6 +9,7 @@ import { addVp, beginHeadline, canEvent, changeDefcon, chooseDecision, drain, in
 
 export type OpsMode = 'INFLUENCE' | 'REALIGNMENT' | 'COUP';
 export type Action =
+  | { type: 'END_ACTION' }
   | { type: 'PLACE_SETUP'; country: string }
   | { type: 'RELOCATE_INFLUENCE'; from: string; to: string }
   | { type: 'PLAY_OPS'; card: number; mode: OpsMode; order?: 'BEFORE' | 'AFTER'; asiaOnly?: boolean; seaOnly?: boolean }
@@ -37,6 +38,7 @@ export function activeSide(state: GameState): Side | null {
 }
 export function legalTargets(state: GameState): string[] {
   const p = state.phase;
+  if (p.kind === 'SETUP_PLACEMENT' && p.remaining<=0) return [];
   if (p.kind === 'SETUP_PLACEMENT') return COUNTRIES.filter(c => c.subRegions.includes(p.subRegion)).map(c => c.id);
   if (p.kind === 'DECISION' && p.decision.kind === 'INFLUENCE') return influenceTargets(p.decision,state);
   if (p.kind === 'DECISION' && p.decision.kind === 'COUNTRY') return p.decision.targets;
@@ -63,6 +65,7 @@ export function canPass(state: GameState, side: Side) {
 export const forcedMissileEnvy = (state: GameState, side: Side) => state.effects.missileEnvy === side && state.hands[side].includes(49);
 function finish(state: GameState, side: Side, round: number) {
   if(state.mode === 'STANDARD'){drain(state);return;}
+  if(state.manualEnd){state.phase={kind:'CONFIRM_END',side,round,context:'ACTION'};return;}
   if (side === 'USSR') state.phase = { kind: 'ACTION_ROUND', side: 'US', round };
   else if (round < actionRoundsForTurn(state.turn)) state.phase = { kind: 'ACTION_ROUND', side: 'USSR', round: round + 1 };
   else {
@@ -110,6 +113,27 @@ function playTasks(next: GameState, side: Side, action: Extract<Action, { type: 
 export function apply(state: GameState, side: Side, action: Action): GameState {
   if (activeSide(state) !== side) throw new Error('尚未轮到该阵营');
   const next = structuredClone(state), p = next.phase;
+  if (action.type === 'END_ACTION') {
+    if (p.kind !== 'CONFIRM_END') throw new Error('请先完成当前行动');
+    if (p.context === 'SETUP') {
+      if (side === 'USSR') next.phase = {kind:'SETUP_PLACEMENT',side:'US',remaining:7,subRegion:'WESTERN_EUROPE'};
+      else if (next.mode === 'STANDARD') beginHeadline(next);
+      else next.phase = {kind:'ACTION_ROUND',side:'USSR',round:1};
+    } else if (p.context === 'HEADLINE') {
+      const card=next.pendingHeadline!;delete next.pendingHeadline;
+      next.phase={kind:'HEADLINE',side};next.manualEnd=false;
+      const resolved=apply(next,side,{type:'SELECT_HEADLINE',card});resolved.manualEnd=true;return resolved;
+    } else {
+      if (next.mode === 'STANDARD') {
+        const task=next.tasks[0];
+        if (!task || task.kind !== 'FINISH_ACTION') throw new Error('缺少行动结束任务');
+        task.confirmed=true;drain(next);
+      } else { next.manualEnd=false;finish(next,side,p.round);next.manualEnd=true; }
+    }
+    next.log.push(side+' 确认结束行动');return next;
+  }
+  if (p.kind === 'CONFIRM_END') throw new Error('行动已完成，请结束回合或撤销');
+
   if (action.type === 'RELOCATE_INFLUENCE') {
     if (p.kind !== 'DECISION' || p.decision.kind !== 'INFLUENCE' || !p.decision.relocation || p.decision.operation !== 'REMOVE') throw new Error('当前事件不允许转移影响力');
     const d = p.decision;
@@ -139,6 +163,7 @@ export function apply(state: GameState, side: Side, action: Action): GameState {
   if(action.type === 'SELECT_HEADLINE') {
     if(p.kind !== 'HEADLINE' || next.mode !== 'STANDARD')throw new Error('当前不是头条选择阶段');
     if(action.card === 32 || !next.hands[side].includes(action.card))throw new Error('该卡不能作为头条');
+    if(next.manualEnd){next.pendingHeadline=action.card;next.phase={kind:'CONFIRM_END',side,round:0,context:'HEADLINE'};return next;}
     next.headlines[side]=action.card;next.hands[side]=next.hands[side].filter(id=>id!==action.card);
     const other=opponent(side);
     if(next.headlines[other] === undefined){next.phase={kind:'HEADLINE',side:other};return next;}
@@ -213,6 +238,7 @@ export function apply(state: GameState, side: Side, action: Action): GameState {
       ? { kind: 'SETUP_PLACEMENT', side: 'US', remaining: 7, subRegion: 'WESTERN_EUROPE' }
       : { kind: 'ACTION_ROUND', side: 'USSR', round: 1 };
     if(!p.remaining && side==='US' && next.mode==='STANDARD')beginHeadline(next);
+    if(!p.remaining && next.manualEnd)next.phase={kind:'CONFIRM_END',side,round:0,context:'SETUP'};
   } else if (action.type === 'PASS_PRACTICE') {
     if (next.mode !== 'PRACTICE' || p.kind !== 'ACTION_ROUND' || next.hands[side].some(id => !CARD_BY_ID.get(id)!.scoring)) throw new Error('仍有可用 OPS 卡牌');
     next.log.push(side + ' 无可用 OPS 卡牌，练习模式跳过行动');

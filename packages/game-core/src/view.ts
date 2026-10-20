@@ -22,7 +22,7 @@ export function viewFor(state:GameState,viewer:Side):PlayerView {
   const headlines:Partial<Record<Side,number>>={};
   if(ownHeadline!==undefined)headlines[viewer]=ownHeadline;
   if(state.phase.kind==='HEADLINE'&&state.space[viewer]>=4&&state.space[enemy]<4&&otherHeadline!==undefined)headlines[enemy]=otherHeadline;
-  const phase=state.phase.kind==='DECISION'&&state.phase.side!==viewer?{kind:'WAITING' as const,side:state.phase.side}:state.phase;
+  const phase=(state.phase.kind==='DECISION'||state.phase.kind==='CONFIRM_END'&&state.phase.context==='HEADLINE')&&state.phase.side!==viewer?{kind:'WAITING' as const,side:state.phase.side}:state.phase;
   return structuredClone({
     currentAction,
     turn:state.turn,phase,vp:state.vp,defcon:state.defcon,milOps:state.milOps,space:state.space,spaceAttempts:state.spaceAttempts,

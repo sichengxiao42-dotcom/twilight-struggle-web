@@ -18,7 +18,7 @@ export function parseAction(value:unknown):Action | {type:'UNDO'} | {type:'UNDO_
       return {type:a.type,from:a.from,to:a.to};
     case 'PLACE_SETUP':case 'TARGET':case 'CANCEL_CMC':keys(['country']);return {type:a.type,country:country()};
     case 'PLAY_EVENT':case 'SELECT_HEADLINE':case 'SPACE':case 'TRAP_DISCARD':keys(['card']);return {type:a.type,card:card()};
-    case 'END_OPS':case 'PASS_EMPTY':keys([]);return {type:a.type};
+    case 'END_ACTION':case 'END_OPS':case 'PASS_EMPTY':keys([]);return {type:a.type};
     case 'CHOOSE':keys(['value']);if(typeof a.value!=='string'||a.value.length>128)throw new Error('无效选择');return {type:a.type,value:a.value};
     case 'PLAY_OPS':
       keys(['card','mode','order','asiaOnly','seaOnly']);
@@ -31,7 +31,7 @@ export function parseAction(value:unknown):Action | {type:'UNDO'} | {type:'UNDO_
 }
 /** A person in the room. Identity (token) is separate from the side they sit on, so sides are chosen in the lobby. */
 interface Member { tokenHash:string; clientId:string|null; requests:Map<string,string> }
-interface Room { state:GameState; members:Map<string,Member>; seats:Partial<Record<Side,string>>; started:boolean; revision:number; touched:number; actions:{side:Side;action:Action}[]; history:{side:Side;state:GameState;action:Action}[]; undoVersion:number }
+interface Room { host:string; state:GameState; members:Map<string,Member>; seats:Partial<Record<Side,string>>; started:boolean; revision:number; touched:number; actions:{side:Side;action:Action}[]; history:{side:Side;state:GameState;action:Action}[]; undoVersion:number }
 export type SeatChoice = Side | 'RANDOM' | null;
 /** In-memory authority. Reconnect survives transport loss and refresh, not a server restart. */
 export class RoomStore {
@@ -39,10 +39,10 @@ export class RoomStore {
   constructor(private readonly seed=()=>randomInt(0,0x100000000),private readonly coin=()=>randomInt(0,2)){}
   create(clientId:string) {
     this.sweep();if(this.rooms.size>=200)throw new Error('房间已满，请稍后重试');
-    let roomId:string;do{roomId=randomBytes(5).toString('hex').toUpperCase();}while(this.rooms.has(roomId));
-    const state=createGame(this.seed());state.log=['对局已创建'];
-    this.rooms.set(roomId,{state,members:new Map(),seats:{},started:false,revision:0,touched:Date.now(),actions:[],history:[],undoVersion:0});
-    return this.join(roomId,clientId);
+    let roomId:string;do{roomId=randomBytes(3).toString('hex').toUpperCase();}while(this.rooms.has(roomId));
+    const state=createGame(this.seed());state.manualEnd=true;state.log=['对局已创建'];
+    this.rooms.set(roomId,{host:'',state,members:new Map(),seats:{},started:false,revision:0,touched:Date.now(),actions:[],history:[],undoVersion:0});
+    const result=this.join(roomId,clientId);this.rooms.get(roomId)!.host=result.key;return result;
   }
   /** Enter a room as a new member, or restore an existing member with its token. Returns the member key used internally. */
   join(roomId:unknown,clientId:string,token?:unknown):{session:Session; key:string; replaced:string|null} {
@@ -91,6 +91,19 @@ export class RoomStore {
     if(!room.seats.US||!room.seats.USSR)throw new Error('等待另一名玩家选择阵营');
     room.started=true;room.state.log.push('双方入座，对局开始');room.revision++;room.touched=Date.now();return room.revision;
   }
+  restart(roomId:string,key:string,clientId:string,expectedRevision:number) {
+    const {room}=this.member(roomId,key,clientId);
+    if(room.host!==key)throw new Error('只有房主可以重新开局');
+    if(expectedRevision!==room.revision)throw new Error('局面已更新，请重新确认重开');
+    room.state=createGame(this.seed());room.state.manualEnd=true;room.state.log=['房主重新开局'];
+    room.started=false;room.history=[];room.actions=[];room.undoVersion++;room.revision++;room.touched=Date.now();
+    return room.revision;
+  }
+  close(roomId:string,key:string,clientId:string) {
+    const {room}=this.member(roomId,key,clientId);
+    if(room.host!==key)throw new Error('只有房主可以关闭房间');
+    const members=this.members(roomId);this.rooms.delete(roomId);return members;
+  }
   disconnect(roomId:string,key:string,clientId:string) {
     const room=this.rooms.get(roomId),member=room?.members.get(key);if(member?.clientId===clientId){member.clientId=null;room!.touched=Date.now();}
   }
@@ -117,6 +130,7 @@ export class RoomStore {
       if(room.history.at(-1)?.side!==side)room.history=[];
       room.history.push({side,state:room.state,action});if(room.history.length>32)room.history.shift();
       room.state=next;room.actions.push({side,action});
+      if(action.type==='END_ACTION')room.history=[];
     }
     room.revision++;room.touched=Date.now();
     member.requests.set(r.id,fingerprint);if(member.requests.size>512)member.requests.delete(member.requests.keys().next().value!);
@@ -127,7 +141,7 @@ export class RoomStore {
     const side=this.sideOf(room,key),last=room.history.at(-1);
     const undoPlacement=side&&last?.side===side?influencePlacement(last.state,last.action)??undefined:undefined;
     const seat=(s:Side)=>{const owner=room.seats[s];return {occupied:Boolean(owner),connected:Boolean(owner&&room.members.get(owner)?.clientId),mine:owner===key};};
-    return {undoPlacement,roomId,side,started:room.started,members:room.members.size,revision:room.revision,canUndo:Boolean(side)&&room.history.at(-1)?.side===side,undoVersion:room.undoVersion,seats:{US:seat('US'),USSR:seat('USSR')},view:side?viewFor(room.state,side):null};
+    return {isHost:room.host===key,undoPlacement,roomId,side,started:room.started,members:room.members.size,revision:room.revision,canUndo:Boolean(side)&&room.history.at(-1)?.side===side,undoVersion:room.undoVersion,seats:{US:seat('US'),USSR:seat('USSR')},view:side?viewFor(room.state,side):null};
   }
   members(roomId:string) {
     const room=this.rooms.get(roomId);return room?[...room.members.entries()].flatMap(([key,m])=>m.clientId?[{clientId:m.clientId,key}]:[]):[];

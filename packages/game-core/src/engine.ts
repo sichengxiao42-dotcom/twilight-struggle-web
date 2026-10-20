@@ -262,6 +262,7 @@ export function drain(s:GameState) {
         influence(s,'US',ids(c=>s.influence[c.id].US>0),1,1,'ADD','US','NORAD：在已有美国影响力的国家 +1');
       } else {
         s.noradPending=false;
+        if(s.manualEnd&&!t.confirmed){s.tasks.unshift(t);s.phase={kind:'CONFIRM_END',side:t.side,round:t.round,context:'ACTION'};return;}
         nextAction(s,t.side,t.round);
       }
     }
