@@ -4,7 +4,7 @@ import { ACTION_ROUND_TRACK, DEFCON_TRACK, MIL_OPS_TRACK, SPACE_TRACK, TRACK_MAR
 
 export interface TrackPiece { id: string; owner: Side | 'neutral'; label: string; title: string; value: number; at: [number,number] }
 const clamp=(v:number,min:number,max:number)=>Math.max(min,Math.min(max,v));
-/** Public track values only. The engine remains authoritative; dragging acknowledges a legal result. */
+/** Public track values only; markers are drawn wherever the authoritative state puts them. */
 export function trackPieces(state: GameState): TrackPiece[] {
   const p=state.phase,finish=state.tasks.find(t=>t.kind==='FINISH_ACTION');
   const ar=p.kind==='ACTION_ROUND'||p.kind==='OPS'&&p.round?{side:p.side,round:p.round}:finish?.kind==='FINISH_ACTION'?finish:null;
@@ -21,9 +21,6 @@ export function trackPieces(state: GameState): TrackPiece[] {
       {id:'mil-'+side,owner:side,label,title:`${name}军事行动标记 → ${mil}`,value:mil,at:MIL_OPS_TRACK[mil]},
       {id:'round-'+side,owner:side,label,title:`${name}行动轮标记 → ${round||'待行动'}`,value:round,at:round?ACTION_ROUND_TRACK[round-1]:[1455,465]});
   }
-  // Keep each side on a fixed lane: an unchanged counter never needs a cosmetic recentering drag.
+  // Each side keeps a fixed lane so the two counters on a shared track never overlap.
   return pieces.map(piece=>({...piece,at:[piece.at[0]+(piece.owner==='neutral'?0:(piece.owner==='USSR'?-0.8:0.8)*TRACK_MARKER_RADIUS),piece.at[1]]}));
-}
-export function trackNeedsMove(placed: TrackPiece | undefined, target: TrackPiece): boolean {
-  return Boolean(placed&&(placed.value!==target.value||placed.at[0]!==target.at[0]||placed.at[1]!==target.at[1]));
 }

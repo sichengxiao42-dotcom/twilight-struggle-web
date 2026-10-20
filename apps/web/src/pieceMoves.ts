@@ -2,8 +2,8 @@ import { controller, type Action, type GameState } from '@ts/game-core';
 import type { Side } from '@ts/shared';
 
 export type InfluencePiece = { kind: 'reserve'; side: Side } | { kind: 'influence'; side: Side; country: string };
-export type Piece = InfluencePiece | { kind: 'track'; id: string };
-export type Drop = { kind: 'country'; id: string } | { kind: 'reserve'; side: Side } | { kind: 'track'; id: string };
+export type Piece = InfluencePiece;
+export type Drop = { kind: 'country'; id: string } | { kind: 'reserve'; side: Side };
 
 /** Drag gestures produce ordinary authority-validated actions, never a rewritten game state. */
 export function influenceDrop(state: GameState, piece: InfluencePiece, drop: Drop, targets: string[]): Action | null {
@@ -23,11 +23,9 @@ export function influenceDrop(state: GameState, piece: InfluencePiece, drop: Dro
 }
 
 export function parseDrop(element: Element | null): Drop | null {
-  const node = element?.closest('[data-country-id],[data-reserve-side],[data-track-drop]');
+  const node = element?.closest('[data-country-id],[data-reserve-side]');
   const country = node?.getAttribute('data-country-id');
   if (country) return { kind: 'country', id: country };
   const side = node?.getAttribute('data-reserve-side');
-  if (side === 'US' || side === 'USSR') return { kind: 'reserve', side };
-  const track = node?.getAttribute('data-track-drop');
-  return track ? { kind: 'track', id: track } : null;
+  return side === 'US' || side === 'USSR' ? { kind: 'reserve', side } : null;
 }

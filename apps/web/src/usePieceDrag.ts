@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { parseDrop, type Drop, type Piece } from './pieceMoves';
 
 interface Drag { piece: Piece; x: number; y: number; startX: number; startY: number; pointer: number; moved: boolean }
-export function usePieceDrag(revision: unknown, onDrop: (piece: Piece, drop: Drop | null, point: {x:number;y:number}) => void) {
+export function usePieceDrag(revision: unknown, onDrop: (piece: Piece, drop: Drop | null) => void) {
   const [drag, setDrag] = useState<Drag | null>(null);
   const current = useRef<Drag | null>(null);
   const suppress = useRef(0);
@@ -39,7 +39,7 @@ export function usePieceDrag(revision: unknown, onDrop: (piece: Piece, drop: Dro
       if (active.moved) {
         suppress.current=Date.now()+350;
         e.preventDefault(); e.stopPropagation();
-        onDrop(active.piece,parseDrop(document.elementFromPoint(e.clientX,e.clientY)),{x:e.clientX,y:e.clientY});
+        onDrop(active.piece,parseDrop(document.elementFromPoint(e.clientX,e.clientY)));
       }
     },
     onPointerCancel: () => { current.current=null; invalidatedPointer.current=null; setDrag(null); suppress.current=Date.now()+350; },

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createGame, legalTargets } from '@ts/game-core';
 import { influenceDrop } from '../src/pieceMoves';
-import { trackNeedsMove, trackPieces } from '../src/tracks';
+import { trackPieces } from '../src/tracks';
 
 test('only the active reserve can deploy to a legal setup country',()=>{
   const s=createGame(1),targets=legalTargets(s);
@@ -21,13 +21,14 @@ test('stale legal targets cannot bypass the latest phase restrictions',()=>{
   const s=createGame(1);s.phase={kind:'HEADLINE',side:'USSR'};
   assert.equal(influenceDrop(s,{kind:'reserve',side:'USSR'},{kind:'country',id:'poland'},['poland']),null);
 });
-test('all nine track pieces have stable IDs and only actual results require placement',()=>{
+const moved=(before:ReturnType<typeof trackPieces>,after:ReturnType<typeof trackPieces>)=>after.filter(p=>{const q=before.find(q=>q.id===p.id)!;return q.at[0]!==p.at[0]||q.at[1]!==p.at[1];}).map(p=>p.id);
+test('all nine track markers have stable IDs and follow the state on their own',()=>{
   const s=createGame(1),before=trackPieces(s);
   assert.equal(before.length,9);assert.equal(new Set(before.map(p=>p.id)).size,9);
-  assert.ok(before.every(p=>!trackNeedsMove(p,p)));
   s.defcon=4;s.vp=-3;s.turn=2;
-  const after=trackPieces(s),changed=after.filter(p=>trackNeedsMove(before.find(q=>q.id===p.id),p)).map(p=>p.id);
-  assert.deepEqual(changed,['turn','defcon','vp']);assert.equal(s.defcon,4);
+  const after=trackPieces(s);
+  assert.deepEqual(moved(before,after),['turn','defcon','vp']);
+  assert.equal(after.find(p=>p.id==='defcon')!.value,4);
 });
 test('shared military and space markers stay distinct while preserving the authoritative value',()=>{
   const pieces=trackPieces(createGame(1));
@@ -35,9 +36,7 @@ test('shared military and space markers stay distinct while preserving the autho
   assert.equal(a.value,b.value);assert.notDeepEqual(a.at,b.at);
 });
 
-test('one side advancing never forces the unchanged counter through a cosmetic placement',()=>{
+test('one side advancing moves only its own counter',()=>{
   const state=createGame(1),before=trackPieces(state);state.space.US=1;
-  const after=trackPieces(state);
-  assert.equal(trackNeedsMove(before.find(p=>p.id==='space-USSR'),after.find(p=>p.id==='space-USSR')!),false);
-  assert.equal(trackNeedsMove(before.find(p=>p.id==='space-US'),after.find(p=>p.id==='space-US')!),true);
+  assert.deepEqual(moved(before,trackPieces(state)),['space-US']);
 });
