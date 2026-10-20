@@ -141,4 +141,23 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
   .game-layout .hand-curtain { height:auto; min-height:70px; padding:10px 12px; }
   .table-actions.is-open { bottom:10px; right:max(10px,calc((100vw - 1900px) / 2)); }
 }
-@media(min-width:821px) and (max-height:900px) { .card-workspace .composer-art { display:none; }.game-layout .hand-dock { max-height:38dvh; } }
+
+/* Side-column card view: enlarged art (it already carries the printed text), play options below it, confirm at the bottom. */
+.card-workspace .card-composer { display:flex; flex-direction:column; align-items:stretch; gap:10px; padding:10px 12px 0; }
+.card-workspace .composer-close { position:absolute; top:6px; right:6px; z-index:2; }
+.card-workspace .composer-art { display:block; align-self:center; width:clamp(150px,calc((100dvh - 600px) * .7),300px); margin:0; }
+.card-workspace .composer-art>.card { width:100%; height:auto; aspect-ratio:7/10; margin:0; transform:none; border-radius:8px; box-shadow:0 3px 10px #3031252e; }
+.card-workspace .composer-art>.card:not(.image) { aspect-ratio:auto; min-height:120px; }
+.card-workspace .composer-content header { margin-bottom:4px; }
+.card-workspace .play-choices { grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-top:0; }
+.card-workspace .play-choice { min-height:46px; padding:6px 8px; }
+.card-workspace .play-choice small { font-size:10px; line-height:1.4; }
+.card-workspace .composer-content>footer { margin-top:10px; padding:10px 0; }
+@media(min-width:821px) and (max-height:900px) {
+  .game-layout .hand-fan { grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; padding:5px 6px 6px; }
+  .game-layout .card-button { height:42px; }
+  .game-layout .card-head { height:38px; gap:4px; padding:3px 5px; }
+  .game-layout .card-head>b { font-size:15px; }
+  .game-layout .card-head small { display:none; }
+  .card-workspace .composer-art { width:clamp(150px,calc((100dvh - 500px) * .7),300px); }
+}
