@@ -8,6 +8,7 @@ import { cardChoices } from './cardPlay';
 import { CardView } from './CardView';
 import { PhaseAnnouncer, phaseAnnouncement } from './PhaseAnnouncer';
 import { LobbyPanel } from './LobbyPanel';
+import { EffectsPanel, LogPanel, PANEL_TITLES, RegionPanel, RulesPanel, SideRail, type SidePanel } from './SidePanels';
 import { displayState, useOnline } from './useOnline';
 const sides: Record<Side, string> = { USSR: '苏联', US: '美国' };
 const modes: Record<OpsMode, string> = { INFLUENCE: '放置影响力', REALIGNMENT: '调整', COUP: '政变' };
@@ -49,7 +50,8 @@ export function App() {
   const [roomId,setRoomId]=useState(()=>new URLSearchParams(location.hash.slice(1)).get('room')??'');
   const [copyStatus,setCopyStatus]=useState('');
   const [selected, setSelected] = useState<number | null>(null);
-  const closeCard=useCallback(()=>setSelected(null),[]);
+  const [sidePanel,setSidePanel]=useState<SidePanel>('regions');
+  const closeCard=useCallback(()=>{setSelected(null);setSidePanel('regions');},[]);
   const [error, setError] = useState('');
   const [revealed, setRevealed] = useState(false);
   const log=formatLog(state.log);
@@ -58,9 +60,15 @@ export function App() {
   const onlineActive=Boolean(online.session);
   const gameStarted=onlineActive?Boolean(online.snapshot?.started&&online.snapshot.view&&online.snapshot.side):localState!==null;
   const inLobby=onlineActive&&!gameStarted;
+  const visiblePanel=!gameStarted?(sidePanel==='rules'&&onlineActive?'rules':'room'):sidePanel==='room'&&!onlineActive?'regions':sidePanel;
   const canAct=gameStarted&&(!onlineActive||Boolean(online.ready&&!online.busy&&online.snapshot?.started&&online.snapshot.side&&actor===side));
+  const taskKey=JSON.stringify(p);
   const targets=canAct?(online.snapshot?online.snapshot.view?.targets??[]:legalTargets(state)):[];
   useEffect(()=>{setSelected(null);},[online.snapshot?.revision,online.session?.roomId]);
+  useEffect(()=>{if(selected===null)setSidePanel(current=>current==='cards'?'regions':current);},[selected]);
+  useEffect(()=>{if(canAct&&(p.kind==='CONFIRM_END'||p.kind==='SUBPLAY'||p.kind==='DECISION'))setSidePanel('cards');},[taskKey,canAct]);
+  useEffect(()=>{setSidePanel('regions');},[side,online.session?.roomId]);
+  useEffect(()=>{if(gameStarted)setSidePanel('regions');},[gameStarted]);
   useEffect(()=>{setRevealed(false);setSelected(null);if(online.session)setState(null);},[online.session?.roomId]);
   useEffect(()=>{setSelected(null);setCountrySelection(null);setActionsOpen(false);},[side]);
   useEffect(()=>{if(p.kind==='CONFIRM_END')setActionsOpen(false);if(p.kind==='DECISION'&&!['INFLUENCE','COUNTRY'].includes(p.decision.kind))setActionsOpen(true);},[p]);
@@ -90,6 +98,7 @@ export function App() {
   const blocked = !gameStarted?'请创建或加入房间，双方入座后开始对局':onlineActive ? !online.ready ? '正在恢复房间连接' : online.busy ? '正在确认你的操作' : !online.snapshot?.started ? '等待双方入座并开始对局' : online.snapshot.view&&online.snapshot.view.phase.kind==='WAITING' ? '等待'+sides[online.snapshot.view.phase.side]+'处理事件' : actor!==side ? '等待'+(actor?sides[actor]:'对方')+'行动' : undefined : undefined;
   const guide = phaseGuide(state, { selected, revealed, targetCount: targets.length, blocked });
   const focusTask = () => {
+    setSidePanel('cards');
     if(p.kind==='SUBPLAY'&&canAct){setRevealed(true);setSelected(p.card);return;}
     if (guide.focus==='hand'&&!revealed) setRevealed(true);
     if (guide.focus==='actions')setActionsOpen(true);
@@ -187,7 +196,7 @@ export function App() {
       </section><section className="new-game-panel"><h2>本地对局</h2>
       <label>新局模式 <select disabled={onlineActive} value={state.mode} onChange={e=>{setHistory([]);setState(newLocalGame(state.seed+1,e.target.value as 'STANDARD'|'PRACTICE'));setRevealed(false);setSelected(null);setError('');}}><option value="STANDARD">标准对局 · 10 回合</option><option value="PRACTICE">行动点练习 · 1 回合</option></select></label>
       <button disabled={onlineActive} onClick={() => { setHistory([]);setState(newLocalGame((state.seed + 1) >>> 0,state.mode)); setRevealed(false); setSelected(null); setError(''); }}>{gameStarted?'重新开局':'开始本地热座'}</button>
-      <p className="field-help">{onlineActive?'联机中不能重开本地对局，请先返回本地。':'本地热座由双方轮流操作同一设备。刷新页面将重开本地对局。'}</p></section></div>
+      <p className="field-help">{onlineActive?'联机中不能重开本地对局，请先返回本地。':'本地热座由双方轮流操作同一设备。刷新页面返回房间入口。'}</p></section></div>
     </details>
     {activeEffects(state.effects).length>0&&<details className="effects-panel"><summary>生效中的事件 <span>{activeEffects(state.effects).length}</span></summary><div className="effect-chips">{activeEffects(state.effects).map(e=><span key={e}>{e}</span>)}</div></details>}
     <details className="log-panel"><summary>对局日志 <span>{log.length} 条记录</span></summary>{log.length?<ol className="log">{log.map((line,i)=><li key={i}>{line}</li>)}</ol>:<p className="field-help">对局开始后，布点、出牌和结算记录会显示在这里。</p>}</details>
@@ -202,18 +211,18 @@ export function App() {
         {!revealed?<div className="hand-curtain"><div className="card-backs" aria-hidden="true"><i/><i/><i/></div><div><h3>手牌暂时隐藏</h3><p>{onlineActive?'点击“显示手牌”查看自己的卡牌。':'请交给'+sides[side]+'玩家，再点击“显示手牌”。'}</p></div></div>:<>
 
         <p className="hand-hint">{!canAct?'等待对方行动；你仍可查看自己的手牌。':p.kind==='SETUP_PLACEMENT'?'当前先完成地图布点，进入头条或行动轮后可选牌。':p.kind==='HEADLINE'?'点击手牌，在右侧确认头条。':p.kind==='ACTION_ROUND'?'点击手牌，在右侧选择用途并确认出牌。':'正在结算行动，完成当前任务后再选择下一张牌。'}</p>
-        <div className="hand hand-fan">{[...state.hands[side],...(state.mode==='STANDARD'&&p.kind==='ACTION_ROUND'&&state.chinaCard.holder===side&&state.chinaCard.faceUp?[6]:[])].map(id=>{const card=CARD_BY_ID.get(id)!;const playable=canAct&&cardChoices(state,side,id).some(option=>!option.reason);return <button className={'card-button '+(playable?'playable ':'')+(selected===id?'selected':'')} data-hand-card={id} key={id} aria-label={card.nameZh+(card.scoring?'，计分牌':'，'+card.ops+' 行动点')} aria-pressed={selected===id} title={card.nameZh+' · 在上方查看'+(playable?'并出牌':'')} onClick={()=>{setSelected(current=>current===id?null:id);}}><span className={'card-head side-'+card.side}><b>{card.scoring?'计分':card.ops}</b><span><span className="card-head-title">{card.nameZh}</span><small>{card.starred?'一次性事件':card.scoring?'区域计分':sides[card.side as Side]??'中立事件'}</small></span></span><CardView card={card}/><span className="card-caption">{card.nameZh}<small>{card.scoring?'计分牌':card.ops+' OPS'}</small></span></button>;})}</div>
+        <div className="hand hand-fan">{[...state.hands[side],...(state.mode==='STANDARD'&&p.kind==='ACTION_ROUND'&&state.chinaCard.holder===side&&state.chinaCard.faceUp?[6]:[])].map(id=>{const card=CARD_BY_ID.get(id)!;const playable=canAct&&cardChoices(state,side,id).some(option=>!option.reason);return <button className={'card-button '+(playable?'playable ':'')+(selected===id?'selected':'')} data-hand-card={id} key={id} aria-label={card.nameZh+(card.scoring?'，计分牌':'，'+card.ops+' 行动点')} aria-pressed={selected===id} title={card.nameZh+' · 在上方查看'+(playable?'并出牌':'')} onClick={()=>{const closing=selected===id&&visiblePanel==='cards';setSelected(closing?null:id);setSidePanel(closing?'regions':'cards');}}><span className={'card-head side-'+card.side}><b>{card.scoring?'计分':card.ops}</b><span><span className="card-head-title">{card.nameZh}</span><small>{card.starred?'一次性事件':card.scoring?'区域计分':sides[card.side as Side]??'中立事件'}</small></span></span><CardView card={card}/><span className="card-caption">{card.nameZh}<small>{card.scoring?'计分牌':card.ops+' OPS'}</small></span></button>;})}</div>
         {state.effects.cia && side==='US' && <details><summary>中央情报局：本回合苏联公开手牌</summary><div className="hand">{state.hands.USSR.map(id=><CardView key={id} card={CARD_BY_ID.get(id)!}/>)}</div></details>}
         {state.effects.aldrich && side==='USSR' && <details><summary>奥德里奇·艾姆斯：本回合美国公开手牌</summary><div className="hand">{state.hands.US.map(id=><CardView key={id} card={CARD_BY_ID.get(id)!}/>)}</div></details>}
 
         </>}
         <div className="hand-footer"><span>牌库 {deckCount} 张 · 弃牌 {state.discard.length} 张</span>{online.snapshot?.view&&<span>对方手牌 {online.snapshot.view.handCounts[side==='US'?'USSR':'US']} 张</span>}<span>中国牌 · {sides[state.chinaCard.holder]}持有</span></div>
       </section>}
-      <aside className="card-workspace surface" aria-label="卡牌操作区">
-        <header className="workspace-heading"><h2>{!gameStarted?onlineActive?'房间大厅':'联机房间':'卡牌操作'}</h2><span>{!gameStarted?onlineActive?'双方入座后开始':'创建或加入房间':'先选牌，再选用途'}</span></header>
+      <div className="workspace-shell"><aside className="card-workspace surface" aria-label="卡牌操作区" id="side-panel-content">
+        <header className="workspace-heading"><h2>{!gameStarted?visiblePanel==='rules'?'规则速查':onlineActive?'房间大厅':'联机房间':PANEL_TITLES[visiblePanel]}</h2><span>{!gameStarted?onlineActive?'双方入座后开始':'创建或加入房间':visiblePanel==='cards'?'先选用途，再确认':visiblePanel==='regions'?'公开局面 · 实时更新':'牌桌参考'}</span></header>
         {!onlineActive&&!gameStarted&&<section className="room-entry" aria-label="联机房间"><button className="primary" disabled={online.busy} onClick={online.create}>创建房间</button><form onSubmit={e=>{e.preventDefault();if(roomId.trim()&&!online.busy)online.join(roomId);}}><input aria-label="房间码" placeholder="输入朋友的房间码" value={roomId} maxLength={10} onChange={e=>setRoomId(e.target.value.toUpperCase())}/><button disabled={online.busy||!roomId.trim()}>加入房间</button></form></section>}
-        {onlineActive&&<section className="room-controls" aria-label="房间管理"><strong>房间码：{online.session!.roomId}</strong><button onClick={()=>{navigator.clipboard?.writeText(online.session!.roomId).then(()=>setCopyStatus('房间码已复制')).catch(()=>setCopyStatus('请手动复制房间码'));}}>复制房间码</button>{copyStatus&&<small>{copyStatus}</small>}{online.snapshot?.isHost&&<><button disabled={online.busy||!online.ready} onClick={()=>{if(window.confirm('重新开局会清除当前对局，双方回到大厅，房间码和座位保留。确定吗？'))online.restart();}}>重新开局</button><button disabled={online.busy||!online.ready} onClick={()=>{if(window.confirm('关闭后双方会退出房间，当前对局将被清除。确定关闭？'))online.close();}}>关闭房间</button></>}</section>}
-        {inLobby?<LobbyPanel snapshot={online.snapshot} roomId={online.session!.roomId} invite={invite} busy={online.busy||!online.ready} copyStatus={copyStatus} onCopy={copyInvite} onSeat={online.seat} onStart={online.start}/>:gameStarted?<>
+        {onlineActive&&visiblePanel==='room'&&<section className="room-controls" aria-label="房间管理"><strong>房间码：{online.session!.roomId}</strong><button onClick={()=>{navigator.clipboard?.writeText(online.session!.roomId).then(()=>setCopyStatus('房间码已复制')).catch(()=>setCopyStatus('请手动复制房间码'));}}>复制房间码</button>{copyStatus&&<small>{copyStatus}</small>}{online.snapshot?.isHost&&<><button disabled={online.busy||!online.ready} onClick={()=>{if(window.confirm('重新开局会清除当前对局，双方回到大厅，房间码和座位保留。确定吗？'))online.restart();}}>重新开局</button><button disabled={online.busy||!online.ready} onClick={()=>{if(window.confirm('关闭后双方会退出房间，当前对局将被清除。确定关闭？'))online.close();}}>关闭房间</button></>}</section>}
+        {inLobby&&visiblePanel==='room'?<LobbyPanel snapshot={online.snapshot} roomId={online.session!.roomId} invite={invite} busy={online.busy||!online.ready} copyStatus={copyStatus} onCopy={copyInvite} onSeat={online.seat} onStart={online.start}/>:gameStarted?<>
         {revealed&&p.kind==='HEADLINE'&&state.space[side]>=4&&state.space[side==='US'?'USSR':'US']<4&&state.headlines[side==='US'?'USSR':'US']!==undefined&&<p className="notice">太空特权：对方头条为 {CARD_BY_ID.get(state.headlines[side==='US'?'USSR':'US']!)!.nameZh}</p>}
     <StageGuide guide={guide} side={side} onFocus={focusTask} showFocus={guide.focus==='hand'&&!revealed||guide.focus==='actions'&&selected===null} actionLabel={guide.focus==='hand'&&!revealed?'显示手牌':undefined}>
       {canAct&&p.kind==='CONFIRM_END'&&<button className="primary end-action" onClick={()=>dispatch({type:'END_ACTION'})}>结束回合</button>}
@@ -222,10 +231,16 @@ export function App() {
       {canAct&&p.kind==='DECISION'&&p.decision.kind==='INFLUENCE'&&p.decision.optional&&<button className="secondary" onClick={()=>dispatch({type:'CHOOSE',value:'done'})}>{p.decision.relocation?'移除完毕':'完成选择'}</button>}
       {canAct&&p.kind==='ACTION_ROUND'&&canPass(state,side)&&<button className="secondary" onClick={()=>dispatch({type:'PASS_EMPTY'})}>跳过本轮</button>}
     </StageGuide>
-      {selected!==null&&revealed&&<CardComposer key={selected} id={selected} state={state} side={side} canAct={canAct} blocked={blocked} onPlay={dispatch} onClose={closeCard}/>}
-        {p.kind!=='CONFIRM_END'&&(selected===null||!revealed)&&<div className="card-workspace-empty"><span aria-hidden="true">▤</span><h3>{revealed?'点击下方的一张手牌':'手牌暂时隐藏'}</h3><p>{revealed?'卡牌效果、用途与确认按钮会显示在这里。':'确认由'+sides[side]+'玩家操作后，显示手牌。'}</p>{!revealed&&<button className="primary" onClick={()=>setRevealed(true)}>显示自己的手牌</button>}</div>}</>:null}
+      {visiblePanel==='cards'&&selected!==null&&revealed&&<CardComposer key={selected} id={selected} state={state} side={side} canAct={canAct} blocked={blocked} onPlay={dispatch} onClose={closeCard}/>}
+        {visiblePanel==='cards'&&p.kind!=='CONFIRM_END'&&(selected===null||!revealed)&&<div className="card-workspace-empty"><span aria-hidden="true">▤</span><h3>{revealed?'点击下方的一张手牌':'手牌暂时隐藏'}</h3><p>{revealed?'卡牌效果、用途与确认按钮会显示在这里。':'确认由'+sides[side]+'玩家操作后，显示手牌。'}</p>{!revealed&&<button className="primary" onClick={()=>setRevealed(true)}>显示自己的手牌</button>}</div>}</>:null}
+        {gameStarted&&visiblePanel==='regions'&&<RegionPanel state={state} side={side}/>}
+        {gameStarted&&visiblePanel==='log'&&<LogPanel lines={log}/>}
+        {visiblePanel==='rules'&&<RulesPanel/>}
+        {gameStarted&&visiblePanel==='effects'&&<EffectsPanel effects={activeEffects(state.effects)}/>}
+        {gameStarted&&visiblePanel==='room'&&<section className="info-panel"><p>房间 {online.session?.roomId} · 你是{sides[side]}</p><p className="panel-intro">对局已开始，阵营已锁定。</p><input aria-label="邀请链接" readOnly value={invite}/><button onClick={copyInvite}>复制邀请链接</button></section>}
       </aside>
-
+      {(gameStarted||onlineActive)&&<SideRail panel={visiblePanel} started={gameStarted} online={onlineActive} onSelect={setSidePanel}/>}
+      </div>
 
     </div>
     <PhaseAnnouncer announcement={gameStarted&&canAct&&!blocked&&actor===side?phaseAnnouncement(state):null}/>
