@@ -161,3 +161,16 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
   .game-layout .card-head small { display:none; }
   .card-workspace .composer-art { width:clamp(150px,calc((100dvh - 500px) * .7),300px); }
 }
+
+/* Phase announcer: a brief centred banner when the acting player enters a new step; never blocks clicks. */
+.phase-announcer { position:fixed; inset:0; z-index:60; display:grid; place-items:center; pointer-events:none; }
+.phase-banner { display:flex; align-items:center; gap:18px; min-width:min(460px,86vw); max-width:min(640px,92vw); padding:22px 30px 22px 22px; background:#f6f0dfef; border:1px solid #a89f84; border-left:8px solid var(--accent); border-radius:6px; box-shadow:0 18px 50px #2a261c4d; animation:phase-flash 1.8s ease-in-out both; }
+.phase-banner.seat-USSR { border-left-color:var(--ussr); }.phase-banner.seat-US { border-left-color:var(--us); }
+.phase-seal { flex:none; display:grid; place-items:center; width:58px; height:64px; font:30px SimSun,serif; color:#fff8ec; border-radius:3px; background:var(--accent); }
+.seat-USSR .phase-seal { background:var(--ussr); }.seat-US .phase-seal { background:var(--us); }
+.phase-banner>div { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.phase-banner small { font-size:13px; letter-spacing:.08em; color:var(--muted); }
+.phase-banner strong { font:700 34px/1.15 "Noto Serif SC","Songti SC",SimSun,serif; color:var(--fg); letter-spacing:.06em; }
+.phase-banner span:not(.phase-seal) { font-size:16px; color:#4b4a40; line-height:1.5; }
+@keyframes phase-flash { 0% { opacity:0; transform:translateY(14px) scale(.96); } 14% { opacity:1; transform:none; } 78% { opacity:1; transform:none; } 100% { opacity:0; transform:translateY(-10px); } }
+@media(prefers-reduced-motion:reduce) { .phase-banner { animation:none !important; } }

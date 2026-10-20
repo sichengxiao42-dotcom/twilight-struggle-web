@@ -6,6 +6,7 @@ import { Board, type PlacementFeedback } from './Board';
 import { CardComposer } from './CardComposer';
 import { cardChoices } from './cardPlay';
 import { CardView } from './CardView';
+import { PhaseAnnouncer, phaseAnnouncement } from './PhaseAnnouncer';
 import { displayState, useOnline } from './useOnline';
 const sides: Record<Side, string> = { USSR: '苏联', US: '美国' };
 const modes: Record<OpsMode, string> = { INFLUENCE: '放置影响力', REALIGNMENT: '调整', COUP: '政变' };
@@ -214,6 +215,7 @@ export function App() {
 
 
     </div>
+    <PhaseAnnouncer announcement={canAct&&!blocked&&!trackTask&&actor===side?phaseAnnouncement(state):null}/>
     <footer className="table-footer"><span>冷战热斗 · 中文牌桌</span><span>苏联先手 · 美国后手</span></footer>
   </main>;
 }
