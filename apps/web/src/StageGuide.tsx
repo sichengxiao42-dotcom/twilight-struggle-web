@@ -21,11 +21,11 @@ export function phaseGuide(state: GameState, context: GuideContext): Guide {
   if (context.blocked) return { title: context.blocked, detail: '对方完成后会自动继续。', focus: 'none' };
   if (p.kind === 'SETUP_PLACEMENT') {
     const region = p.subRegion === 'EASTERN_EUROPE' ? '东欧' : '西欧';
-    return { title: `${sides[p.side]}：在${region}放置影响力`, detail: `还需放置 ${p.remaining} 点。点击金框国家，每次放置 1 点。`, focus: 'map' };
+    return { title: `${sides[p.side]}：在${region}放置影响力`, detail: `还需放置 ${p.remaining} 点。从备用区拖动同色棋子到金框国家，每次 1 点；也可点击国家。`, focus: 'map' };
   }
   if (p.kind === 'HEADLINE') return {
     title: `${sides[p.side]}：秘密选择头条`,
-    detail: !context.revealed ? '请让另一位玩家回避，然后显示自己的手牌。' : context.selected === 32 ? '联合国干预不能作为头条。请在手牌中选择另一张。' : context.selected !== null ? `已选「${CARD_BY_ID.get(context.selected)?.nameZh}」。请在操作区确认头条。` : '选择一张手牌作为本回合头条。',
+    detail: !context.revealed ? '请让另一位玩家回避，然后显示自己的手牌。' : context.selected === 32 ? '联合国干预不能作为头条。请在手牌中选择另一张。' : context.selected !== null ? `已选「${CARD_BY_ID.get(context.selected)?.nameZh}」。在牌面弹窗确认头条。` : '点击一张手牌，在牌面弹窗中打出头条。',
     focus: !context.revealed || context.selected === null || context.selected === 32 ? 'hand' : 'actions',
   };
   if (p.kind === 'ACTION_ROUND') {

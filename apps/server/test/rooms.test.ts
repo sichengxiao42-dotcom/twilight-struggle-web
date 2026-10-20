@@ -10,6 +10,9 @@ test('room waits for a peer, reserves seats, and never exposes tokens in snapsho
   assert.ok(!JSON.stringify(store.snapshot(a.roomId,'USSR')).includes(a.token));
 });
 test('server validates side, revision, malformed actions and duplicate request IDs',()=>{
+  assert.deepEqual(parseAction({type:'RELOCATE_INFLUENCE',from:'syria',to:'angola'}),{type:'RELOCATE_INFLUENCE',from:'syria',to:'angola'});
+  assert.throws(()=>parseAction({type:'RELOCATE_INFLUENCE',from:'syria',to:'not-a-country'}));
+  assert.throws(()=>parseAction({type:'RELOCATE_INFLUENCE',from:'syria',to:'angola',amount:99}));
   const {store,a}=joined();const request={id:'1',expectedRevision:0,action:{type:'PLACE_SETUP',country:'poland'}};
   assert.throws(()=>store.execute(a.roomId,'US','b',request),/尚未轮到/);
   assert.equal(store.execute(a.roomId,'USSR','a',request),1);

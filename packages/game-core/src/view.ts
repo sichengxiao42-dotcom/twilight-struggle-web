@@ -4,6 +4,7 @@ import type { GameState, Phase } from './state';
 
 export type ViewPhase = Phase | { kind: 'WAITING'; side: Side };
 export interface PlayerView {
+  currentAction?: {side:Side;round:number};
   turn: number; phase: ViewPhase; vp: number; defcon: number;
   milOps: GameState['milOps']; space: GameState['space']; spaceAttempts: GameState['spaceAttempts'];
   influence: GameState['influence']; effects: GameState['effects'];
@@ -15,12 +16,15 @@ export interface PlayerView {
 }
 /** Whitelist public fields. Never serialize the seed, RNG cursor, task queue or deck order. */
 export function viewFor(state:GameState,viewer:Side):PlayerView {
+  const p=state.phase,finish=state.tasks.find(t=>t.kind==='FINISH_ACTION');
+  const currentAction=p.kind==='ACTION_ROUND'||p.kind==='OPS'&&p.round?{side:p.side,round:p.round}:finish?.kind==='FINISH_ACTION'?{side:finish.side,round:finish.round}:undefined;
   const enemy=opponent(viewer), ownHeadline=state.headlines[viewer], otherHeadline=state.headlines[enemy];
   const headlines:Partial<Record<Side,number>>={};
   if(ownHeadline!==undefined)headlines[viewer]=ownHeadline;
   if(state.phase.kind==='HEADLINE'&&state.space[viewer]>=4&&state.space[enemy]<4&&otherHeadline!==undefined)headlines[enemy]=otherHeadline;
   const phase=state.phase.kind==='DECISION'&&state.phase.side!==viewer?{kind:'WAITING' as const,side:state.phase.side}:state.phase;
   return structuredClone({
+    currentAction,
     turn:state.turn,phase,vp:state.vp,defcon:state.defcon,milOps:state.milOps,space:state.space,spaceAttempts:state.spaceAttempts,
     influence:state.influence,effects:state.effects,
     hands:{[viewer]:state.hands[viewer],[enemy]:(viewer==='US'&&state.effects.cia)||(viewer==='USSR'&&state.effects.aldrich)?state.hands[enemy]:[]} as Record<Side,number[]>,

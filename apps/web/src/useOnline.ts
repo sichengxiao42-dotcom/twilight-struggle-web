@@ -10,7 +10,7 @@ function saved():Session|null {
 /** UI-only placeholder fields contain no secrets and are never sent back as state. */
 export function displayState(v:PlayerView):GameState {
   return {...v,mode:'STANDARD',phase:v.phase.kind==='WAITING'?{kind:'HEADLINE',side:v.phase.side}:v.phase,
-    seed:0,rngCalls:0,tasks:[],deck:[],actionStartInfluence:null,phasingSide:'USSR',noradPending:false};
+    seed:0,rngCalls:0,tasks:v.currentAction?[{kind:'FINISH_ACTION',...v.currentAction}]:[],deck:[],actionStartInfluence:null,phasingSide:'USSR',noradPending:false};
 }
 export function useOnline() {
   const socket=useRef<Socket<ServerToClient,ClientToServer>|null>(null);

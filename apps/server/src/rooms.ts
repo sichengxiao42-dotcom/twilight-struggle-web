@@ -10,6 +10,10 @@ export function parseAction(value:unknown):Action {
   const card=()=>{if(typeof a.card!=='number'||!Number.isInteger(a.card)||!CARD_BY_ID.has(a.card))throw new Error('无效卡号');return a.card;};
   const country=()=>{if(typeof a.country!=='string'||!COUNTRY_BY_ID.has(a.country))throw new Error('无效国家');return a.country;};
   switch(a.type){
+    case 'RELOCATE_INFLUENCE':
+      keys(['from','to']);
+      if(typeof a.from!=='string'||!COUNTRY_BY_ID.has(a.from)||typeof a.to!=='string'||!COUNTRY_BY_ID.has(a.to))throw new Error('无效转移国家');
+      return {type:a.type,from:a.from,to:a.to};
     case 'PLACE_SETUP':case 'TARGET':case 'CANCEL_CMC':keys(['country']);return {type:a.type,country:country()};
     case 'PLAY_EVENT':case 'SELECT_HEADLINE':case 'SPACE':case 'TRAP_DISCARD':keys(['card']);return {type:a.type,card:card()};
     case 'END_OPS':case 'PASS_EMPTY':keys([]);return {type:a.type};

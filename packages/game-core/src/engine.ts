@@ -30,7 +30,7 @@ export function protectedCountry(s:GameState,id:string,side:Side) {
   return side==='USSR' && ((id==='japan'&&s.effects.japan) || (s.effects.nato&&COUNTRY_BY_ID.get(id)!.region==='EUROPE'&&controller(s,id)==='US'&&!(id==='france'&&s.effects.deGaulle)&&!(id==='west_germany'&&s.effects.willyBrandt)));
 }
 export function influenceTargets(d:Extract<Decision,{kind:'INFLUENCE'}>,s:GameState) {
-  return d.targets.filter(id=>(d.used[id]??0)<d.perCountry && (d.operation==='REMOVE'||d.operation==='CLEAR'||d.operation==='DOUBLE'?s.influence[id][d.affected]>0:d.operation==='MATCH'?s.influence[id].US<s.influence[id].USSR:true));
+  return d.targets.filter(id=>(d.used[id]??0)<d.perCountry && (!d.relocationOriginal || d.operation!=='REMOVE' || (d.used[id]??0)<(d.relocationOriginal[id]??0)) && (d.operation==='REMOVE'||d.operation==='CLEAR'||d.operation==='DOUBLE'?s.influence[id][d.affected]>0:d.operation==='MATCH'?s.influence[id].US<s.influence[id].USSR:true));
 }
 export function influence(s:GameState,side:Side,targets:string[],remaining:number,perCountry:number,operation:Extract<Decision,{kind:'INFLUENCE'}>['operation']='ADD',affected:Side=side,prompt='选择国家',optional=false,relocation=false,singleCountry=false) {
   const decision:Extract<Decision,{kind:'INFLUENCE'}>={kind:'INFLUENCE',prompt,targets,remaining,perCountry,operation,affected,used:{},optional,relocation,singleCountry};
@@ -289,7 +289,16 @@ export function chooseDecision(s:GameState,value:string) {
       s.log.push(d.prompt+'：'+COUNTRY_BY_ID.get(value)!.nameZh);
       if(d.remaining>0&&influenceTargets(d,s).length)return;
     }
-    if(d.relocation){const count=Object.values(d.used).reduce((a,b)=>a+b,0);if(count){influence(s,'USSR',ids(c=>controller(s,c.id)!=='US'),count,2,'ADD','USSR','去斯大林化：重新放置移除的影响力，每国最多 2');if(s.phase.kind==='DECISION'&&s.phase.decision!==d)return;}}
+    if(d.relocation){
+      const count=Object.values(d.used).reduce((a,b)=>a+b,0)-Object.values(d.relocationPlaced??{}).reduce((a,b)=>a+b,0);
+      if(count){
+        influence(s,'USSR',ids(c=>controller(s,c.id)!=='US'),count,2,'ADD','USSR','去斯大林化：重新放置移除的影响力，每国最多 2');
+        if(s.phase.kind==='DECISION'&&s.phase.decision!==d){
+          if(s.phase.decision.kind==='INFLUENCE')s.phase.decision.used={...d.relocationPlaced};
+          return;
+        }
+      }
+    }
   } else if(d.kind==='COUNTRY') {
     if(!d.targets.includes(value))throw new Error('无效的事件目标');
     resolveCountryChoice(s,d,value);

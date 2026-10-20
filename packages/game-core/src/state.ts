@@ -21,7 +21,7 @@ export type Phase =
 
 
 export type Decision =
-  | { kind: 'INFLUENCE'; prompt: string; targets: string[]; affected: Side; operation: 'ADD' | 'REMOVE' | 'CLEAR' | 'MATCH' | 'DOUBLE'; remaining: number; perCountry: number; used: Record<string, number>; optional?: boolean; relocation?: boolean; singleCountry?: boolean }
+  | { kind: 'INFLUENCE'; prompt: string; targets: string[]; affected: Side; operation: 'ADD' | 'REMOVE' | 'CLEAR' | 'MATCH' | 'DOUBLE'; remaining: number; perCountry: number; used: Record<string, number>; optional?: boolean; relocation?: boolean; singleCountry?: boolean; relocationPlaced?: Record<string, number>; relocationOriginal?: Record<string, number> }
   /** memo carries event-specific card lists (cards drawn, a taken card, a discard count). */
   | { kind: 'CHOICE'; prompt: string; options: { id: string; label: string }[]; event: number; actor: Side; phasing: Side; memo?: number[] }
   /** Pick one country on the board for an event (war targets, region-free choices). */

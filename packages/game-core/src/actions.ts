@@ -10,6 +10,7 @@ import { addVp, beginHeadline, canEvent, changeDefcon, chooseDecision, drain, in
 export type OpsMode = 'INFLUENCE' | 'REALIGNMENT' | 'COUP';
 export type Action =
   | { type: 'PLACE_SETUP'; country: string }
+  | { type: 'RELOCATE_INFLUENCE'; from: string; to: string }
   | { type: 'PLAY_OPS'; card: number; mode: OpsMode; order?: 'BEFORE' | 'AFTER'; asiaOnly?: boolean; seaOnly?: boolean }
   | { type: 'PLAY_EVENT'; card: number }
   | { type: 'SELECT_HEADLINE'; card: number }
@@ -101,6 +102,22 @@ function playTasks(next: GameState, side: Side, action: Extract<Action, { type: 
 export function apply(state: GameState, side: Side, action: Action): GameState {
   if (activeSide(state) !== side) throw new Error('尚未轮到该阵营');
   const next = structuredClone(state), p = next.phase;
+  if (action.type === 'RELOCATE_INFLUENCE') {
+    if (p.kind !== 'DECISION' || p.decision.kind !== 'INFLUENCE' || !p.decision.relocation || p.decision.operation !== 'REMOVE') throw new Error('当前事件不允许转移影响力');
+    const d = p.decision;
+    if (!COUNTRY_BY_ID.has(action.from) || !COUNTRY_BY_ID.has(action.to) || action.from === action.to || d.remaining < 1 || !legalTargets(next).includes(action.from) || controller(next, action.to) === 'US' || (d.relocationPlaced?.[action.to] ?? 0) >= 2) throw new Error('无效的影响力转移落点');
+    d.relocationOriginal ??= Object.fromEntries(d.targets.map(id => [id, next.influence[id][d.affected] + (d.used[id] ?? 0)]));
+    if ((d.used[action.from] ?? 0) >= d.relocationOriginal[action.from]) throw new Error('不能再次转移已重新放置的影响力');
+    d.relocationPlaced ??= {};
+    next.influence[action.from][d.affected]--;
+    next.influence[action.to][d.affected]++;
+    d.used[action.from] = (d.used[action.from] ?? 0) + 1;
+    d.relocationPlaced[action.to] = (d.relocationPlaced[action.to] ?? 0) + 1;
+    d.remaining--;
+    next.log.push(d.prompt + '：' + COUNTRY_BY_ID.get(action.from)!.nameZh + ' → ' + COUNTRY_BY_ID.get(action.to)!.nameZh + ' 1 点');
+    if (!d.remaining || !legalTargets(next).length) chooseDecision(next, 'done');
+    return next;
+  }
   if(action.type === 'CHOOSE') {
     chooseDecision(next,action.value);return next;
   }
