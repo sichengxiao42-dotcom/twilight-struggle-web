@@ -1,7 +1,8 @@
 import { boardChanges, type CountryChange } from './boardChanges';
+import { PublicCard } from './PlayedCards';
 import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from 'react';
 import type { Region, Side } from '@ts/shared';
-import { ADJACENCY, COUNTRIES, controller, placementCost, type Action, type Country, type GameState } from '@ts/game-core';
+import { ADJACENCY, COUNTRIES, controller, placementCost, type Action, type Country, type GameState, type PublicPlay } from '@ts/game-core';
 import { boardImage } from './assets';
 import { usePieceDrag } from './usePieceDrag';
 import { influenceDrop } from './pieceMoves';
@@ -28,7 +29,7 @@ const trackColours = { US: ['#2f5d9e', '#fff'], USSR: ['#b3261e', '#fff'], neutr
 
 export interface PlacementFeedback { country: string; side: Side; before: number }
 
-export function Board({selectedCountry,state,targets,onCountry,onAction,canInteract,scale=1,lastPlacement}:{selectedCountry?:string;state:GameState;targets:string[];onCountry:(id:string)=>void;onAction:(action:Action)=>void;canInteract:boolean;scale?:number;lastPlacement?:PlacementFeedback|null}) {
+export function Board({selectedCountry,state,targets,onCountry,onAction,canInteract,scale=1,lastPlacement,publicPlays=[]}:{selectedCountry?:string;state:GameState;targets:string[];onCountry:(id:string)=>void;onAction:(action:Action)=>void;canInteract:boolean;scale?:number;lastPlacement?:PlacementFeedback|null;publicPlays?:PublicPlay[]}) {
   const [hover, setHover] = useState<string | null>(null);
   const previous = useRef(state);
   const sequence = useRef(0);
@@ -114,6 +115,7 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
           </>);
         })}
         {renderedTracks}
+      {publicPlays.map((play,i)=><foreignObject key={play.id} x={(map?(play.side==='US'?140:5350):play.side==='US'?20:830)+i*(map?130:15)} y={(map?(play.side==='US'?680:880):100)+i*(map?130:15)} width={map?(play.side==='US'?1000:1180):160} height={map?(play.side==='US'?1700:1950):265} className={'public-card-slot '+(!map?'schematic-card-slot':'')}><PublicCard play={play}/></foreignObject>)}
       </svg></div>{feedback}<p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>放大后可横向滚动</span></p></>;
   }
   return <>
@@ -124,5 +126,6 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
         const inf = state.influence[c.id];
         return country(c, positions[c.id], <><rect width="120" height="40" rx="5"/><text x="6" y="15">{c.battleground ? '★ ' : ''}{c.nameZh}</text><text x="6" y="32" className="stability">稳 {c.stability}</text><text x="72" y="32" className="us-value">{inf.US}</text><text x="99" y="32" className="ussr-value">{inf.USSR}</text></>);
       })}
-    </svg></div>{feedback}<p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>放大后可横向滚动</span></p></>;
+    {publicPlays.map((play,i)=><foreignObject key={play.id} x={(map?(play.side==='US'?140:5350):play.side==='US'?20:830)+i*(map?130:15)} y={(map?(play.side==='US'?680:880):100)+i*(map?130:15)} width={map?(play.side==='US'?1000:1180):160} height={map?(play.side==='US'?1700:1950):265} className={'public-card-slot '+(!map?'schematic-card-slot':'')}><PublicCard play={play}/></foreignObject>)}
+      </svg></div>{feedback}<p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>放大后可横向滚动</span></p></>;
 }

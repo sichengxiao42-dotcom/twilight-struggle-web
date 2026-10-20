@@ -4,6 +4,7 @@ import type { GameState, Phase } from './state';
 
 export type ViewPhase = Phase | { kind: 'WAITING'; side: Side };
 export interface PlayerView {
+  publicPlays: NonNullable<GameState['publicPlays']>;
   currentAction?: {side:Side;round:number};
   turn: number; phase: ViewPhase; vp: number; defcon: number;
   milOps: GameState['milOps']; space: GameState['space']; spaceAttempts: GameState['spaceAttempts'];
@@ -24,6 +25,7 @@ export function viewFor(state:GameState,viewer:Side):PlayerView {
   if(state.phase.kind==='HEADLINE'&&state.space[viewer]>=4&&state.space[enemy]<4&&otherHeadline!==undefined)headlines[enemy]=otherHeadline;
   const phase=(state.phase.kind==='DECISION'||state.phase.kind==='CONFIRM_END'&&state.phase.context==='HEADLINE')&&state.phase.side!==viewer?{kind:'WAITING' as const,side:state.phase.side}:state.phase;
   return structuredClone({
+    publicPlays:state.publicPlays??[],
     currentAction,
     turn:state.turn,phase,vp:state.vp,defcon:state.defcon,milOps:state.milOps,space:state.space,spaceAttempts:state.spaceAttempts,
     influence:state.influence,effects:state.effects,

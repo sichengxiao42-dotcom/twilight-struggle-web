@@ -64,6 +64,8 @@ export interface Effects {
 }
 
 export interface GameState {
+  /** Only publicly played cards; secret headline selections are never recorded here. */
+  publicPlays?: PublicPlay[];
   manualEnd?: boolean;
   pendingHeadline?: number;
   mode: 'PRACTICE' | 'STANDARD';
@@ -91,6 +93,16 @@ export interface GameState {
   removed: number[];
   chinaCard: { holder: Side; faceUp: boolean };
   log: string[];
+}
+
+export interface PublicPlay {
+  id: number;
+  card: number;
+  side: Side;
+  use: 'EVENT' | 'HEADLINE' | 'SPACE' | 'DISCARD' | OpsKind;
+  turn: number;
+  round: number;
+  finished: boolean;
 }
 
 export const HAND_SIZE = { early: 8, midLate: 9 } as const;

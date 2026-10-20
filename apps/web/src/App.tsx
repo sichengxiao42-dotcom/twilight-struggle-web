@@ -8,6 +8,7 @@ import { cardChoices } from './cardPlay';
 import { CardView } from './CardView';
 import { PhaseAnnouncer, phaseAnnouncement } from './PhaseAnnouncer';
 import { LobbyPanel } from './LobbyPanel';
+import { PlayFlights, RecentDock, RecentPlays, usePlayPresentation } from './PlayedCards';
 import { EffectsPanel, LogPanel, PANEL_TITLES, RegionPanel, RulesPanel, SideRail, type SidePanel } from './SidePanels';
 import { displayState, useOnline } from './useOnline';
 const sides: Record<Side, string> = { USSR: '苏联', US: '美国' };
@@ -60,6 +61,7 @@ export function App() {
   const onlineActive=Boolean(online.session);
   const gameStarted=onlineActive?Boolean(online.snapshot?.started&&online.snapshot.view&&online.snapshot.side):localState!==null;
   const inLobby=onlineActive&&!gameStarted;
+  const presentation=usePlayPresentation(state.publicPlays,gameStarted?(online.session?.roomId??'local-'+state.seed):'lobby');
   const visiblePanel=!gameStarted?(sidePanel==='rules'&&onlineActive?'rules':'room'):sidePanel==='room'&&!onlineActive?'regions':sidePanel;
   const canAct=gameStarted&&(!onlineActive||Boolean(online.ready&&!online.busy&&online.snapshot?.started&&online.snapshot.side&&actor===side));
   const taskKey=JSON.stringify(p);
@@ -140,7 +142,7 @@ export function App() {
           <p>{canIncrease?(p.kind==='OPS'?'每加 1 点消耗 '+placementCost(state,countrySelection.country,side)+' OPS':'每次增加 1 点影响力'):canDecrease?'本次放置已完成，仍可用减号撤回最后一点':'当前不能继续放置，请按阶段提示操作'}<small>减号仅撤回该国最近的放置；其他误操作用“撤销上一步”。</small></p>
           <button className="secondary" onClick={()=>setCountrySelection(null)}>收起</button>
         </div>}
-        <Board selectedCountry={countrySelection?.country} key={(online.session?.roomId??'local-'+state.seed)+'-undo-'+(online.snapshot?.undoVersion??undoVersion)} canInteract={canAct} onAction={dispatch} state={state} targets={targets} onCountry={onCountry} scale={zoom} lastPlacement={lastPlacement}/>
+        <Board publicPlays={gameStarted?presentation.boardPlays:[]} selectedCountry={countrySelection?.country} key={(online.session?.roomId??'local-'+state.seed)+'-undo-'+(online.snapshot?.undoVersion??undoVersion)} canInteract={canAct} onAction={dispatch} state={state} targets={targets} onCountry={onCountry} scale={zoom} lastPlacement={lastPlacement}/>
       </section>
       <aside id="table-actions" className={'action-panel command-dock surface table-actions '+(actionsOpen?'is-open':'')} hidden={!actionsOpen} ref={actionRef} tabIndex={-1} aria-label="操作区">
         <div className="panel-heading"><div><span className="eyebrow">{sides[side]}指挥席</span><h2>{blocked?'等待对局':p.kind==='SETUP_PLACEMENT'?'开局部署':p.kind==='OPS'?'执行行动':p.kind==='DECISION'||p.kind==='SUBPLAY'?'事件处理':'出牌与行动'}</h2></div><button className="secondary" aria-label="关闭操作区" onClick={()=>setActionsOpen(false)}>×</button></div>
@@ -231,8 +233,10 @@ export function App() {
       {canAct&&p.kind==='DECISION'&&p.decision.kind==='INFLUENCE'&&p.decision.optional&&<button className="secondary" onClick={()=>dispatch({type:'CHOOSE',value:'done'})}>{p.decision.relocation?'移除完毕':'完成选择'}</button>}
       {canAct&&p.kind==='ACTION_ROUND'&&canPass(state,side)&&<button className="secondary" onClick={()=>dispatch({type:'PASS_EMPTY'})}>跳过本轮</button>}
     </StageGuide>
+    <RecentDock plays={state.publicPlays??[]} receiving={presentation.flights.length>0} onOpen={()=>setSidePanel('recent')}/>
       {visiblePanel==='cards'&&selected!==null&&revealed&&<CardComposer key={selected} id={selected} state={state} side={side} canAct={canAct} blocked={blocked} onPlay={dispatch} onClose={closeCard}/>}
         {visiblePanel==='cards'&&p.kind!=='CONFIRM_END'&&(selected===null||!revealed)&&<div className="card-workspace-empty"><span aria-hidden="true">▤</span><h3>{revealed?'点击下方的一张手牌':'手牌暂时隐藏'}</h3><p>{revealed?'卡牌效果、用途与确认按钮会显示在这里。':'确认由'+sides[side]+'玩家操作后，显示手牌。'}</p>{!revealed&&<button className="primary" onClick={()=>setRevealed(true)}>显示自己的手牌</button>}</div>}</>:null}
+        {gameStarted&&visiblePanel==='recent'&&<RecentPlays plays={state.publicPlays??[]}/>}
         {gameStarted&&visiblePanel==='regions'&&<RegionPanel state={state} side={side}/>}
         {gameStarted&&visiblePanel==='log'&&<LogPanel lines={log}/>}
         {visiblePanel==='rules'&&<RulesPanel/>}
@@ -243,6 +247,7 @@ export function App() {
       </div>
 
     </div>
+    <PlayFlights flights={presentation.flights} onFinish={presentation.finishFlight}/>
     <PhaseAnnouncer announcement={gameStarted&&canAct&&!blocked&&actor===side?phaseAnnouncement(state):null}/>
     <footer className="table-footer"><span>冷战热斗 · 中文牌桌</span><span>苏联先手 · 美国后手</span></footer>
   </main>;

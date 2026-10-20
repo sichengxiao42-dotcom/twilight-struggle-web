@@ -4,6 +4,7 @@ import { CARD_BY_ID, WAR_CARDS } from './data/cards';
 import { COUNTRIES, COUNTRY_BY_ID } from './data/countries';
 import { actionRoundsForTurn, controller, coupResult, isRegionRestrictedByDefcon, placementCost, vpWinner } from './rules';
 import { createRng, rollDie } from './rng';
+import { trackPublicPlays } from './publicPlays';
 import type { GameState, Task } from './state';
 import { addVp, beginHeadline, canEvent, changeDefcon, chooseDecision, drain, influenceTargets, modifiedOps, protectedCountry, roundsFor } from './engine';
 
@@ -111,6 +112,9 @@ function playTasks(next: GameState, side: Side, action: Extract<Action, { type: 
   return [...(triggered ? (action.order === 'AFTER' ? [ops, event] : [event, ops]) : [ops]), { kind: 'DISPOSE', card: card.id, event: false }];
 }
 export function apply(state: GameState, side: Side, action: Action): GameState {
+  return trackPublicPlays(state,applyInternal(state,side,action),side,action);
+}
+function applyInternal(state: GameState, side: Side, action: Action): GameState {
   if (activeSide(state) !== side) throw new Error('尚未轮到该阵营');
   const next = structuredClone(state), p = next.phase;
   if (action.type === 'END_ACTION') {
@@ -122,7 +126,7 @@ export function apply(state: GameState, side: Side, action: Action): GameState {
     } else if (p.context === 'HEADLINE') {
       const card=next.pendingHeadline!;delete next.pendingHeadline;
       next.phase={kind:'HEADLINE',side};next.manualEnd=false;
-      const resolved=apply(next,side,{type:'SELECT_HEADLINE',card});resolved.manualEnd=true;return resolved;
+      const resolved=applyInternal(next,side,{type:'SELECT_HEADLINE',card});resolved.manualEnd=true;return resolved;
     } else {
       if (next.mode === 'STANDARD') {
         const task=next.tasks[0];

@@ -69,12 +69,18 @@ test('real Socket.IO clients: lobby seats, separate views, full early-war flow, 
     }else throw new Error('unexpected phase '+p.kind);
     const next=client.last!.revision+1;const reply=await client.act(action,'step_'+step);assert.ok(reply.ok,reply.ok?'':reply.error);
     await Promise.all([b.wait(s=>s.revision===next),reconnected.wait(s=>s.revision===next)]);
+    assert.deepEqual(b.last!.view!.publicPlays,reconnected.last!.view!.publicPlays);
     for(const c of [b,reconnected]){
       assert.ok(!('seed' in c.last!.view!));assert.ok(!('deck' in c.last!.view!));assert.ok(!('tasks' in c.last!.view!));
       const enemy=c.last!.side==='US'?'USSR':'US';if(!(c.last!.side==='US'&&c.last!.view!.effects.cia)&&!(c.last!.side==='USSR'&&c.last!.view!.effects.aldrich))assert.deepEqual(c.last!.view!.hands[enemy],[]);
     }
   }
   assert.equal(b.last!.view!.turn,4);assert.equal(b.last!.view!.handCounts.US,9);
+  const publicHistory=structuredClone(b.last!.view!.publicPlays);
+  assert.ok(publicHistory.length>0);assert.ok(publicHistory.every(play=>play.finished));
+  await a.connect();assert.ok((await a.join(session)).ok);
+  await a.wait(snapshot=>snapshot.revision===b.last!.revision&&snapshot.side==='USSR');
+  assert.deepEqual(a.last!.view!.publicPlays,publicHistory);
 });
 
 test('socket room management keeps seats on restart and broadcasts close to both members',{timeout:15000},async t=>{
