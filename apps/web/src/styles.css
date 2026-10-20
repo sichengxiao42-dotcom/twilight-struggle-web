@@ -71,6 +71,11 @@ summary>span { color:var(--muted); font-size:11px; margin-left:9px; }
 .region-title { fill:#4f4b42; font-size:17px; font-weight:700; }
 .map-caption { display:flex; gap:14px; flex-wrap:wrap; font-size:10px; padding:10px 16px; color:var(--muted); }
 .map-caption span:first-child { color:var(--us); }.map-caption span:nth-child(2) { color:var(--ussr); }
+.map-interaction { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px 16px; padding:9px 16px; border-bottom:1px solid var(--line); font-size:11px; color:var(--muted); }
+.map-feedback { color:var(--fg); font-weight:600; }
+.map-feedback:empty { display:none; }
+.map-board { user-select:none; touch-action:manipulation; }
+.map-board .country .tint,.map-board .country .marker,.map-board .connection { pointer-events:none; }
 .action-panel { grid-area:actions; position:sticky; top:125px; max-height:calc(100vh - 145px); overflow-y:auto; scrollbar-width:thin; scroll-margin-top:135px; }
 .action-panel .panel-heading { background:#eae3d3; }
 .seat-tag { padding:5px 9px; font-size:11px; border:1px solid #b48b7e; color:#8e3329; background:#9d3e3312; border-radius:5px; white-space:nowrap; }

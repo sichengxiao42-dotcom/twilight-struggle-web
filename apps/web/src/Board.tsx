@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import type { Region, Side } from '@ts/shared';
-import { ADJACENCY, COUNTRIES, controller, type Country, type GameState } from '@ts/game-core';
+import { ADJACENCY, COUNTRIES, controller, placementCost, type Country, type GameState } from '@ts/game-core';
 import { boardImage } from './assets';
 import { ACTION_ROUND_TRACK, BOX_HEADER, BOX_HEIGHT, BOX_WIDTH, DEFCON_TRACK, MAP_HEIGHT, MAP_POSITIONS, MAP_WIDTH, MIL_OPS_TRACK, SPACE_TRACK, TRACK_MARKER_RADIUS, TURN_TRACK, VP_TRACK } from './mapPositions';
 const labels: Record<Region, string> = { EUROPE: '欧洲', ASIA: '亚洲', MIDDLE_EAST: '中东', AFRICA: '非洲', CENTRAL_AMERICA: '中美洲', SOUTH_AMERICA: '南美洲' };
@@ -58,12 +58,25 @@ function TrackMarkers({ state }: { state: GameState }) {
   </g>;
 }
 
-export function Board({ state, targets, onCountry, scale = 1 }: { state: GameState; targets: string[]; onCountry: (id: string) => void; scale?: number }) {
+export interface PlacementFeedback { country: string; side: Side; before: number }
+
+export function Board({ state, targets, onCountry, scale = 1, lastPlacement }: { state: GameState; targets: string[]; onCountry: (id: string) => void; scale?: number; lastPlacement?: PlacementFeedback | null }) {
   const [hover, setHover] = useState<string | null>(null);
+  const p = state.phase;
+  const placing = p.kind === 'SETUP_PLACEMENT' || (p.kind === 'OPS' && p.mode === 'INFLUENCE');
+  const hint = (id: string) => {
+    if (!targets.includes(id)) return '当前不可操作';
+    if (p.kind === 'SETUP_PLACEMENT') return `点击部署 1 点${p.side === 'USSR' ? '苏联' : '美国'}影响力`;
+    if (p.kind === 'OPS' && p.mode === 'INFLUENCE') return `点击部署 1 点影响力 · 消耗 ${placementCost(state, id, p.side)} 行动点`;
+    return '点击选择这个国家';
+  };
+  const delta = lastPlacement ? state.influence[lastPlacement.country][lastPlacement.side] - lastPlacement.before : 0;
+  const receipt = lastPlacement && delta > 0 ? `已在${nameOf(lastPlacement.country)}部署 ${delta} 点${lastPlacement.side === 'USSR' ? '苏联' : '美国'}影响力` : '';
+  const feedback = <div className="map-interaction"><span>{hover ? nameOf(hover) + ' · ' + hint(hover) : placing ? '直接点击棋盘上的金框国家部署影响力' : '金框国家可直接点击选择'}</span><span className="map-feedback" role="status" aria-live="polite">{receipt}</span></div>;
   const country = (c: Country, [x, y]: number[], body: ReactNode) => {
     const inf = state.influence[c.id], ctrl = controller(state, c.id), legal = targets.includes(c.id);
-    return <g key={c.id} transform={'translate(' + x + ',' + y + ')'} className={'country ' + (legal ? 'legal ' : '') + (ctrl ? 'controlled-' + ctrl : '')} role="button" aria-disabled={!legal} aria-label={c.nameZh + ' 稳定度' + c.stability + ' 美国' + inf.US + ' 苏联' + inf.USSR} tabIndex={0} onMouseEnter={() => setHover(c.id)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(c.id)} onBlur={() => setHover(null)} onClick={() => { if (legal) onCountry(c.id); }} onKeyDown={e => { if (legal && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onCountry(c.id); } }}>
-      <title>{c.nameZh + ' · 稳定度 ' + c.stability + ' · 相邻：' + ADJACENCY[c.id].map(nameOf).join('、')}</title>
+    return <g key={c.id} data-country-id={c.id} transform={'translate(' + x + ',' + y + ')'} className={'country ' + (legal ? 'legal ' : '') + (ctrl ? 'controlled-' + ctrl : '')} role="button" aria-disabled={!legal} aria-label={c.nameZh + ' 稳定度' + c.stability + ' 美国' + inf.US + ' 苏联' + inf.USSR} tabIndex={0} onMouseEnter={() => setHover(c.id)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(c.id)} onBlur={() => setHover(null)} onClick={() => { if (legal) onCountry(c.id); }} onKeyDown={e => { if (legal && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onCountry(c.id); } }}>
+      <title>{c.nameZh + ' · ' + hint(c.id) + ' · 稳定度 ' + c.stability + ' · 相邻：' + ADJACENCY[c.id].map(nameOf).join('、')}</title>
       {body}
     </g>;
   };
@@ -71,19 +84,20 @@ export function Board({ state, targets, onCountry, scale = 1 }: { state: GameSta
     const centre = (id: string) => [MAP_POSITIONS[id][0] + BOX_WIDTH / 2, MAP_POSITIONS[id][1] + BOX_HEIGHT / 2];
     return <>
       <div className="board-scroll"><svg viewBox={'0 0 ' + MAP_WIDTH + ' ' + MAP_HEIGHT} className="board map-board" style={{width: `${scale * 100}%`}} aria-label="世界局势地图">
-        <image href={map} width={MAP_WIDTH} height={MAP_HEIGHT}/>
+        <image href={map} width={MAP_WIDTH} height={MAP_HEIGHT} pointerEvents="none"/>
         {hover && ADJACENCY[hover].map(id => { const a = centre(hover), b = centre(id); return <line key={id} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} className="connection"/>; })}
         {COUNTRIES.map(c => {
           const inf = state.influence[c.id], ctrl = controller(state, c.id), half = BOX_WIDTH / 2, size = BOX_HEIGHT - BOX_HEADER - 40;
           return country(c, MAP_POSITIONS[c.id], <>
-            <rect className="hit" width={BOX_WIDTH} height={BOX_HEIGHT} rx="10"/>
             <rect className="tint" y={BOX_HEADER} width={BOX_WIDTH} height={BOX_HEIGHT - BOX_HEADER}/>
             <Marker x={(half - size) / 2} value={inf.US} side="us" filled={ctrl === 'US'}/>
             <Marker x={half + (half - size) / 2} value={inf.USSR} side="ussr" filled={ctrl === 'USSR'}/>
+            {/* Topmost hit surface covers the printed name, both halves and existing counters. */}
+            <rect className="hit" width={BOX_WIDTH} height={BOX_HEIGHT} rx="10" pointerEvents="all" aria-hidden="true"/>
           </>);
         })}
         <TrackMarkers state={state}/>
-      </svg></div><p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>悬停或聚焦查看相邻连线 · 放大后可横向滚动</span></p></>;
+      </svg></div>{feedback}<p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>放大后可横向滚动</span></p></>;
   }
   return <>
     <div className="board-scroll"><svg viewBox="0 0 1208 810" className="board" style={{width: `${scale * 100}%`}} aria-label="世界局势示意地图">
@@ -93,5 +107,5 @@ export function Board({ state, targets, onCountry, scale = 1 }: { state: GameSta
         const inf = state.influence[c.id];
         return country(c, positions[c.id], <><rect width="120" height="40" rx="5"/><text x="6" y="15">{c.battleground ? '★ ' : ''}{c.nameZh}</text><text x="6" y="32" className="stability">稳 {c.stability}</text><text x="72" y="32" className="us-value">{inf.US}</text><text x="99" y="32" className="ussr-value">{inf.USSR}</text></>);
       })}
-    </svg></div><p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>悬停或聚焦查看相邻连线 · 放大后可横向滚动</span></p></>;
+    </svg></div>{feedback}<p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>放大后可横向滚动</span></p></>;
 }

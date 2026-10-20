@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Region, Side } from '@ts/shared';
 import { CARD_BY_ID, COUNTRIES, EVENT_SUMMARIES, REGION_NAMES, activeSide, apply, canEvent, canPass, createGame, forcedMissileEnvy, formatLog, legalTargets, trapDiscards, trapped, type Action, type Effects, type OpsMode } from '@ts/game-core';
 import { phaseGuide, StageGuide } from './StageGuide';
-import { Board } from './Board';
+import { Board, type PlacementFeedback } from './Board';
 import { CardView } from './CardView';
 import { displayState, useOnline } from './useOnline';
 const sides: Record<Side, string> = { USSR: '苏联', US: '美国' };
@@ -31,6 +31,7 @@ export function App() {
   const handRef = useRef<HTMLElement>(null);
   const actionRef = useRef<HTMLElement>(null);
   const [zoom, setZoom] = useState(1);
+  const [lastPlacement, setLastPlacement] = useState<PlacementFeedback | null>(null);
   const [localState, setState] = useState(() => createGame(1));
   const online=useOnline();
   const state=online.snapshot?displayState(online.snapshot.view):localState;
@@ -52,6 +53,7 @@ export function App() {
   const targets=canAct?(online.snapshot?online.snapshot.view.targets:legalTargets(state)):[];
   useEffect(()=>{setSelected(null);setRegional('NONE');},[online.snapshot?.revision,online.session?.roomId]);
   useEffect(()=>{setRevealed(false);},[online.session?.roomId]);
+  useEffect(()=>{setLastPlacement(null);},[state.seed,online.session?.roomId]);
   const invite=online.session?location.origin+location.pathname+'#room='+online.session.roomId+'&side='+(online.session.side==='US'?'USSR':'US'):'';
   const dispatch = (action: Action) => {
     if (!side || !canAct) return;
@@ -70,7 +72,11 @@ export function App() {
     ref.current?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
     ref.current?.focus({preventScroll:true});
   };
-  const onCountry = (id:string) => dispatch(p.kind === 'DECISION' ? {type:'CHOOSE',value:id} : { type: p.kind === 'SETUP_PLACEMENT' ? 'PLACE_SETUP' : 'TARGET', country:id });
+  const onCountry = (id:string) => {
+    if (!canAct || !targets.includes(id)) return;
+    setLastPlacement(p.kind === 'SETUP_PLACEMENT' || (p.kind === 'OPS' && p.mode === 'INFLUENCE') ? {country:id,side,before:state.influence[id][side]} : null);
+    dispatch(p.kind === 'DECISION' ? {type:'CHOOSE',value:id} : { type: p.kind === 'SETUP_PLACEMENT' ? 'PLACE_SETUP' : 'TARGET', country:id });
+  };
   const deckCount = online.snapshot?.view.deckCount ?? state.deck.length;
   return <main className="command-room">
     <header className="masthead"><div className="brand"><span className="brand-symbol" aria-hidden="true">✦</span><div><h1>冷战热斗</h1><span className="brand-subtitle">TWILIGHT STRUGGLE · 1945—1989</span></div></div><div className="session-label"><i className={onlineActive?'live-dot online':'live-dot'}/>{onlineActive?'联机房间 · '+online.session!.roomId:'本地双人热座'}<span>{state.mode==='STANDARD'?'标准对局':'行动点练习'}</span></div></header>
@@ -102,7 +108,7 @@ export function App() {
     <div className="game-layout">
       <section className="map-panel surface" ref={mapRef} tabIndex={-1} aria-label="世界棋盘">
         <div className="panel-heading"><div><span className="eyebrow">全球局势</span><h2>世界棋盘</h2></div><div className="map-tools"><span className="target-legend"><i/>{targets.length?targets.length+' 个可选国家':'当前无需选择国家'}</span><button aria-label="缩小地图" disabled={zoom<=1} onClick={()=>setZoom(z=>Math.max(1,z-0.25))}>−</button><button className="zoom-reset" onClick={()=>setZoom(1)} title="重置为适应宽度">{Math.round(zoom*100)}%</button><button aria-label="放大地图" disabled={zoom>=2} onClick={()=>setZoom(z=>Math.min(2,z+0.25))}>＋</button></div></div>
-        <Board state={state} targets={targets} onCountry={onCountry} scale={zoom}/>
+        <Board state={state} targets={targets} onCountry={onCountry} scale={zoom} lastPlacement={lastPlacement}/>
       </section>
       <aside className="action-panel surface" ref={actionRef} tabIndex={-1} aria-label="操作区">
         <div className="panel-heading"><div><span className="eyebrow">{sides[side]}指挥席</span><h2>{blocked?'等待对局':p.kind==='SETUP_PLACEMENT'?'开局部署':p.kind==='OPS'?'执行行动':p.kind==='DECISION'||p.kind==='SUBPLAY'?'事件处理':'出牌与行动'}</h2></div><span className={'seat-tag seat-'+side}>{sides[side]}</span></div>
