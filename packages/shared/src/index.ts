@@ -6,23 +6,28 @@ export type SubRegion = 'EASTERN_EUROPE' | 'WESTERN_EUROPE' | 'SOUTHEAST_ASIA';
 
 export const opponent = (side: Side): Side => (side === 'USSR' ? 'US' : 'USSR');
 
-export interface SeatStatus { occupied: boolean; connected: boolean }
+export interface SeatStatus { occupied: boolean; connected: boolean; mine: boolean }
 export interface RoomSnapshot {
-  roomId: string; side: Side; revision: number;
+  /** side is null until this member sits down in the lobby; view is null while unseated. */
+  roomId: string; side: Side | null; started: boolean; members: number; revision: number;
   canUndo?: boolean; undoVersion?: number;
   undoPlacement?: {country:string;side:Side};
   seats: Record<Side,SeatStatus>;
   // The concrete PlayerView is defined by game-core, which depends on this package.
-  view: unknown;
+  view: unknown | null;
 }
 export type Reply<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
-export interface Session { roomId: string; side: Side; token: string }
+/** Room membership; the side is chosen separately in the lobby. */
+export interface Session { roomId: string; token: string }
+export type SeatChoice = Side | 'RANDOM' | null;
 export interface ServerToClient {
   state: (snapshot: RoomSnapshot) => void;
   error: (message: string) => void;
 }
 export interface ClientToServer {
-  create: (request: { side: Side }, ack: (reply: Reply<Session>) => void) => void;
-  join: (request: { roomId: string; side: Side; token?: string }, ack: (reply: Reply<Session>) => void) => void;
+  create: (request: Record<string, never>, ack: (reply: Reply<Session>) => void) => void;
+  join: (request: { roomId: string; token?: string }, ack: (reply: Reply<Session>) => void) => void;
+  seat: (request: { side: SeatChoice }, ack: (reply: Reply<{ revision: number }>) => void) => void;
+  start: (request: Record<string, never>, ack: (reply: Reply<{ revision: number }>) => void) => void;
   action: (request: { id: string; expectedRevision: number; action: unknown }, ack: (reply: Reply<{ revision: number }>) => void) => void;
 }

@@ -28,9 +28,13 @@ try{
     const socket=io(origin,{autoConnect:false,transports:['websocket'],reconnection:false});clients.push(socket);
     await new Promise((resolve,reject)=>{socket.once('connect',resolve);socket.once('connect_error',reject);socket.connect();});
   }
-  const created=await clients[0].timeout(3000).emitWithAck('create',{side:'USSR'});if(!created.ok)throw new Error(created.error);
-  const joined=await clients[1].timeout(3000).emitWithAck('join',{roomId:created.data.roomId,side:'US'});if(!joined.ok)throw new Error(joined.error);
-  console.log('Production smoke passed: HTML, JavaScript, CSS, Chinese art, health, SPA navigation, and two WebSocket clients.');
+  const check=(reply)=>{if(!reply.ok)throw new Error(reply.error);return reply;};
+  const created=check(await clients[0].timeout(3000).emitWithAck('create',{}));
+  check(await clients[1].timeout(3000).emitWithAck('join',{roomId:created.data.roomId}));
+  check(await clients[0].timeout(3000).emitWithAck('seat',{side:'USSR'}));
+  check(await clients[1].timeout(3000).emitWithAck('seat',{side:'US'}));
+  check(await clients[1].timeout(3000).emitWithAck('start',{}));
+  console.log('Production smoke passed: HTML, JavaScript, CSS, Chinese art, health, SPA navigation, and two WebSocket clients through the lobby.');
 }finally{
   for(const socket of clients)socket.disconnect();
   if(child.exitCode===null){const ended=once(child,'exit');child.kill('SIGTERM');const timer=setTimeout(()=>child.kill('SIGKILL'),3000);await ended;clearTimeout(timer);}

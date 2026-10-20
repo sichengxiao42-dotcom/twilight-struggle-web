@@ -172,3 +172,18 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
 .phase-banner span:not(.phase-seal) { font-size:16px; color:#4b4a40; line-height:1.5; }
 @keyframes phase-flash { 0% { opacity:0; transform:translateY(14px) scale(.96); } 14% { opacity:1; transform:none; } 78% { opacity:1; transform:none; } 100% { opacity:0; transform:translateY(-10px); } }
 @media(prefers-reduced-motion:reduce) { .phase-banner { animation:none !important; } }
+
+/* Room lobby (side column, before the game starts): invite, two seats, random assignment, start. */
+.lobby-panel { display:flex; flex-direction:column; gap:12px; padding:14px; }
+.lobby-panel>header { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+.lobby-panel>header h2 { font-size:20px; letter-spacing:.06em; }.lobby-panel>header span { font-size:11px; color:var(--muted); }
+.lobby-invite { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }.lobby-invite input { flex:1 1 100%; font-size:11px; }.lobby-invite button { font-size:12px; }.lobby-invite small { font-size:11px; }
+.lobby-hint { font-size:12px; color:var(--muted); }
+.lobby-seats { display:flex; flex-direction:column; gap:8px; }
+.lobby-seat { display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px dashed var(--line); border-radius:5px; background:var(--surface); }
+.lobby-seat.taken { border-style:solid; }.lobby-seat.mine { border:2px solid var(--accent); background:#e4e6d2; padding:9px 11px; }
+.lobby-seal { flex:none; display:grid; place-items:center; width:40px; height:44px; font:22px SimSun,serif; color:#fff8ec; border-radius:3px; }
+.lobby-seat.seat-USSR .lobby-seal { background:var(--ussr); }.lobby-seat.seat-US .lobby-seal { background:var(--us); }
+.lobby-seat>div { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }.lobby-seat strong { font-size:15px; color:var(--fg); }.lobby-seat small { font-size:11px; }
+.lobby-seat button { flex:none; font-size:12px; min-width:84px; }
+.lobby-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }.lobby-actions button { font-size:13px; }

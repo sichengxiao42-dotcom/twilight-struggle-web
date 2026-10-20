@@ -29,46 +29,81 @@ export function parseAction(value:unknown):Action | {type:'UNDO'} | {type:'UNDO_
     default:throw new Error('不支持的操作');
   }
 }
-interface Seat { tokenHash:string; clientId:string|null; requests:Map<string,string> }
-interface Room { state:GameState; seats:Partial<Record<Side,Seat>>; revision:number; touched:number; actions:{side:Side;action:Action}[]; history:{side:Side;state:GameState;action:Action}[]; undoVersion:number }
+/** A person in the room. Identity (token) is separate from the side they sit on, so sides are chosen in the lobby. */
+interface Member { tokenHash:string; clientId:string|null; requests:Map<string,string> }
+interface Room { state:GameState; members:Map<string,Member>; seats:Partial<Record<Side,string>>; started:boolean; revision:number; touched:number; actions:{side:Side;action:Action}[]; history:{side:Side;state:GameState;action:Action}[]; undoVersion:number }
+export type SeatChoice = Side | 'RANDOM' | null;
 /** In-memory authority. Reconnect survives transport loss and refresh, not a server restart. */
 export class RoomStore {
   private rooms=new Map<string,Room>();
-  constructor(private readonly seed=()=>randomInt(0,0x100000000)){}
-  create(side:unknown,clientId:string) {
-    if(!isSide(side))throw new Error('请选择美国或苏联');
+  constructor(private readonly seed=()=>randomInt(0,0x100000000),private readonly coin=()=>randomInt(0,2)){}
+  create(clientId:string) {
     this.sweep();if(this.rooms.size>=200)throw new Error('房间已满，请稍后重试');
     let roomId:string;do{roomId=randomBytes(5).toString('hex').toUpperCase();}while(this.rooms.has(roomId));
     const state=createGame(this.seed());state.log=['对局已创建'];
-    this.rooms.set(roomId,{state,seats:{},revision:0,touched:Date.now(),actions:[],history:[],undoVersion:0});
-    return this.join(roomId,side,clientId);
+    this.rooms.set(roomId,{state,members:new Map(),seats:{},started:false,revision:0,touched:Date.now(),actions:[],history:[],undoVersion:0});
+    return this.join(roomId,clientId);
   }
-  join(roomId:unknown,side:unknown,clientId:string,token?:unknown):{session:Session; replaced:string|null} {
-    if(typeof roomId!=='string'||!isSide(side))throw new Error('无效房间或阵营');
+  /** Enter a room as a new member, or restore an existing member with its token. Returns the member key used internally. */
+  join(roomId:unknown,clientId:string,token?:unknown):{session:Session; key:string; replaced:string|null} {
+    if(typeof roomId!=='string')throw new Error('无效房间号');
     const normalized=roomId.trim().toUpperCase(),room=this.rooms.get(normalized);
     if(!room)throw new Error('房间不存在或已失效');
-    const seat=room.seats[side];let secret:string,replaced:string|null=null;
-    if(seat){
-      if(typeof token!=='string'||token.length>128||hash(token)!==seat.tokenHash)throw new Error('该阵营已被占用，请使用原设备的恢复身份');
-      secret=token;replaced=seat.clientId!==clientId?seat.clientId:null;seat.clientId=clientId;
+    let secret:string,replaced:string|null=null,member:Member|undefined;
+    if(token!==undefined){
+      if(typeof token!=='string'||token.length>128||!(member=room.members.get(hash(token))))throw new Error('恢复身份已失效，请重新加入房间');
+      secret=token;replaced=member.clientId&&member.clientId!==clientId?member.clientId:null;member.clientId=clientId;
     }else{
-      if(token!==undefined)throw new Error('恢复身份已失效');
-      secret=randomBytes(32).toString('base64url');room.seats[side]={tokenHash:hash(secret),clientId,requests:new Map()};
+      if(room.members.size>=2)throw new Error('房间已满：已有两名玩家');
+      secret=randomBytes(32).toString('base64url');room.members.set(hash(secret),{tokenHash:hash(secret),clientId,requests:new Map()});
     }
-    room.touched=Date.now();return {session:{roomId:normalized,side,token:secret},replaced};
+    room.touched=Date.now();return {session:{roomId:normalized,token:secret},key:hash(secret),replaced};
   }
-  disconnect(roomId:string,side:Side,clientId:string) {
-    const room=this.rooms.get(roomId),seat=room?.seats[side];if(seat?.clientId===clientId){seat.clientId=null;room!.touched=Date.now();}
+  private member(roomId:string,key:string,clientId:string) {
+    const room=this.rooms.get(roomId),member=room?.members.get(key);
+    if(!room||!member||member.clientId!==clientId)throw new Error('房间身份无效，请重新连接');
+    return {room,member};
   }
-  execute(roomId:string,side:Side,clientId:string,request:unknown) {
-    const room=this.rooms.get(roomId),seat=room?.seats[side];
-    if(!room||!seat||seat.clientId!==clientId)throw new Error('房间身份无效，请重新连接');
-    if(!room.seats.US||!room.seats.USSR)throw new Error('等待另一名玩家加入');
+  private sideOf(room:Room,key:string):Side|null {
+    return room.seats.USSR===key?'USSR':room.seats.US===key?'US':null;
+  }
+  /** Lobby seat change: sit on a free side, switch, stand up, or random assignment. Locked once the game starts. */
+  seat(roomId:string,key:string,clientId:string,choice:unknown) {
+    const {room}=this.member(roomId,key,clientId);
+    if(room.started)throw new Error('对局已开始，不能更换阵营');
+    if(choice!==null&&choice!=='RANDOM'&&!isSide(choice))throw new Error('请选择美国或苏联');
+    const current=this.sideOf(room,key);
+    if(choice==='RANDOM'){
+      const keys=[...room.members.keys()];
+      if(keys.length===2){const first=this.coin()?keys:[keys[1],keys[0]];room.seats={USSR:first[0],US:first[1]};}
+      else{const free=(['USSR','US'] as const).filter(side=>!room.seats[side]||room.seats[side]===key);if(current)delete room.seats[current];room.seats[free[free.length>1?this.coin():0]]=key;}
+    }else{
+      if(choice&&room.seats[choice]&&room.seats[choice]!==key)throw new Error('该阵营已有玩家，请选择另一边');
+      if(current)delete room.seats[current];
+      if(choice)room.seats[choice]=key;
+    }
+    room.revision++;room.touched=Date.now();return room.revision;
+  }
+  start(roomId:string,key:string,clientId:string) {
+    const {room}=this.member(roomId,key,clientId);
+    if(room.started)return room.revision;
+    if(!this.sideOf(room,key))throw new Error('请先选择阵营');
+    if(!room.seats.US||!room.seats.USSR)throw new Error('等待另一名玩家选择阵营');
+    room.started=true;room.state.log.push('双方入座，对局开始');room.revision++;room.touched=Date.now();return room.revision;
+  }
+  disconnect(roomId:string,key:string,clientId:string) {
+    const room=this.rooms.get(roomId),member=room?.members.get(key);if(member?.clientId===clientId){member.clientId=null;room!.touched=Date.now();}
+  }
+  execute(roomId:string,key:string,clientId:string,request:unknown) {
+    const {room,member}=this.member(roomId,key,clientId);
+    const side=this.sideOf(room,key);
+    if(!room.started)throw new Error(side?'等待双方入座并开始对局':'请先选择阵营');
+    if(!side)throw new Error('你没有入座，不能操作');
     if(!request||typeof request!=='object')throw new Error('无效请求');
     const r=request as Record<string,unknown>;
     if(typeof r.id!=='string'||!/^[a-zA-Z0-9_-]{1,80}$/.test(r.id))throw new Error('无效请求编号');
     const action=parseAction(r.action),fingerprint=JSON.stringify(action);
-    const prior=seat.requests.get(r.id);
+    const prior=member.requests.get(r.id);
     if(prior!==undefined){if(prior!==fingerprint)throw new Error('请求编号已用于其他操作');return room.revision;}
     if(r.expectedRevision!==room.revision)throw new Error('局面已更新，请按最新局面重试');
     if(action.type==='UNDO'||action.type==='UNDO_PLACEMENT'){
@@ -84,19 +119,20 @@ export class RoomStore {
       room.state=next;room.actions.push({side,action});
     }
     room.revision++;room.touched=Date.now();
-    seat.requests.set(r.id,fingerprint);if(seat.requests.size>512)seat.requests.delete(seat.requests.keys().next().value!);
+    member.requests.set(r.id,fingerprint);if(member.requests.size>512)member.requests.delete(member.requests.keys().next().value!);
     return room.revision;
   }
-  snapshot(roomId:string,side:Side):RoomSnapshot {
+  snapshot(roomId:string,key:string):RoomSnapshot {
     const room=this.rooms.get(roomId);if(!room)throw new Error('房间不存在');
-    const last=room.history.at(-1);
-    const undoPlacement=last?.side===side?influencePlacement(last.state,last.action)??undefined:undefined;
-    return {undoPlacement,roomId,side,revision:room.revision,canUndo:room.history.at(-1)?.side===side,undoVersion:room.undoVersion,seats:{US:{occupied:Boolean(room.seats.US),connected:Boolean(room.seats.US?.clientId)},USSR:{occupied:Boolean(room.seats.USSR),connected:Boolean(room.seats.USSR?.clientId)}},view:viewFor(room.state,side)};
+    const side=this.sideOf(room,key),last=room.history.at(-1);
+    const undoPlacement=side&&last?.side===side?influencePlacement(last.state,last.action)??undefined:undefined;
+    const seat=(s:Side)=>{const owner=room.seats[s];return {occupied:Boolean(owner),connected:Boolean(owner&&room.members.get(owner)?.clientId),mine:owner===key};};
+    return {undoPlacement,roomId,side,started:room.started,members:room.members.size,revision:room.revision,canUndo:Boolean(side)&&room.history.at(-1)?.side===side,undoVersion:room.undoVersion,seats:{US:seat('US'),USSR:seat('USSR')},view:side?viewFor(room.state,side):null};
   }
   members(roomId:string) {
-    const room=this.rooms.get(roomId);return (['USSR','US'] as const).flatMap(side=>{const clientId=room?.seats[side]?.clientId;return clientId?[{clientId,side}]:[];});
+    const room=this.rooms.get(roomId);return room?[...room.members.entries()].flatMap(([key,m])=>m.clientId?[{clientId:m.clientId,key}]:[]):[];
   }
   sweep(now=Date.now()) {
-    for(const [id,room] of this.rooms)if(!Object.values(room.seats).some(s=>s.clientId)&&now-room.touched>24*60*60*1000)this.rooms.delete(id);
+    for(const [id,room] of this.rooms)if(![...room.members.values()].some(m=>m.clientId)&&now-room.touched>24*60*60*1000)this.rooms.delete(id);
   }
 }

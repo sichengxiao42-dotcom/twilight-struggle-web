@@ -14,30 +14,41 @@ class Client {
     if(this.last&&predicate(this.last))return this.last;
     return new Promise<Snapshot>((resolve,reject)=>{const timer=setTimeout(()=>{this.socket.off('state',check);reject(new Error('state timeout'));},3000);const check=(s:RoomSnapshot)=>{if(predicate(s as Snapshot)){clearTimeout(timer);this.socket.off('state',check);resolve(s as Snapshot);}};this.socket.on('state',check);});
   }
-  async create(side:Side){const r=await this.socket.timeout(3000).emitWithAck('create',{side});assert.ok(r.ok,r.ok?'':r.error);return r.data;}
-  async join(session:Pick<Session,'roomId'|'side'>&{token?:string}){return this.socket.timeout(3000).emitWithAck('join',session);}
+  async create(){const r=await this.socket.timeout(3000).emitWithAck('create',{});assert.ok(r.ok,r.ok?'':r.error);return r.data;}
+  async join(session:Pick<Session,'roomId'>&{token?:string}){return this.socket.timeout(3000).emitWithAck('join',session);}
+  async seat(side:Side|'RANDOM'|null){return this.socket.timeout(3000).emitWithAck('seat',{side});}
+  async start(){return this.socket.timeout(3000).emitWithAck('start',{});}
   async act(action:Action,id:string,revision=this.last!.revision){return this.socket.timeout(3000).emitWithAck('action',{id,expectedRevision:revision,action});}
 }
-test('real Socket.IO clients: separate views, full early-war flow, duplicates and token reconnection', {timeout:20000},async t=>{
+test('real Socket.IO clients: lobby seats, separate views, full early-war flow, duplicates and token reconnection', {timeout:20000},async t=>{
   const server=createGameServer(new RoomStore(()=>42));
   await new Promise<void>(resolve=>server.http.listen(0,'127.0.0.1',resolve));
   const addr=server.http.address();assert.ok(addr&&typeof addr==='object');const url='http://127.0.0.1:'+addr.port;
   const a=new Client(url),b=new Client(url),intruder=new Client(url),reconnected=new Client(url);
   t.after(async()=>{for(const c of [a,b,intruder,reconnected])c.socket.disconnect();await new Promise<void>(resolve=>server.io.close(()=>resolve()));});
   await Promise.all([a.connect(),b.connect(),intruder.connect()]);
-  const session=await a.create('USSR');await a.wait(s=>s.side==='USSR');
-  assert.equal((await intruder.join({roomId:session.roomId,side:'USSR'})).ok,false);
-  const us=await b.join({roomId:session.roomId,side:'US'});assert.ok(us.ok);
-  await Promise.all([a.wait(s=>s.seats.US.connected),b.wait(s=>s.seats.USSR.connected)]);
+  // Lobby: create without a side, the guest joins, both choose sides, then start.
+  const session=await a.create();await a.wait(s=>s.members===1&&s.side===null&&s.view===null);
+  assert.ok((await b.join({roomId:session.roomId})).ok);
+  assert.equal((await intruder.join({roomId:session.roomId})).ok,false);
+  assert.ok((await a.seat('USSR')).ok);
+  assert.equal((await b.seat('USSR')).ok,false);
+  assert.ok((await b.seat('US')).ok);
+  await Promise.all([a.wait(s=>s.side==='USSR'&&s.seats.US.occupied),b.wait(s=>s.side==='US'&&s.seats.USSR.occupied)]);
+  assert.equal((await a.act({type:'PLACE_SETUP',country:'poland'},'early',a.last!.revision)).ok,false);
+  assert.ok((await b.start()).ok);
+  await Promise.all([a.wait(s=>s.started),b.wait(s=>s.started)]);
+  assert.equal((await a.seat('US')).ok,false);
+  const r0=a.last!.revision;
   assert.deepEqual(a.last!.view.hands.US,[]);assert.deepEqual(b.last!.view.hands.USSR,[]);
   assert.equal((await b.act({type:'PLACE_SETUP',country:'france'},'wrong')).ok,false);
   const first=await a.act({type:'PLACE_SETUP',country:'poland'},'first');assert.ok(first.ok);
-  await Promise.all([a.wait(s=>s.revision===1),b.wait(s=>s.revision===1)]);
-  const again=await a.act({type:'PLACE_SETUP',country:'poland'},'first',0);assert.ok(again.ok);assert.equal(again.data.revision,1);
-  assert.equal((await a.act({type:'PLACE_SETUP',country:'poland'},'stale',0)).ok,false);
+  await Promise.all([a.wait(s=>s.revision===r0+1),b.wait(s=>s.revision===r0+1)]);
+  const again=await a.act({type:'PLACE_SETUP',country:'poland'},'first',r0);assert.ok(again.ok);assert.equal(again.data.revision,r0+1);
+  assert.equal((await a.act({type:'PLACE_SETUP',country:'poland'},'stale',r0)).ok,false);
   a.socket.disconnect();await b.wait(s=>!s.seats.USSR.connected);
   await reconnected.connect();assert.equal((await reconnected.join(session)).ok,true);
-  await Promise.all([reconnected.wait(s=>s.revision===1),b.wait(s=>s.seats.USSR.connected)]);
+  await Promise.all([reconnected.wait(s=>s.revision===r0+1&&s.side==='USSR'),b.wait(s=>s.seats.USSR.connected)]);
   const clients:Record<Side,Client>={USSR:reconnected,US:b};
   for(let step=0;step<400;step++){
     const view=b.last!.view;
