@@ -14,16 +14,20 @@ export interface Guide {
   title: string;
   detail: string;
   focus: 'map' | 'hand' | 'actions' | 'none';
+  counter?: { value:number; unit:string };
+  rule?: string;
+  actionHint?: string;
+  waiting?: boolean;
 }
 
 /** Describes the visible phase only; never inspects another player's hand. */
 export function phaseGuide(state: GameState, context: GuideContext): Guide {
   const p = state.phase;
-  if (context.blocked) return { title: context.blocked, detail: '对方完成后会自动继续。', focus: 'none' };
+  if (context.blocked) return { title: context.blocked, detail: '对方完成后会自动继续。', focus: 'none', waiting:true };
   if (p.kind === 'CONFIRM_END') return {title:sides[p.side]+'：等待结束回合',detail:'本次操作已完成。可以先撤销检查，点击“结束回合”后才会继续；确认后不能撤销上轮操作。',focus:'none'};
   if (p.kind === 'SETUP_PLACEMENT') {
     const region = p.subRegion === 'EASTERN_EUROPE' ? '东欧' : '西欧';
-    return { title: `${sides[p.side]}：在${region}放置影响力`, detail: `还需放置 ${p.remaining} 点。点击高亮国家放置 1 点；也可拖入同色棋子。`, focus: 'map' };
+    return { title: `轮到${sides[p.side]} · ${region}部署`, detail: '点击金框国家部署，也可拖入同色棋子。', counter:{value:p.remaining,unit:'点影响力'}, focus: 'map' };
   }
   if (p.kind === 'HEADLINE') return {
     title: `${sides[p.side]}：秘密选择头条`,
@@ -34,7 +38,14 @@ export function phaseGuide(state: GameState, context: GuideContext): Guide {
     if (state.mode === 'STANDARD' && trapped(state, p.side)) return { title: `${sides[p.side]}：处理${p.side === 'US' ? '泥潭' : '捕熊陷阱'}`, detail: '显示手牌，点击符合条件的牌并选择“弃牌尝试脱困”；没有可弃牌时打计分牌或跳过。', focus: 'hand' };
     return { title: `${sides[p.side]}：第 ${p.round} / ${roundsFor(state,p.side)} 行动轮`, detail: !context.revealed ? '显示自己的手牌，开始本轮行动。' : context.selected === null ? state.mode === 'PRACTICE' ? '当前为行动点练习。选择一张非计分牌，用于放置影响力、调整或政变。' : '请选择一张手牌。计分牌须在本回合打出。' : `已选「${CARD_BY_ID.get(context.selected)?.nameZh}」。选择用途，再确认出牌。`, focus: !context.revealed || context.selected === null ? 'hand' : 'actions' };
   }
-  if (p.kind === 'OPS') return { title: `${sides[p.side]}：${modes[p.mode]}`, detail: context.targetCount ? `剩余 ${p.remaining} 行动点。${p.mode === 'INFLUENCE' ? '点击高亮国家部署 1 点，也可拖动备用棋子。' : '点击地图上的金框国家执行操作。'}${p.mode === 'INFLUENCE' ? '在对方控制国放置影响力通常需要 2 行动点。' : p.mode === 'COUP' ? '点击目标即发动政变，并消耗本次全部行动点。' : '每次调整消耗 1 行动点。'}` : '当前没有可操作的国家。可在操作区结束操作，放弃剩余行动点。', focus: context.targetCount ? 'map' : 'actions' };
+  if (p.kind === 'OPS') return {
+    title: `轮到${sides[p.side]} · ${modes[p.mode]}`,
+    detail: context.targetCount ? p.mode==='INFLUENCE'?'点击金框国家部署，也可拖入棋子。':p.mode==='COUP'?'点击金框国家立即发动政变。':'点击金框国家执行一次调整。' : '当前没有可操作的国家，可结束操作。',
+    counter:{value:p.remaining,unit:'OPS'},
+    rule:p.mode==='INFLUENCE'?'在对方控制国放置 1 点影响力通常需要 2 OPS，其余通常为 1 OPS。':p.mode==='COUP'?'点击目标即执行政变，并消耗本次全部行动点；请先确认目标及 DEFCON 风险。':'每次调整消耗 1 OPS；骰点与国家局势共同决定结果。',
+    actionHint:p.mode==='COUP'?'结束操作将放弃本次政变':'检查后确认结束行动',
+    focus:context.targetCount?'map':'actions',
+  };
   if (p.kind === 'DECISION') {
     const d = p.decision;
     if (d.kind === 'INFLUENCE' || d.kind === 'COUNTRY') return { title: `${sides[p.side]}：处理事件`, detail: d.prompt + (d.kind === 'INFLUENCE' ? ` · 剩余 ${d.remaining} 点／次。` : '。') + (context.targetCount ? d.kind==='INFLUENCE'&&d.operation==='ADD'?'点击高亮国家增加 1 点影响力。':'点击金框国家继续。' : '当前没有可选国家，请查看操作区的完成选项。'), focus: context.targetCount ? 'map' : 'actions' };
@@ -47,11 +58,13 @@ export function phaseGuide(state: GameState, context: GuideContext): Guide {
 }
 
 export function StageGuide({ guide, side, onFocus, actionLabel, showFocus=true, children }: { guide: Guide; side: Side; onFocus: () => void; actionLabel?: string; showFocus?: boolean; children?: ReactNode }) {
-  return <section className="stage-guide" aria-label="当前阶段引导">
+  return <section className={'stage-guide task-'+side+(guide.waiting?' task-waiting':'')} aria-label="当前阶段引导">
     <div className="guide-main" role="status" aria-live="polite" aria-atomic="true">
       <span className={`side-seal seal-${side}`}>{side === 'USSR' ? '苏' : '美'}</span>
       <div><h2>{guide.title}</h2><p>{guide.detail}</p></div>
     </div>
-    {(children||showFocus&&guide.focus !== 'none') && <div className="guide-next">{children}{showFocus&&guide.focus!=='none'&&<button className="primary" onClick={onFocus}>{actionLabel ?? (guide.focus === 'map' ? '前往地图' : guide.focus === 'hand' ? '选择手牌' : '前往操作区')} <span aria-hidden="true">↗</span></button>}</div>}
+    {(guide.counter||children||showFocus&&guide.focus !== 'none')&&<div className="guide-bottom">{guide.counter&&<div className="guide-counter" role="status" aria-live="polite" aria-atomic="true"><span>剩余</span><strong>{guide.counter.value}</strong><span>{guide.counter.unit}</span></div>}
+    {(children||showFocus&&guide.focus !== 'none') && <div className="guide-next">{children}{showFocus&&guide.focus!=='none'&&<button className="primary" onClick={onFocus}>{actionLabel ?? (guide.focus === 'map' ? '前往地图' : guide.focus === 'hand' ? '选择手牌' : '前往操作区')} <span aria-hidden="true">↗</span></button>}</div>}</div>}
+    {(guide.rule||guide.actionHint)&&<div className="guide-foot">{guide.rule&&<details className="guide-rules" key={guide.rule}><summary>规则提示</summary><p>{guide.rule}</p></details>}{guide.actionHint&&<small>{guide.actionHint}</small>}</div>}
   </section>;
 }

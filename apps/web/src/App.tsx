@@ -222,17 +222,19 @@ export function App() {
       </section>}
       <div className="workspace-shell"><aside className="card-workspace surface" aria-label="卡牌操作区" id="side-panel-content">
         <header className="workspace-heading"><h2>{!gameStarted?visiblePanel==='rules'?'规则速查':onlineActive?'房间大厅':'联机房间':PANEL_TITLES[visiblePanel]}</h2><span>{!gameStarted?onlineActive?'双方入座后开始':'创建或加入房间':visiblePanel==='cards'?'先选用途，再确认':visiblePanel==='regions'?'公开局面 · 实时更新':'牌桌参考'}</span></header>
+    {gameStarted&&<StageGuide guide={guide} side={side} onFocus={focusTask} showFocus={p.kind!=='OPS'&&(guide.focus==='hand'&&!revealed||guide.focus==='actions'&&selected===null)} actionLabel={guide.focus==='hand'&&!revealed?'显示手牌':undefined}>
+      {canAct&&p.kind==='CONFIRM_END'&&<button className="primary end-action" onClick={()=>dispatch({type:'END_ACTION'})}>结束回合</button>}
+      {canAct&&p.kind==='ACTION_ROUND'&&state.mode==='PRACTICE'&&state.hands[side].every(id=>CARD_BY_ID.get(id)!.scoring)&&<button className="secondary" onClick={()=>dispatch({type:'PASS_PRACTICE'})}>跳过练习行动</button>}
+      {canAct&&p.kind==='OPS'&&<button className="primary" onClick={()=>dispatch({type:'END_OPS'})}>{p.mode==='INFLUENCE'?'完成部署':p.mode==='REALIGNMENT'?'完成调整':'放弃本次政变'}</button>}
+      {canAct&&p.kind==='DECISION'&&p.decision.kind==='INFLUENCE'&&p.decision.optional&&<button className="secondary" onClick={()=>dispatch({type:'CHOOSE',value:'done'})}>{p.decision.relocation?'移除完毕':'完成选择'}</button>}
+      {canAct&&p.kind==='ACTION_ROUND'&&canPass(state,side)&&<button className="secondary" onClick={()=>dispatch({type:'PASS_EMPTY'})}>跳过本轮</button>}
+    </StageGuide>}
+        <div className="workspace-body" key={visiblePanel+':'+(selected??'')}>
         {!onlineActive&&!gameStarted&&<section className="room-entry" aria-label="联机房间"><button className="primary" disabled={online.busy} onClick={online.create}>创建房间</button><form onSubmit={e=>{e.preventDefault();if(roomId.trim()&&!online.busy)online.join(roomId);}}><input aria-label="房间码" placeholder="输入朋友的房间码" value={roomId} maxLength={10} onChange={e=>setRoomId(e.target.value.toUpperCase())}/><button disabled={online.busy||!roomId.trim()}>加入房间</button></form></section>}
         {onlineActive&&visiblePanel==='room'&&<section className="room-controls" aria-label="房间管理"><strong>房间码：{online.session!.roomId}</strong><button onClick={()=>{navigator.clipboard?.writeText(online.session!.roomId).then(()=>setCopyStatus('房间码已复制')).catch(()=>setCopyStatus('请手动复制房间码'));}}>复制房间码</button>{copyStatus&&<small>{copyStatus}</small>}{online.snapshot?.isHost&&<><button disabled={online.busy||!online.ready} onClick={()=>{if(window.confirm('重新开局会清除当前对局，双方回到大厅，房间码和座位保留。确定吗？'))online.restart();}}>重新开局</button><button disabled={online.busy||!online.ready} onClick={()=>{if(window.confirm('关闭后双方会退出房间，当前对局将被清除。确定关闭？'))online.close();}}>关闭房间</button></>}</section>}
         {inLobby&&visiblePanel==='room'?<LobbyPanel snapshot={online.snapshot} roomId={online.session!.roomId} invite={invite} busy={online.busy||!online.ready} copyStatus={copyStatus} onCopy={copyInvite} onSeat={online.seat} onStart={online.start}/>:gameStarted?<>
         {revealed&&p.kind==='HEADLINE'&&state.space[side]>=4&&state.space[side==='US'?'USSR':'US']<4&&state.headlines[side==='US'?'USSR':'US']!==undefined&&<p className="notice">太空特权：对方头条为 {CARD_BY_ID.get(state.headlines[side==='US'?'USSR':'US']!)!.nameZh}</p>}
-    <StageGuide guide={guide} side={side} onFocus={focusTask} showFocus={guide.focus==='hand'&&!revealed||guide.focus==='actions'&&selected===null} actionLabel={guide.focus==='hand'&&!revealed?'显示手牌':undefined}>
-      {canAct&&p.kind==='CONFIRM_END'&&<button className="primary end-action" onClick={()=>dispatch({type:'END_ACTION'})}>结束回合</button>}
-      {canAct&&p.kind==='ACTION_ROUND'&&state.mode==='PRACTICE'&&state.hands[side].every(id=>CARD_BY_ID.get(id)!.scoring)&&<button className="secondary" onClick={()=>dispatch({type:'PASS_PRACTICE'})}>跳过练习行动</button>}
-      {canAct&&p.kind==='OPS'&&<button className="secondary" onClick={()=>dispatch({type:'END_OPS'})}>完成操作，检查后结束回合</button>}
-      {canAct&&p.kind==='DECISION'&&p.decision.kind==='INFLUENCE'&&p.decision.optional&&<button className="secondary" onClick={()=>dispatch({type:'CHOOSE',value:'done'})}>{p.decision.relocation?'移除完毕':'完成选择'}</button>}
-      {canAct&&p.kind==='ACTION_ROUND'&&canPass(state,side)&&<button className="secondary" onClick={()=>dispatch({type:'PASS_EMPTY'})}>跳过本轮</button>}
-    </StageGuide>
+
     <RecentDock plays={state.publicPlays??[]} receiving={presentation.flights.length>0} onOpen={()=>setSidePanel('recent')}/>
       {visiblePanel==='cards'&&selected!==null&&revealed&&<CardComposer key={selected} id={selected} state={state} side={side} canAct={canAct} blocked={blocked} onPlay={dispatch} onClose={closeCard}/>}
         {visiblePanel==='cards'&&p.kind!=='CONFIRM_END'&&(selected===null||!revealed)&&<div className="card-workspace-empty"><span aria-hidden="true">▤</span><h3>{revealed?'点击下方的一张手牌':'手牌暂时隐藏'}</h3><p>{revealed?'卡牌效果、用途与确认按钮会显示在这里。':'确认由'+sides[side]+'玩家操作后，显示手牌。'}</p>{!revealed&&<button className="primary" onClick={()=>setRevealed(true)}>显示自己的手牌</button>}</div>}</>:null}
@@ -242,6 +244,7 @@ export function App() {
         {visiblePanel==='rules'&&<RulesPanel/>}
         {gameStarted&&visiblePanel==='effects'&&<EffectsPanel effects={activeEffects(state.effects)}/>}
         {gameStarted&&visiblePanel==='room'&&<section className="info-panel"><p>房间 {online.session?.roomId} · 你是{sides[side]}</p><p className="panel-intro">对局已开始，阵营已锁定。</p><input aria-label="邀请链接" readOnly value={invite}/><button onClick={copyInvite}>复制邀请链接</button></section>}
+        </div>
       </aside>
       {(gameStarted||onlineActive)&&<SideRail panel={visiblePanel} started={gameStarted} online={onlineActive} onSelect={setSidePanel}/>}
       </div>
