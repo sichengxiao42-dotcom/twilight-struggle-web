@@ -93,3 +93,32 @@ export const MAP_POSITIONS: Record<string, [number, number]> = {
   argentina: [1724, 5086],
   uruguay: [2163, 4872],
 };
+
+type Point = [number, number];
+/** 轨道标记的半径（原图像素），比最小的行动轮格（约 188 宽）略小。 */
+export const TRACK_MARKER_RADIUS = 72;
+/** 以下为各轨道格中心点的原图像素坐标，按格子边框的像素扫描量出。下标 0 对应轨道上的第一格。 */
+/** 回合记录条：第 1–10 回合。 */
+export const TURN_TRACK: Point[] = [6373, 6650, 6930, 7208, 7487, 7766, 8045, 8325, 8603, 8882].map(x => [x, 399]);
+/** 行动轮：第 1–8 轮。 */
+export const ACTION_ROUND_TRACK: Point[] = [1753, 1964, 2175, 2386, 2597, 2808, 3019, 3231].map(x => [x, 465]);
+/** 太空竞赛：0（起点）–8（空间站）。 */
+export const SPACE_TRACK: Point[] = [6372, 6685, 6991, 7296, 7603, 7907, 8214, 8519, 8825].map(x => [x, 1055]);
+/** 核威胁戒备状态：从左到右为 DEFCON 5–1。 */
+export const DEFCON_TRACK: Record<number, Point> = { 5: [2856, 4776], 4: [3137, 4776], 3: [3418, 4776], 2: [3700, 4776], 1: [3980, 4776] };
+/** 军事需求：0–5。 */
+export const MIL_OPS_TRACK: Point[] = [2857, 3138, 3419, 3700, 3981, 4265].map(x => [x, 5415]);
+/** 胜利分轨道：照地图印刷排成 5 行 9 列，负数为苏联、正数为美国；跨格的 0 与 ±20 取所占格的中点。 */
+const VP_COLUMNS = [5569, 5810, 6051, 6292, 6533, 6775, 7015, 7257, 7498];
+const VP_ROWS = [4541, 4793, 5047, 5301, 5554];
+const VP_GRID = [
+  [-20, -20, -19, -18, -17, -16, -15, -14, -13],
+  [-12, -11, -10, -9, -8, -7, -6, -5, -4],
+  [-3, -2, -1, 0, 0, 0, 1, 2, 3],
+  [4, 5, 6, 7, 8, 9, 10, 11, 12],
+  [13, 14, 15, 16, 17, 18, 19, 20, 20],
+];
+export const VP_TRACK: Record<number, Point> = Object.fromEntries([...new Set(VP_GRID.flat())].map(vp => {
+  const cells = VP_GRID.flatMap((row, r) => row.flatMap((v, c) => v === vp ? [[VP_COLUMNS[c], VP_ROWS[r]]] : []));
+  return [vp, [cells.reduce((s, p) => s + p[0], 0) / cells.length, cells.reduce((s, p) => s + p[1], 0) / cells.length]];
+}));
