@@ -310,3 +310,4 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
   .side-rail { grid-column:1; grid-row:1; flex-direction:row; gap:4px; padding:0; }
   .side-rail button { width:auto; flex:1; min-height:44px; flex-direction:row; border-radius:4px 4px 0 0; gap:5px; }.side-rail button b { font-size:16px; }
 }
+.add-bot { width:100%; margin:0 0 12px; border-style:dashed; color:#4d5b45; background:#e8e8d7; font-weight:700; }

@@ -94,6 +94,8 @@ export function useOnline() {
     send((timeout,reply)=>{setBusy(false);setError(timeout?'操作超时，请重试':reply?.ok?'':reply?.error??'操作失败');});
   };
   const seat=(side:SeatChoice)=>lobby(ack=>socket.current!.timeout(8000).emit('seat',{side},ack));
+  const bot=(enabled:boolean)=>lobby(ack=>socket.current!.timeout(8000).emit('bot',{enabled},ack));
+  const retryBot=()=>lobby(ack=>socket.current!.timeout(8000).emit('botRetry',{},ack));
   const restart=()=>{if(snapshot)lobby(ack=>socket.current!.timeout(8000).emit('restart',{expectedRevision:snapshot.revision},ack));};
   const close=()=>{if(!ready||!socket.current?.connected)return;setBusy(true);socket.current.timeout(8000).emit('close',{},(timeout,reply)=>{setBusy(false);if(timeout||!reply?.ok)setError(timeout?'关闭超时，请重试':reply&&!reply.ok?reply.error:'关闭失败');});};
   const start=()=>lobby(ack=>socket.current!.timeout(8000).emit('start',{},ack));
@@ -104,5 +106,5 @@ export function useOnline() {
   };
   const leave=()=>{socket.current?.disconnect();identity.current=null;pending.current=null;setHasPending(false);setSession(null);setSnapshot(null);setReady(false);setBusy(false);setError('');};
   const resume=()=>{const s=saved();if(!s){setError('此标签页没有可恢复的房间');return;}remember(s);socket.current?.connect();};
-  return {session,snapshot,ready,busy,error,hasPending,create:()=>enter(),join:(room:string)=>enter(room),seat,start,restart,close,send,leave,resume,retry:()=>sendPending.current()};
+  return {session,snapshot,ready,busy,error,hasPending,create:()=>enter(),join:(room:string)=>enter(room),seat,bot,retryBot,start,restart,close,send,leave,resume,retry:()=>sendPending.current()};
 }

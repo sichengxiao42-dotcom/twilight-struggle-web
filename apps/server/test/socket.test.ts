@@ -20,6 +20,41 @@ class Client {
   async start(){return this.socket.timeout(3000).emitWithAck('start',{});}
   async act(action:Action,id:string,revision=this.last!.revision){return this.socket.timeout(3000).emitWithAck('action',{id,expectedRevision:revision,action});}
 }
+
+test('socket bot plays automatically, keeps its headline secret, and cancels pending work on restart',{timeout:15000},async t=>{
+  const server=createGameServer(new RoomStore(()=>42),{botDelayMs:5});
+  await new Promise<void>(resolve=>server.http.listen(0,'127.0.0.1',resolve));
+  const addr=server.http.address();assert.ok(addr&&typeof addr==='object');
+  const a=new Client('http://127.0.0.1:'+addr.port);
+  t.after(async()=>{a.socket.disconnect();await new Promise<void>(resolve=>server.io.close(()=>resolve()));});
+  await a.connect();await a.create();
+  assert.ok((await a.socket.emitWithAck('bot',{enabled:true})).ok);
+  await a.wait(s=>Boolean(s.seats.USSR.bot));assert.equal(a.last!.view,null);
+  assert.ok((await a.start()).ok);
+  await a.wait(s=>s.view?.phase.kind==='SETUP_PLACEMENT'&&s.view.phase.side==='US');
+  assert.deepEqual(a.last!.view!.hands.USSR,[]);
+  for(let i=0;i<7;i++){
+    const revision=a.last!.revision+1;assert.ok((await a.act({type:'PLACE_SETUP',country:'west_germany'},'setup_'+i)).ok);
+    await a.wait(s=>s.revision>=revision);
+  }
+  assert.ok((await a.act({type:'END_ACTION'},'confirm_setup')).ok);
+  await a.wait(s=>s.view?.phase.kind==='HEADLINE'&&s.view.phase.side==='US');
+  assert.equal(a.last!.view!.headlineCommitted.USSR,true);
+  assert.equal(a.last!.view!.headlines.USSR,undefined);
+  assert.deepEqual(a.last!.view!.publicPlays,[],'no secret headline in public history');
+  const card=a.last!.view!.hands.US.find(id=>CARD_BY_ID.get(id)!.scoring)??a.last!.view!.hands.US.find(id=>id!==32)!;
+  let revision=a.last!.revision+1;
+  assert.ok((await a.act({type:'SELECT_HEADLINE',card},'headline')).ok);await a.wait(s=>s.revision>=revision);
+  assert.ok((await a.act({type:'END_ACTION'},'confirm_headline')).ok);
+  await a.wait(s=>Boolean(s.view?.publicPlays.some(p=>p.use!=='HEADLINE'))||Boolean(s.botError)||s.view?.phase.kind==='DECISION'&&s.view.phase.side==='US');
+  assert.equal(a.last!.botError,undefined);
+  revision=a.last!.revision;
+  assert.ok((await a.socket.emitWithAck('restart',{expectedRevision:revision})).ok);
+  await a.wait(s=>!s.started&&s.revision>revision);
+  const stopped=a.last!.revision;
+  await new Promise(resolve=>setTimeout(resolve,30));
+  assert.equal(a.last!.revision,stopped);assert.equal(a.last!.view,null);
+});
 test('real Socket.IO clients: lobby seats, separate views, full early-war flow, duplicates and token reconnection', {timeout:20000},async t=>{
   const server=createGameServer(new RoomStore(()=>42));
   await new Promise<void>(resolve=>server.http.listen(0,'127.0.0.1',resolve));

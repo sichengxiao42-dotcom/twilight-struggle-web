@@ -1,7 +1,8 @@
 import { createHash, randomBytes, randomInt } from 'node:crypto';
-import { apply, influencePlacement, CARD_BY_ID, COUNTRY_BY_ID, createGame, viewFor, type Action, type GameState } from '@ts/game-core';
+import { activeSide, apply, chooseBotAction, influencePlacement, CARD_BY_ID, COUNTRY_BY_ID, createGame, viewFor, type Action, type GameState } from '@ts/game-core';
 import type { RoomSnapshot, Session, Side } from '@ts/shared';
 const hash=(token:string)=>createHash('sha256').update(token).digest('hex');
+const BOT='sparring-bot';
 const isSide=(value:unknown):value is Side=>value==='US'||value==='USSR';
 export function parseAction(value:unknown):Action | {type:'UNDO'} | {type:'UNDO_PLACEMENT';country:string} {
   if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('无效操作');
@@ -31,7 +32,7 @@ export function parseAction(value:unknown):Action | {type:'UNDO'} | {type:'UNDO_
 }
 /** A person in the room. Identity (token) is separate from the side they sit on, so sides are chosen in the lobby. */
 interface Member { tokenHash:string; clientId:string|null; requests:Map<string,string> }
-interface Room { host:string; state:GameState|null; members:Map<string,Member>; seats:Partial<Record<Side,string>>; started:boolean; revision:number; touched:number; actions:{side:Side;action:Action}[]; history:{side:Side;state:GameState;action:Action}[]; undoVersion:number }
+interface Room { host:string; state:GameState|null; members:Map<string,Member>; seats:Partial<Record<Side,string>>; started:boolean; revision:number; touched:number; actions:{side:Side;action:Action}[]; history:{side:Side;state:GameState;action:Action}[]; undoVersion:number; botError?:string }
 export type SeatChoice = Side | 'RANDOM' | null;
 /** In-memory authority. Reconnect survives transport loss and refresh, not a server restart. */
 export class RoomStore {
@@ -53,7 +54,7 @@ export class RoomStore {
       if(typeof token!=='string'||token.length>128||!(member=room.members.get(hash(token))))throw new Error('恢复身份已失效，请重新加入房间');
       secret=token;replaced=member.clientId&&member.clientId!==clientId?member.clientId:null;member.clientId=clientId;
     }else{
-      if(room.members.size>=2)throw new Error('房间已满：已有两名玩家');
+      if(room.members.size>=2||this.sideOf(room,BOT))throw new Error('房间已满：已有两名玩家');
       secret=randomBytes(32).toString('base64url');room.members.set(hash(secret),{tokenHash:hash(secret),clientId,requests:new Map()});
     }
     room.touched=Date.now();return {session:{roomId:normalized,token:secret},key:hash(secret),replaced};
@@ -73,7 +74,7 @@ export class RoomStore {
     if(choice!==null&&choice!=='RANDOM'&&!isSide(choice))throw new Error('请选择美国或苏联');
     const current=this.sideOf(room,key);
     if(choice==='RANDOM'){
-      const keys=[...room.members.keys()];
+      const keys=[...room.members.keys(),...(this.sideOf(room,BOT)?[BOT]:[])];
       if(keys.length===2){const first=this.coin()?keys:[keys[1],keys[0]];room.seats={USSR:first[0],US:first[1]};}
       else{const free=(['USSR','US'] as const).filter(side=>!room.seats[side]||room.seats[side]===key);if(current)delete room.seats[current];room.seats[free[free.length>1?this.coin():0]]=key;}
     }else{
@@ -88,8 +89,8 @@ export class RoomStore {
     if(room.started)return room.revision;
     if(!this.sideOf(room,key))throw new Error('请先选择阵营');
     if(!room.seats.US||!room.seats.USSR)throw new Error('等待另一名玩家选择阵营');
-    if(!room.members.get(room.seats.US)?.clientId||!room.members.get(room.seats.USSR)?.clientId)throw new Error('等待双方在线后开始对局');
-    room.state=createGame(this.seed());room.state.manualEnd=true;room.state.log=['双方入座，对局开始'];
+    if([room.seats.US,room.seats.USSR].some(owner=>owner!==BOT&&!room.members.get(owner)?.clientId))throw new Error('等待双方在线后开始对局');
+    room.state=createGame(this.seed());room.state.manualEnd=true;room.state.log=['双方入座，对局开始',...(this.sideOf(room,BOT)?['基础陪练机器人加入对局']:[])];
     room.started=true;room.revision++;room.touched=Date.now();return room.revision;
   }
   restart(roomId:string,key:string,clientId:string,expectedRevision:number) {
@@ -97,13 +98,50 @@ export class RoomStore {
     if(room.host!==key)throw new Error('只有房主可以重新开局');
     if(expectedRevision!==room.revision)throw new Error('局面已更新，请重新确认重开');
     room.state=null;
-    room.started=false;room.history=[];room.actions=[];room.undoVersion++;room.revision++;room.touched=Date.now();
+    room.started=false;room.history=[];room.actions=[];delete room.botError;room.undoVersion++;room.revision++;room.touched=Date.now();
     return room.revision;
   }
   close(roomId:string,key:string,clientId:string) {
     const {room}=this.member(roomId,key,clientId);
     if(room.host!==key)throw new Error('只有房主可以关闭房间');
     const members=this.members(roomId);this.rooms.delete(roomId);return members;
+  }
+  setBot(roomId:string,key:string,clientId:string,enabled:unknown){
+    const {room}=this.member(roomId,key,clientId);
+    if(room.host!==key)throw new Error('只有房主可以管理机器人');
+    if(room.started)throw new Error('对局已开始，不能更换对手');
+    if(typeof enabled!=='boolean')throw new Error('无效机器人设置');
+    const botSide=this.sideOf(room,BOT);
+    if(Boolean(botSide)===enabled)return room.revision;
+    if(enabled){
+      if(room.members.size!==1)throw new Error('房间已有其他玩家，不能添加机器人');
+      if(!this.sideOf(room,key))room.seats.US=key;
+      room.seats[this.sideOf(room,key)==='US'?'USSR':'US']=BOT;
+    }else if(botSide)delete room.seats[botSide];
+    delete room.botError;room.revision++;room.touched=Date.now();return room.revision;
+  }
+  retryBot(roomId:string,key:string,clientId:string){
+    const {room}=this.member(roomId,key,clientId);
+    if(room.host!==key)throw new Error('只有房主可以重试机器人');
+    delete room.botError;return room.revision;
+  }
+  /** One step per timer; paused when no human is connected. Always recheck the live state. */
+  botPending(roomId:string){
+    const room=this.rooms.get(roomId);
+    if(!room?.started||!room.state||room.botError||![...room.members.values()].some(m=>m.clientId))return false;
+    const side=activeSide(room.state);return Boolean(side&&room.seats[side]===BOT);
+  }
+  stepBot(roomId:string){
+    if(!this.botPending(roomId))return false;
+    const room=this.rooms.get(roomId)!,side=activeSide(room.state!)!;
+    try{
+      const action=chooseBotAction(room.state!);
+      if(!action)throw new Error('当前事件没有可执行的机器人操作');
+      room.state=apply(room.state!,side,action);room.actions.push({side,action});room.history=[];
+    }catch(error){
+      room.botError='陪练暂时无法继续，请重试。'+(error instanceof Error?error.message:'操作失败');
+    }
+    room.revision++;room.touched=Date.now();return true;
   }
   disconnect(roomId:string,key:string,clientId:string) {
     const room=this.rooms.get(roomId),member=room?.members.get(key);if(member?.clientId===clientId){member.clientId=null;room!.touched=Date.now();}
@@ -141,8 +179,9 @@ export class RoomStore {
     const room=this.rooms.get(roomId);if(!room)throw new Error('房间不存在');
     const side=this.sideOf(room,key),last=room.history.at(-1);
     const undoPlacement=side&&last?.side===side?influencePlacement(last.state,last.action)??undefined:undefined;
-    const seat=(s:Side)=>{const owner=room.seats[s];return {occupied:Boolean(owner),connected:Boolean(owner&&room.members.get(owner)?.clientId),mine:owner===key};};
-    return {isHost:room.host===key,undoPlacement,roomId,side,started:room.started,members:room.members.size,revision:room.revision,canUndo:Boolean(side)&&room.history.at(-1)?.side===side,undoVersion:room.undoVersion,seats:{US:seat('US'),USSR:seat('USSR')},view:room.started&&room.state&&side?viewFor(room.state,side):null};
+    const bot=Boolean(this.sideOf(room,BOT));
+    const seat=(s:Side)=>{const owner=room.seats[s];return {occupied:Boolean(owner),connected:owner===BOT||Boolean(owner&&room.members.get(owner)?.clientId),mine:owner===key,...(owner===BOT?{bot:true}:{})};};
+    return {isHost:room.host===key,botError:room.botError,undoPlacement,roomId,side,started:room.started,members:room.members.size+Number(bot),revision:room.revision,canUndo:Boolean(side)&&room.history.at(-1)?.side===side,undoVersion:room.undoVersion,seats:{US:seat('US'),USSR:seat('USSR')},view:room.started&&room.state&&side?viewFor(room.state,side):null};
   }
   members(roomId:string) {
     const room=this.rooms.get(roomId);return room?[...room.members.entries()].flatMap(([key,m])=>m.clientId?[{clientId:m.clientId,key}]:[]):[];

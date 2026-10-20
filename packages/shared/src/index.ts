@@ -6,11 +6,12 @@ export type SubRegion = 'EASTERN_EUROPE' | 'WESTERN_EUROPE' | 'SOUTHEAST_ASIA';
 
 export const opponent = (side: Side): Side => (side === 'USSR' ? 'US' : 'USSR');
 
-export interface SeatStatus { occupied: boolean; connected: boolean; mine: boolean }
+export interface SeatStatus { occupied: boolean; connected: boolean; mine: boolean; bot?: boolean }
 export interface RoomSnapshot {
   /** side is null until this member sits down in the lobby; view is null throughout the lobby, including after choosing a side. */
   roomId: string; side: Side | null; started: boolean; members: number; revision: number;
   isHost?: boolean;
+  botError?: string;
   canUndo?: boolean; undoVersion?: number;
   undoPlacement?: {country:string;side:Side};
   seats: Record<Side,SeatStatus>;
@@ -27,6 +28,8 @@ export interface ServerToClient {
   error: (message: string) => void;
 }
 export interface ClientToServer {
+  bot: (request: {enabled:boolean}, ack: (reply: Reply<{revision:number}>) => void) => void;
+  botRetry: (request: Record<string,never>, ack: (reply: Reply<{revision:number}>) => void) => void;
   restart: (request: {expectedRevision:number}, ack: (reply: Reply<{revision:number}>) => void) => void;
   close: (request: Record<string,never>, ack: (reply: Reply) => void) => void;
   create: (request: Record<string, never>, ack: (reply: Reply<Session>) => void) => void;

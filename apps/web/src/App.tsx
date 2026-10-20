@@ -97,7 +97,8 @@ export function App() {
     if(!country)setCountrySelection(null);
     setSelected(null);setLastPlacement(null);setError('');
   };
-  const blocked = !gameStarted?'请创建或加入房间，双方入座后开始对局':onlineActive ? !online.ready ? '正在恢复房间连接' : online.busy ? '正在确认你的操作' : !online.snapshot?.started ? '等待双方入座并开始对局' : online.snapshot.view&&online.snapshot.view.phase.kind==='WAITING' ? '等待'+sides[online.snapshot.view.phase.side]+'处理事件' : actor!==side ? '等待'+(actor?sides[actor]:'对方')+'行动' : undefined : undefined;
+  const waitingActor=actor&&online.snapshot?.seats[actor].bot?sides[actor]+'陪练':actor?sides[actor]:'对方';
+  const blocked = !gameStarted?'请创建或加入房间，双方入座后开始对局':onlineActive ? !online.ready ? '正在恢复房间连接' : online.busy ? '正在确认你的操作' : !online.snapshot?.started ? '等待双方入座并开始对局' : online.snapshot.view&&online.snapshot.view.phase.kind==='WAITING' ? '等待'+waitingActor+'处理事件' : actor!==side ? '等待'+waitingActor+'行动' : undefined : undefined;
   const guide = phaseGuide(state, { selected, revealed, targetCount: targets.length, blocked });
   const focusTask = () => {
     setSidePanel('cards');
@@ -188,7 +189,7 @@ export function App() {
         <button disabled={online.busy||!roomId.trim()} onClick={()=>online.join(roomId)}>加入房间</button>
         <button disabled={online.busy} onClick={online.resume}>恢复上次房间</button></>:<>
         <p>房间 <strong>{online.session.roomId}</strong> · {online.snapshot?.side?'你是'+sides[online.snapshot.side]:'尚未入座'} · {online.ready?'已连接':'连接已中断，自动重连中'}</p>
-        <p>{(['USSR','US'] as const).map(s=><span key={s}>{sides[s]}：{online.snapshot?.seats[s].mine?'你':online.snapshot?.seats[s].connected?'在线':online.snapshot?.seats[s].occupied?'离线（保留席位）':'空位'} </span>)}</p>
+        <p>{(['USSR','US'] as const).map(s=><span key={s}>{sides[s]}：{online.snapshot?.seats[s].mine?'你':online.snapshot?.seats[s].bot?'基础陪练':online.snapshot?.seats[s].connected?'在线':online.snapshot?.seats[s].occupied?'离线（保留席位）':'空位'} </span>)}</p>
         <input aria-label="邀请链接" readOnly value={invite}/><button onClick={copyInvite}>复制邀请链接</button><span>{copyStatus}</span>
         <button onClick={online.leave}>返回本地（保留恢复身份）</button>
         {online.hasPending&&<button disabled={!online.ready||online.busy} onClick={online.retry}>重试待确认操作</button>}
@@ -232,7 +233,8 @@ export function App() {
         <div className="workspace-body" key={visiblePanel+':'+(selected??'')}>
         {!onlineActive&&!gameStarted&&<section className="room-entry" aria-label="联机房间"><button className="primary" disabled={online.busy} onClick={online.create}>创建房间</button><form onSubmit={e=>{e.preventDefault();if(roomId.trim()&&!online.busy)online.join(roomId);}}><input aria-label="房间码" placeholder="输入朋友的房间码" value={roomId} maxLength={10} onChange={e=>setRoomId(e.target.value.toUpperCase())}/><button disabled={online.busy||!roomId.trim()}>加入房间</button></form></section>}
         {onlineActive&&visiblePanel==='room'&&<section className="room-controls" aria-label="房间管理"><strong>房间码：{online.session!.roomId}</strong><button onClick={()=>{navigator.clipboard?.writeText(online.session!.roomId).then(()=>setCopyStatus('房间码已复制')).catch(()=>setCopyStatus('请手动复制房间码'));}}>复制房间码</button>{copyStatus&&<small>{copyStatus}</small>}{online.snapshot?.isHost&&<><button disabled={online.busy||!online.ready} onClick={()=>{if(window.confirm('重新开局会清除当前对局，双方回到大厅，房间码和座位保留。确定吗？'))online.restart();}}>重新开局</button><button disabled={online.busy||!online.ready} onClick={()=>{if(window.confirm('关闭后双方会退出房间，当前对局将被清除。确定关闭？'))online.close();}}>关闭房间</button></>}</section>}
-        {inLobby&&visiblePanel==='room'?<LobbyPanel snapshot={online.snapshot} roomId={online.session!.roomId} invite={invite} busy={online.busy||!online.ready} copyStatus={copyStatus} onCopy={copyInvite} onSeat={online.seat} onStart={online.start}/>:gameStarted?<>
+        {online.snapshot?.botError&&<div className="error" role="alert">{online.snapshot.botError}<button disabled={online.busy||!online.ready} onClick={online.retryBot}>重试陪练</button></div>}
+        {inLobby&&visiblePanel==='room'?<LobbyPanel snapshot={online.snapshot} roomId={online.session!.roomId} invite={invite} busy={online.busy||!online.ready} copyStatus={copyStatus} onCopy={copyInvite} onSeat={online.seat} onStart={online.start} onBot={online.bot}/>:gameStarted?<>
         {revealed&&p.kind==='HEADLINE'&&state.space[side]>=4&&state.space[side==='US'?'USSR':'US']<4&&state.headlines[side==='US'?'USSR':'US']!==undefined&&<p className="notice">太空特权：对方头条为 {CARD_BY_ID.get(state.headlines[side==='US'?'USSR':'US']!)!.nameZh}</p>}
 
     <RecentDock plays={state.publicPlays??[]} receiving={presentation.flights.length>0} onOpen={()=>setSidePanel('recent')}/>
