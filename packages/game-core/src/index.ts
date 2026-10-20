@@ -10,3 +10,5 @@ export * from './scoring';
 export * from './data/descriptions';
 export * from './view';
 export * from './logText';
+export { canEvent, roundsFor } from './engine';
+export { REGION_NAMES } from './events';

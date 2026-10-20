@@ -23,7 +23,7 @@ export function viewFor(state:GameState,viewer:Side):PlayerView {
   return structuredClone({
     turn:state.turn,phase,vp:state.vp,defcon:state.defcon,milOps:state.milOps,space:state.space,spaceAttempts:state.spaceAttempts,
     influence:state.influence,effects:state.effects,
-    hands:{[viewer]:state.hands[viewer],[enemy]:viewer==='US'&&state.effects.cia?state.hands[enemy]:[]} as Record<Side,number[]>,
+    hands:{[viewer]:state.hands[viewer],[enemy]:(viewer==='US'&&state.effects.cia)||(viewer==='USSR'&&state.effects.aldrich)?state.hands[enemy]:[]} as Record<Side,number[]>,
     handCounts:{US:state.hands.US.length,USSR:state.hands.USSR.length},
     discard:state.discard,removed:state.removed,deckCount:state.deck.length,chinaCard:state.chinaCard,
     log:state.log.filter(line=>!line.startsWith('Game created with seed ')),headlines,

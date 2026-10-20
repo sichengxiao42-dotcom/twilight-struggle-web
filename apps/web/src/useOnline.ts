@@ -9,7 +9,7 @@ function saved():Session|null {
 }
 /** UI-only placeholder fields contain no secrets and are never sent back as state. */
 export function displayState(v:PlayerView):GameState {
-  return {...v,mode:'EARLY_WAR',phase:v.phase.kind==='WAITING'?{kind:'HEADLINE',side:v.phase.side}:v.phase,
+  return {...v,mode:'STANDARD',phase:v.phase.kind==='WAITING'?{kind:'HEADLINE',side:v.phase.side}:v.phase,
     seed:0,rngCalls:0,tasks:[],deck:[],actionStartInfluence:null,phasingSide:'USSR',noradPending:false};
 }
 export function useOnline() {

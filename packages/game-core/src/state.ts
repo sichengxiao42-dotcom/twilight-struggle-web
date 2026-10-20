@@ -1,43 +1,69 @@
-import type { Side } from '@ts/shared';
+import type { Region, Side } from '@ts/shared';
 import { CARDS, CHINA_CARD_ID } from './data/cards';
 import { COUNTRIES } from './data/countries';
 import { createRng, shuffle } from './rng';
 
 export type Influence = Record<Side, number>;
+export type OpsKind = 'INFLUENCE' | 'REALIGNMENT' | 'COUP';
+/** Restrictions for OPS granted by an event: allowed countries, free coup (no military ops, ignores DEFCON regions), Che's follow-up. */
+export interface OpsGrant { only?: string[]; free?: boolean; che?: boolean }
 
 export type Phase =
   | { kind: 'SETUP_PLACEMENT'; side: Side; remaining: number; subRegion: 'EASTERN_EUROPE' | 'WESTERN_EUROPE' }
   | { kind: 'HEADLINE'; side: Side }
   | { kind: 'DECISION'; side: Side; decision: Decision }
-  | { kind: 'EARLY_WAR_COMPLETE' }
   | { kind: 'M1_COMPLETE' }
-  | { kind: 'OPS'; side: Side; round: number; mode: 'INFLUENCE' | 'REALIGNMENT' | 'COUP'; remaining: number; ops: number; eligible: string[]; china?: boolean; asiaOnly?: boolean; seaOnly?: boolean; militaryOps?: number }
+  | ({ kind: 'OPS'; side: Side; round: number; mode: OpsKind; remaining: number; ops: number; eligible: string[]; china?: boolean; asiaOnly?: boolean; seaOnly?: boolean; militaryOps?: number } & OpsGrant)
   | { kind: 'ACTION_ROUND'; round: number; side: Side }
+  /** Grain Sales: the US plays a card taken from the USSR hand as if it were its own. */
+  | { kind: 'SUBPLAY'; side: Side; card: number }
   | { kind: 'GAME_OVER'; winner: Side | 'DRAW'; reason: string };
 
 
 export type Decision =
-  | { kind: 'INFLUENCE'; prompt: string; targets: string[]; affected: Side; operation: 'ADD' | 'REMOVE' | 'CLEAR' | 'MATCH'; remaining: number; perCountry: number; used: Record<string, number>; optional?: boolean; relocation?: boolean; singleCountry?: boolean }
-  | { kind: 'CHOICE'; prompt: string; options: { id: string; label: string }[]; event: number; actor: Side; phasing: Side }
-  | { kind: 'OPS_MODE'; prompt: string; base: number; china?: boolean; phasing: Side }
+  | { kind: 'INFLUENCE'; prompt: string; targets: string[]; affected: Side; operation: 'ADD' | 'REMOVE' | 'CLEAR' | 'MATCH' | 'DOUBLE'; remaining: number; perCountry: number; used: Record<string, number>; optional?: boolean; relocation?: boolean; singleCountry?: boolean }
+  /** memo carries event-specific card lists (cards drawn, a taken card, a discard count). */
+  | { kind: 'CHOICE'; prompt: string; options: { id: string; label: string }[]; event: number; actor: Side; phasing: Side; memo?: number[] }
+  /** Pick one country on the board for an event (war targets, region-free choices). */
+  | { kind: 'COUNTRY'; prompt: string; targets: string[]; event: number; actor: Side }
+  | ({ kind: 'OPS_MODE'; prompt: string; base: number; china?: boolean; phasing: Side; modes?: OpsKind[] } & OpsGrant)
   | { kind: 'REVEAL'; prompt: string; cards: number[] };
 export type Task =
   | { kind: 'EVENT'; card: number; actor: Side; phasing: Side; headline?: boolean }
   | { kind: 'DISPOSE'; card: number; event: boolean }
-  | { kind: 'START_OPS'; side: Side; base: number; mode?: 'INFLUENCE' | 'REALIGNMENT' | 'COUP'; china?: boolean; asiaOnly?: boolean; seaOnly?: boolean }
+  | ({ kind: 'START_OPS'; side: Side; base: number; mode?: OpsKind; modes?: OpsKind[]; china?: boolean; asiaOnly?: boolean; seaOnly?: boolean } & OpsGrant)
+  | { kind: 'SPACE_ROLL'; side: Side }
   | { kind: 'FINISH_ACTION'; side: Side; round: number }
   | { kind: 'FINISH_HEADLINES' }
   | { kind: 'END_TURN'; final?: boolean }
   | { kind: 'HELD_DISCARD'; side: Side }
-  | { kind: 'CAMBRIDGE_PLACEMENT'; regions: import('@ts/shared').Region[] };
+  | { kind: 'CAMBRIDGE_PLACEMENT'; regions: Region[] };
 export interface Effects {
   containment?: boolean; vietnam?: boolean; purge: Partial<Record<Side, boolean>>;
   nato?: boolean; warsaw?: boolean; marshall?: boolean; deGaulle?: boolean;
   japan?: boolean; formosan?: boolean; norad?: boolean; cia?: boolean;
+  // Lasting for the current turn only (cleared in endTurn).
+  /** Cuban Missile Crisis: this side loses if it attempts a coup. */
+  cmc?: Side;
+  nuclearSubs?: boolean; salt?: boolean; brezhnev?: boolean; u2?: boolean; iranContra?: boolean; yuri?: boolean; aldrich?: boolean;
+  /** Latin American Death Squads beneficiary. */
+  deathSquads?: Side;
+  chernobyl?: Region;
+  /** North Sea Oil: the US may take an eighth action round this turn. */
+  northSeaRound?: boolean;
+  // Lasting until cancelled, used, or for the rest of the game.
+  quagmire?: boolean; bearTrap?: boolean;
+  /** Missile Envy: this side must play card 49 for OPS on its next action round. */
+  missileEnvy?: Side;
+  /** "We Will Bury You": USSR gains 3 VP before the next US action unless UN Intervention is played. */
+  buryYou?: boolean;
+  shuttle?: boolean; flowerPower?: boolean; evilEmpire?: boolean; iranianHostage?: boolean; ironLady?: boolean;
+  northSeaOil?: boolean; reformer?: boolean; campDavid?: boolean; johnPaul?: boolean; awacs?: boolean;
+  tearDown?: boolean; willyBrandt?: boolean;
 }
 
 export interface GameState {
-  mode: 'PRACTICE' | 'EARLY_WAR';
+  mode: 'PRACTICE' | 'STANDARD';
   tasks: Task[];
   effects: Effects;
   headlines: Partial<Record<Side, number>>;
@@ -66,7 +92,7 @@ export interface GameState {
 
 export const HAND_SIZE = { early: 8, midLate: 9 } as const;
 
-// 初始影响力（豪华版规则 3.0），需对照规则书复核。
+// 初始影响力（豪华版规则 3.2/3.3，已对照 2015 官方规则书核对）。
 const INITIAL_INFLUENCE: Record<Side, Record<string, number>> = {
   USSR: { syria: 1, iraq: 1, north_korea: 3, east_germany: 3, finland: 1 },
   US: {
@@ -75,7 +101,7 @@ const INITIAL_INFLUENCE: Record<Side, Record<string, number>> = {
   },
 };
 
-export function createGame(seed: number, mode: GameState['mode'] = 'EARLY_WAR'): GameState {
+export function createGame(seed: number, mode: GameState['mode'] = 'STANDARD'): GameState {
   const rng = createRng(seed);
   let rngCalls = 0;
   const counted = () => { rngCalls++; return rng(); };

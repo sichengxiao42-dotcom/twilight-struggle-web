@@ -69,3 +69,4 @@ button:disabled { cursor:default; opacity:.5; }
 .online-panel button,.online-panel label { margin:5px 10px 5px 0; }
 .online-panel input { font:inherit; padding:6px; max-width:100%; box-sizing:border-box; }
 .online-panel input[readonly] { width:min(640px,100%); }
+.effects { font-size:13px; color:var(--muted); margin:0 0 8px; line-height:1.7; }

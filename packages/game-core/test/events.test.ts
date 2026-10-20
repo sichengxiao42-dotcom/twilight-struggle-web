@@ -15,7 +15,7 @@ function auto(s:GameState):GameState {
   }return s;
 }
 test('all 38 early-war event cards resolve without a stuck continuation',()=>{
-  for(const card of CARDS.filter(c=>c.id!==6)){
+  for(const card of CARDS.filter(c=>c.id!==6&&c.period==='EARLY')){
     const side=card.side==='US'?'US':'USSR';
     const s=auto(play(card.id,side,s=>{s.effects.marshall=true;s.influence.uk.US=5;s.hands[side]=[card.id,4,8,1];}));
     assert.equal(s.phase.kind,'ACTION_ROUND',card.nameZh+' should finish');
@@ -110,8 +110,10 @@ test('end of turn catches held scoring, flips China, resets temporary effects, r
   s=ready('US');beginAction(s,'US',6);s.hands.US=[35];s.hands.USSR=[];s.defcon=3;s.chinaCard.faceUp=false;s.effects.containment=true;s.effects.vietnam=true;s.effects.purge.US=true;
   s=apply(s,'US',{type:'PLAY_EVENT',card:35});assert.equal(s.turn,2);assert.equal(s.phase.kind,'HEADLINE');assert.equal(s.hands.US.length,8);assert.equal(s.defcon,4);assert.equal(s.effects.containment,undefined);assert.equal(s.effects.formosan,true);assert.equal(s.chinaCard.faceUp,true);
 });
-test('early-war scenario ends after turn 3 without pretending to be the full final scoring',()=>{
-  let s=ready('US');s.turn=3;beginAction(s,'US',6);s.hands.US=[35];s.hands.USSR=[];s=apply(s,'US',{type:'PLAY_EVENT',card:35});assert.equal(s.phase.kind,'EARLY_WAR_COMPLETE');
+test('turn 4 shuffles the Mid War cards into the draw deck and hands grow to nine',()=>{
+  let s=ready('US');s.turn=3;beginAction(s,'US',6);s.hands.US=[35];s.hands.USSR=[];s=apply(s,'US',{type:'PLAY_EVENT',card:35});
+  assert.equal(s.turn,4);assert.equal(s.phase.kind,'HEADLINE');assert.equal(s.hands.US.length,9);assert.equal(s.hands.USSR.length,9);
+  assert.ok([...s.deck,...s.hands.US,...s.hands.USSR].some(id=>CARD_BY_ID.get(id)!.period==='MID'));
 });
 test('modifiers are aggregated and expire separately from permanent events',()=>{
   const s=ready('US');s.effects.containment=true;s.effects.purge.US=true;
@@ -124,7 +126,7 @@ test('seeded three-turn playthroughs conserve cards, keep finite state, and neve
     for(let i=0;i<6;i++)s=apply(s,'USSR',{type:'PLACE_SETUP',country:'poland'});
     for(let i=0;i<7;i++)s=apply(s,'US',{type:'PLACE_SETUP',country:'west_germany'});
     for(let step=0;step<400;step++){
-      if(s.phase.kind==='GAME_OVER'||s.phase.kind==='EARLY_WAR_COMPLETE')break;
+      if(s.phase.kind==='GAME_OVER'||s.turn>=4)break;
       const side=activeSide(s)!;
       if(s.phase.kind==='HEADLINE'){
         const id=s.hands[side].find(id=>CARD_BY_ID.get(id)!.scoring)??s.hands[side].find(id=>id!==32)!;
@@ -139,10 +141,10 @@ test('seeded three-turn playthroughs conserve cards, keep finite state, and neve
       const all=[...s.deck,...s.discard,...s.removed,...s.hands.US,...s.hands.USSR,...s.tasks.filter(t=>t.kind==='DISPOSE').map(t=>t.card)];
       if(s.phase.kind==='HEADLINE'&&!s.tasks.length)all.push(...Object.values(s.headlines));
       assert.equal(new Set(all).size,all.length,'duplicate cards seed '+seed);
-      assert.equal(all.length,38,'lost card seed '+seed+' phase '+s.phase.kind);
+      if(s.turn<4)assert.equal(all.length,38,'lost card seed '+seed+' phase '+s.phase.kind);
     }
-    assert.ok(['GAME_OVER','EARLY_WAR_COMPLETE'].includes(s.phase.kind),'stalled seed '+seed);
-    if(s.phase.kind==='EARLY_WAR_COMPLETE')completed++;
+    assert.ok(s.phase.kind==='GAME_OVER'||s.turn>=4,'stalled seed '+seed);
+    if(s.turn>=4)completed++;
   }
   assert.ok(completed>0,'at least one full three-turn scenario');
 });

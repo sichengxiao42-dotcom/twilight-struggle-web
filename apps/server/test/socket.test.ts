@@ -41,7 +41,7 @@ test('real Socket.IO clients: separate views, full early-war flow, duplicates an
   const clients:Record<Side,Client>={USSR:reconnected,US:b};
   for(let step=0;step<400;step++){
     const view=b.last!.view;
-    if(view.phase.kind==='GAME_OVER'||view.phase.kind==='EARLY_WAR_COMPLETE')break;
+    if(view.phase.kind==='GAME_OVER'||view.turn>=4)break;
     assert.ok('side' in view.phase);const side=view.phase.side,client=clients[side],p=client.last!.view.phase;
     assert.notEqual(p.kind,'WAITING');let action:Action;
     if(p.kind==='SETUP_PLACEMENT')action={type:'PLACE_SETUP',country:side==='USSR'?'poland':'west_germany'};
@@ -57,8 +57,8 @@ test('real Socket.IO clients: separate views, full early-war flow, duplicates an
     await Promise.all([b.wait(s=>s.revision===next),reconnected.wait(s=>s.revision===next)]);
     for(const c of [b,reconnected]){
       assert.ok(!('seed' in c.last!.view));assert.ok(!('deck' in c.last!.view));assert.ok(!('tasks' in c.last!.view));
-      const enemy=c.last!.side==='US'?'USSR':'US';if(!(c.last!.side==='US'&&c.last!.view.effects.cia))assert.deepEqual(c.last!.view.hands[enemy],[]);
+      const enemy=c.last!.side==='US'?'USSR':'US';if(!(c.last!.side==='US'&&c.last!.view.effects.cia)&&!(c.last!.side==='USSR'&&c.last!.view.effects.aldrich))assert.deepEqual(c.last!.view.hands[enemy],[]);
     }
   }
-  assert.equal(b.last!.view.phase.kind,'EARLY_WAR_COMPLETE');assert.equal(b.last!.view.turn,3);
+  assert.equal(b.last!.view.turn,4);assert.equal(b.last!.view.handCounts.US,9);
 });
