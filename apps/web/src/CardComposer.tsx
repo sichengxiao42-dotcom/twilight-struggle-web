@@ -5,7 +5,7 @@ import { CardView } from './CardView';
 import { cardAction, cardChoices, isOpsUse, type CardUse } from './cardPlay';
 
 export function CardComposer({id,state,side,canAct,blocked,onPlay,onClose}:{id:number;state:GameState;side:Side;canAct:boolean;blocked?:string;onPlay:(action:Action)=>void;onClose:()=>void}) {
-  const ref=useRef<HTMLElement>(null),closeRef=useRef<HTMLButtonElement>(null);
+  const closeRef=useRef<HTMLButtonElement>(null);
   const card=CARD_BY_ID.get(id)!,choices=cardChoices(state,side,id),enabled=choices.filter(c=>!c.reason);
   const [use,setUse]=useState<CardUse|null>(()=>enabled.length===1?enabled[0].id:null);
   const [order,setOrder]=useState<'BEFORE'|'AFTER'>('BEFORE');
@@ -15,11 +15,10 @@ export function CardComposer({id,state,side,canAct,blocked,onPlay,onClose}:{id:n
     const previous=document.activeElement as HTMLElement|null;
     closeRef.current?.focus({preventScroll:true});
     const key=(event:KeyboardEvent)=>{if(event.key==='Escape'){event.preventDefault();onClose();}};
-    const outside=(event:PointerEvent)=>{const target=event.target;if(target instanceof Element&&!ref.current?.contains(target)&&!target.closest('[data-hand-card]'))onClose();};
-    document.addEventListener('keydown',key);document.addEventListener('pointerdown',outside);
-    return()=>{document.removeEventListener('keydown',key);document.removeEventListener('pointerdown',outside);if(previous?.isConnected)previous.focus({preventScroll:true});};
+    document.addEventListener('keydown',key);
+    return()=>{document.removeEventListener('keydown',key);if(previous?.isConnected)previous.focus({preventScroll:true});};
   },[onClose]);
-  return <section ref={ref} className="card-composer" role="dialog" aria-modal="false" aria-label={'查看 '+card.nameZh}>
+  return <section className="card-composer" role="region" aria-label={'查看 '+card.nameZh}>
     <div className="composer-art"><CardView card={card}/><span>{card.scoring?'计分牌':card.ops+' OPS'} · {card.side==='US'?'美国':card.side==='USSR'?'苏联':'中立'}{card.starred?' · 一次性事件':''}</span></div>
     <div className="composer-content"><header><div><h2>{card.nameZh}</h2><p className="card-effect">{EVENT_SUMMARIES[id]}</p></div><button ref={closeRef} className="icon-button" aria-label="收回卡牌" onClick={onClose}>×</button></header>
       {choices.length>0&&canAct?<><div className="play-choices" role="group" aria-label="选择卡牌用途">{choices.map(option=><button key={option.id} className={'play-choice '+(use===option.id?'chosen':'')} aria-pressed={use===option.id} disabled={Boolean(option.reason)} onClick={()=>{setUse(option.id);setRegion('NONE');}}><strong>{option.label}</strong><small>{option.reason??option.detail}</small></button>)}</div>
