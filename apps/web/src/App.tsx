@@ -8,7 +8,7 @@ import { cardChoices } from './cardPlay';
 import { CardView } from './CardView';
 import { PhaseAnnouncer, phaseAnnouncement } from './PhaseAnnouncer';
 import { LobbyPanel } from './LobbyPanel';
-import { PlayFlights, RecentDock, RecentPlays, usePlayPresentation } from './PlayedCards';
+import { DiscardGallery, PlayFlights, RecentDock, usePlayPresentation } from './PlayedCards';
 import { EffectsPanel, LogPanel, PANEL_TITLES, RegionPanel, RulesPanel, SideRail, type SidePanel } from './SidePanels';
 import { displayState, useOnline } from './useOnline';
 const sides: Record<Side, string> = { USSR: '苏联', US: '美国' };
@@ -52,6 +52,7 @@ export function App() {
   const [copyStatus,setCopyStatus]=useState('');
   const [selected, setSelected] = useState<number | null>(null);
   const [sidePanel,setSidePanel]=useState<SidePanel>('regions');
+  const [archiveSide,setArchiveSide]=useState<Side|null>(null);
   const closeCard=useCallback(()=>{setSelected(null);setSidePanel('regions');},[]);
   const [error, setError] = useState('');
   const [revealed, setRevealed] = useState(false);
@@ -60,6 +61,7 @@ export function App() {
   const actor=activeSide(state),side=online.snapshot?.side??actor??state.phasingSide,p=state.phase;
   const onlineActive=Boolean(online.session);
   const gameStarted=onlineActive?Boolean(online.snapshot?.started&&online.snapshot.view&&online.snapshot.side):localState!==null;
+  useEffect(()=>{setArchiveSide(null);},[online.session?.roomId,state.seed,gameStarted]);
   const inLobby=onlineActive&&!gameStarted;
   const presentation=usePlayPresentation(state.publicPlays,gameStarted?(online.session?.roomId??'local-'+state.seed):'lobby');
   const visiblePanel=!gameStarted?(sidePanel==='rules'&&onlineActive?'rules':'room'):sidePanel==='room'&&!onlineActive?'regions':sidePanel;
@@ -237,10 +239,9 @@ export function App() {
         {inLobby&&visiblePanel==='room'?<LobbyPanel snapshot={online.snapshot} roomId={online.session!.roomId} invite={invite} busy={online.busy||!online.ready} copyStatus={copyStatus} onCopy={copyInvite} onSeat={online.seat} onStart={online.start} onBot={online.bot}/>:gameStarted?<>
         {revealed&&p.kind==='HEADLINE'&&state.space[side]>=4&&state.space[side==='US'?'USSR':'US']<4&&state.headlines[side==='US'?'USSR':'US']!==undefined&&<p className="notice">太空特权：对方头条为 {CARD_BY_ID.get(state.headlines[side==='US'?'USSR':'US']!)!.nameZh}</p>}
 
-    <RecentDock plays={state.publicPlays??[]} receiving={presentation.flights.length>0} onOpen={()=>setSidePanel('recent')}/>
+    <RecentDock plays={state.publicPlays??[]} receiving={presentation.flights.map(f=>f.play.side)} compact={visiblePanel!=='recent'} onOpen={setArchiveSide}/>
       {visiblePanel==='cards'&&selected!==null&&revealed&&<CardComposer key={selected} id={selected} state={state} side={side} canAct={canAct} blocked={blocked} onPlay={dispatch} onClose={closeCard}/>}
         {visiblePanel==='cards'&&p.kind!=='CONFIRM_END'&&(selected===null||!revealed)&&<div className="card-workspace-empty"><span aria-hidden="true">▤</span><h3>{revealed?'点击下方的一张手牌':'手牌暂时隐藏'}</h3><p>{revealed?'卡牌效果、用途与确认按钮会显示在这里。':'确认由'+sides[side]+'玩家操作后，显示手牌。'}</p>{!revealed&&<button className="primary" onClick={()=>setRevealed(true)}>显示自己的手牌</button>}</div>}</>:null}
-        {gameStarted&&visiblePanel==='recent'&&<RecentPlays plays={state.publicPlays??[]}/>}
         {gameStarted&&visiblePanel==='regions'&&<RegionPanel state={state} side={side}/>}
         {gameStarted&&visiblePanel==='log'&&<LogPanel lines={log}/>}
         {visiblePanel==='rules'&&<RulesPanel/>}
@@ -253,6 +254,7 @@ export function App() {
 
     </div>
     <PlayFlights flights={presentation.flights} onFinish={presentation.finishFlight}/>
+    {gameStarted&&archiveSide&&<DiscardGallery plays={state.publicPlays??[]} side={archiveSide} onSide={setArchiveSide} onClose={()=>setArchiveSide(null)}/>}
     <PhaseAnnouncer announcement={gameStarted&&canAct&&!blocked&&actor===side?phaseAnnouncement(state):null}/>
     <footer className="table-footer"><span>冷战热斗 · 中文牌桌</span><span>苏联先手 · 美国后手</span></footer>
   </main>;

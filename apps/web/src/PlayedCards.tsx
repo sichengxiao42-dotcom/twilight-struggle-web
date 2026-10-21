@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { CARD_BY_ID, EVENT_SUMMARIES, type PublicPlay } from '@ts/game-core';
+import { CARD_BY_ID, type PublicPlay } from '@ts/game-core';
+import type { Side } from '@ts/shared';
+import { createPortal } from 'react-dom';
 import { CardView } from './CardView';
 
 const SIDES={US:'美国',USSR:'苏联'};
@@ -42,7 +44,7 @@ export function usePlayPresentation(plays:PublicPlay[]=EMPTY,scope:string) {
       const timer=setTimeout(()=>{
         timers.current.delete(key);seen.current.set(key,-1);
         const source=document.querySelector(`[data-public-play="${key}"]`);
-        const target=document.querySelector('[data-recent-dock]');
+        const target=document.querySelector(`[data-discard-dock="${play.side}"]`);
         if(source&&target&&!matchMedia('(prefers-reduced-motion: reduce)').matches) {
           const a=source.getBoundingClientRect(),b=target.getBoundingClientRect();
           if(a.width&&b.width)setFlights(previous=>[...previous,{key,play,style:{left:a.left,top:a.top,width:a.width,height:a.height,'--fly-x':`${b.left+b.width/2-a.left-a.width/2}px`,'--fly-y':`${b.top+b.height/2-a.top-a.height/2}px`} as CSSProperties}]);
@@ -59,22 +61,45 @@ export function usePlayPresentation(plays:PublicPlay[]=EMPTY,scope:string) {
 export function PublicCard({play}:{play:PublicPlay}) {
   return <div className={'public-play public-'+play.side} data-public-play={keyOf(play)} aria-label={SIDES[play.side]+'打出'+CARD_BY_ID.get(play.card)!.nameZh+'，'+PLAY_USES[play.use]}>
     <header><b>{SIDES[play.side]}</b><span>{PLAY_USES[play.use]}</span></header><CardView card={CARD_BY_ID.get(play.card)!}/>
-    <footer>{play.finished?'操作完成 · 收入最近出牌':'正在结算'}</footer>
+    <footer>{play.finished?'操作完成 · 收入弃牌堆':'正在结算'}</footer>
   </div>;
 }
 export function PlayFlights({flights,onFinish}:{flights:Flight[];onFinish:(key:string)=>void}) {
   return <>{flights.map(flight=><div key={flight.key} className="play-flight" style={flight.style} onAnimationEnd={()=>onFinish(flight.key)} aria-hidden="true"><CardView card={CARD_BY_ID.get(flight.play.card)!}/></div>)}</>;
 }
-export function RecentDock({plays,onOpen,receiving}:{plays:PublicPlay[];onOpen:()=>void;receiving:boolean}) {
-  const completed=plays.filter(play=>play.finished),latest=completed.at(-1);
-  return <button className={'recent-dock '+(receiving?'receiving':'')} data-recent-dock onClick={onOpen}><span>最近出牌 <small>{completed.length}</small></span><strong>{latest?SIDES[latest.side]+' · '+CARD_BY_ID.get(latest.card)!.nameZh:'暂无已完成的出牌'}</strong><span aria-hidden="true">›</span></button>;
+export function completedPlays(plays:PublicPlay[],side:Side) {
+  return plays.filter(play=>play.finished&&play.side===side).slice().reverse();
 }
-export function RecentPlays({plays}:{plays:PublicPlay[]}) {
-  const completed=plays.filter(play=>play.finished).slice().reverse();
-  const [selected,setSelected]=useState<string|null>(null);
-  const chosen=completed.find(play=>keyOf(play)===selected)??completed[0];
-  return <section className="info-panel recent-plays" aria-label="最近出牌详情"><p className="panel-intro">已完成操作的公开出牌 · 最新在上</p>
-    {chosen?<><div className="recent-preview"><CardView card={CARD_BY_ID.get(chosen.card)!}/><h3>{CARD_BY_ID.get(chosen.card)!.nameZh}</h3><p className={'ink-'+chosen.side}>{SIDES[chosen.side]} · 第 {chosen.turn} 回合 · {PLAY_USES[chosen.use]}</p><p>{EVENT_SUMMARIES[chosen.card]}</p><small>历史卡牌仅供查看，不会再次打出。</small></div>
-    <div className="recent-list">{completed.map(play=><button key={keyOf(play)} aria-pressed={keyOf(chosen)===keyOf(play)} onClick={()=>setSelected(keyOf(play))}><span className={'ink-'+play.side}>{SIDES[play.side]}</span><strong>{CARD_BY_ID.get(play.card)!.nameZh}</strong><small>第 {play.turn} 回合 · {PLAY_USES[play.use]}</small></button>)}</div></>:<p className="panel-empty">打出的牌会先展示在棋盘上，操作结束后收进这里。</p>}
+
+export function RecentDock({plays,onOpen,receiving,compact=false}:{plays:PublicPlay[];onOpen:(side:Side)=>void;receiving:Side[];compact?:boolean}) {
+  return <section className={'discard-piles'+(compact?' compact':'')} aria-label="双方弃牌堆">
+    {(['USSR','US'] as const).map(side=>{
+      const completed=completedPlays(plays,side),latest=completed[0];
+      return <button key={side} className={'discard-pile pile-'+side+(receiving.includes(side)?' receiving':'')} data-discard-dock={side} onClick={()=>onOpen(side)} aria-label={`${SIDES[side]}弃牌堆，${completed.length} 张，点击查看卡面`} aria-haspopup="dialog">
+        <span className={'pile-cards'+(!latest?' empty':'')} aria-hidden="true">{latest?<CardView card={CARD_BY_ID.get(latest.card)!}/>:<span>{side==='USSR'?'苏':'美'}</span>}</span>
+        <span className="pile-caption"><strong>{SIDES[side]}弃牌堆</strong><span>{completed.length} 张</span><small>{compact?'点击展开':latest?'最近：'+CARD_BY_ID.get(latest.card)!.nameZh:'暂时没有用过的牌'}</small></span>
+      </button>;
+    })}
+    {!compact&&<p>点击牌堆，展开查看该方用过的所有卡面。</p>}
   </section>;
+}
+
+export function DiscardGallery({plays,side,onSide,onClose}:{plays:PublicPlay[];side:Side;onSide:(side:Side)=>void;onClose:()=>void}) {
+  const dialog=useRef<HTMLDialogElement>(null);
+  const completed=completedPlays(plays,side);
+  useEffect(()=>{
+    const element=dialog.current!,trigger=document.activeElement;
+    element.showModal();
+    return ()=>{element.close();if(trigger instanceof HTMLElement&&trigger.isConnected)trigger.focus({preventScroll:true});};
+  },[]);
+  return createPortal(<dialog ref={dialog} className={'discard-dialog gallery-'+side} aria-labelledby="discard-title" onCancel={event=>{event.preventDefault();onClose();}} onClick={event=>{if(event.target===event.currentTarget)onClose();}}>
+    <div className="discard-window">
+      <header><div><h2 id="discard-title">{SIDES[side]}弃牌堆 <span>{completed.length} 张</span></h2><p>按出牌方归档的用牌记录 · 最新在前</p></div><button className="gallery-close" aria-label="关闭弃牌堆" autoFocus onClick={onClose}>×</button></header>
+      <div className="gallery-sides" aria-label="选择弃牌堆">{(['USSR','US'] as const).map(s=><button key={s} className={'ink-'+s} aria-pressed={side===s} onClick={()=>onSide(s)}>{SIDES[s]} <span>{completedPlays(plays,s).length}</span></button>)}</div>
+      <div className="discard-gallery" key={side} tabIndex={0} aria-label="已用卡面列表">
+        {completed.length?completed.map(play=><figure key={keyOf(play)} aria-label={CARD_BY_ID.get(play.card)!.nameZh+'，第'+play.turn+'回合，'+PLAY_USES[play.use]}><CardView card={CARD_BY_ID.get(play.card)!}/><figcaption><strong>{CARD_BY_ID.get(play.card)!.nameZh}</strong><span>第 {play.turn} 回合 · {PLAY_USES[play.use]}</span></figcaption></figure>):<div className="gallery-empty"><span aria-hidden="true">{side==='USSR'?'苏':'美'}</span><h3>还没有用过的牌</h3><p>该方的出牌结算结束后，会自动收进这里。</p></div>}
+      </div>
+      <footer>包含事件、头条、OPS、太空及弃牌记录；移出游戏或已洗回的牌也保留记录。<span>Esc 关闭</span></footer>
+    </div>
+  </dialog>,document.body);
 }

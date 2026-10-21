@@ -2,11 +2,11 @@ import { COUNTRIES, REGION_NAMES, controller, scoreRegion, scoreSoutheastAsia, t
 import type { Region, Side } from '@ts/shared';
 
 export type SidePanel = 'cards' | 'regions' | 'log' | 'rules' | 'effects' | 'room' | 'recent';
-export const PANEL_TITLES: Record<SidePanel, string> = { cards:'卡牌操作', regions:'地区局势', log:'对局日志', rules:'规则速查', effects:'持续效果', room:'房间大厅', recent:'最近出牌' };
+export const PANEL_TITLES: Record<SidePanel, string> = { cards:'卡牌操作', regions:'地区局势', log:'对局日志', rules:'规则速查', effects:'持续效果', room:'房间大厅', recent:'弃牌堆' };
 const TABS: {id:SidePanel; mark:string; label:string}[] = [
   {id:'cards',mark:'牌',label:'卡牌'}, {id:'regions',mark:'势',label:'局势'},
   {id:'log',mark:'录',label:'日志'}, {id:'rules',mark:'查',label:'规则'},
-  {id:'recent',mark:'迹',label:'出牌'},
+  {id:'recent',mark:'弃',label:'弃牌'},
   {id:'effects',mark:'效',label:'效果'}, {id:'room',mark:'房',label:'房间'},
 ];
 export function SideRail({panel,started,online,onSelect}:{panel:SidePanel;started:boolean;online:boolean;onSelect:(panel:SidePanel)=>void}) {
