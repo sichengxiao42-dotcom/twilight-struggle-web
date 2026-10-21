@@ -1,5 +1,6 @@
 import { boardChanges, type CountryChange } from './boardChanges';
 import { PublicCard } from './PlayedCards';
+import { publicCardSlot } from './publicCardLayout';
 import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from 'react';
 import type { Region, Side } from '@ts/shared';
 import { ADJACENCY, COUNTRIES, controller, placementCost, type Action, type Country, type GameState, type PublicPlay } from '@ts/game-core';
@@ -68,6 +69,10 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
       <title>{t.title}</title><circle r={r} fill={fill} stroke="#fff" strokeWidth="10"/><text dominantBaseline="central" textAnchor="middle" fontSize={t.label.length>1?r*.75:r} fontWeight="800" fill={ink}>{t.label}</text></g>;
   })}</g>;
   const p = state.phase;
+  const publicCards=publicPlays.map((play,index)=>{
+    const stackIndex=publicPlays.slice(0,index).filter(previous=>previous.side===play.side).length;
+    return <foreignObject key={play.id} {...publicCardSlot(play.side,stackIndex,Boolean(map))} className={'public-card-slot '+(!map?'schematic-card-slot':'')}><PublicCard play={play}/></foreignObject>;
+  });
   const placing = p.kind === 'SETUP_PLACEMENT' || (p.kind === 'OPS' && p.mode === 'INFLUENCE');
   const hint = (id: string) => {
     if (!targets.includes(id)) return '当前不可操作';
@@ -115,7 +120,7 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
           </>);
         })}
         {renderedTracks}
-      {publicPlays.map((play,i)=><foreignObject key={play.id} x={(map?(play.side==='US'?140:5350):play.side==='US'?20:830)+i*(map?130:15)} y={(map?(play.side==='US'?680:880):100)+i*(map?130:15)} width={map?(play.side==='US'?1000:1180):160} height={map?(play.side==='US'?1700:1950):265} className={'public-card-slot '+(!map?'schematic-card-slot':'')}><PublicCard play={play}/></foreignObject>)}
+      {publicCards}
       </svg></div>{feedback}<p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>放大后可横向滚动</span></p></>;
   }
   return <>
@@ -126,6 +131,6 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
         const inf = state.influence[c.id];
         return country(c, positions[c.id], <><rect width="120" height="40" rx="5"/><text x="6" y="15">{c.battleground ? '★ ' : ''}{c.nameZh}</text><text x="6" y="32" className="stability">稳 {c.stability}</text><text x="72" y="32" className="us-value">{inf.US}</text><text x="99" y="32" className="ussr-value">{inf.USSR}</text></>);
       })}
-    {publicPlays.map((play,i)=><foreignObject key={play.id} x={(map?(play.side==='US'?140:5350):play.side==='US'?20:830)+i*(map?130:15)} y={(map?(play.side==='US'?680:880):100)+i*(map?130:15)} width={map?(play.side==='US'?1000:1180):160} height={map?(play.side==='US'?1700:1950):265} className={'public-card-slot '+(!map?'schematic-card-slot':'')}><PublicCard play={play}/></foreignObject>)}
+    {publicCards}
       </svg></div>{feedback}<p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>放大后可横向滚动</span></p></>;
 }
