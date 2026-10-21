@@ -19,6 +19,7 @@ const defconCards = [4,50,89];
 export function chooseBotAction(state:GameState):Action|null {
   const side=activeSide(state);if(!side)return null;
   const p=state.phase, candidates:{action:Action;score:number}[]=[];
+  if(p.kind==='DICE_ROLL')return {type:p.values.length===p.request.rollers.length?'CONTINUE_DICE':'ROLL_DICE'};
   const add=(action:Action,score=0)=>candidates.push({action,score});
   if(p.kind==='CONFIRM_END')add({type:'END_ACTION'});
   if(p.kind==='SETUP_PLACEMENT')for(const country of legalTargets(state))add({type:'PLACE_SETUP',country},placementValue(state,side,country));

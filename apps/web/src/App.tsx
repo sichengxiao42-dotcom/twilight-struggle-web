@@ -6,6 +6,7 @@ import { Board, type PlacementFeedback } from './Board';
 import { CardComposer } from './CardComposer';
 import { cardChoices } from './cardPlay';
 import { CardView } from './CardView';
+import { DiceDialog } from './DiceDialog';
 import { PhaseAnnouncer, phaseAnnouncement } from './PhaseAnnouncer';
 import { LobbyPanel } from './LobbyPanel';
 import { DiscardGallery, PlayFlights, RecentDock, usePlayPresentation } from './PlayedCards';
@@ -32,7 +33,7 @@ function activeEffects(effects: Effects): string[] {
   }
   return list;
 }
-const newLocalGame=(seed:number,mode:'STANDARD'|'PRACTICE'='STANDARD'):GameState=>({...createGame(seed,mode),manualEnd:true});
+const newLocalGame=(seed:number,mode:'STANDARD'|'PRACTICE'='STANDARD'):GameState=>({...createGame(seed,mode),manualEnd:true,manualDice:true});
 const LOBBY_PREVIEW=createBoardPreview();
 export function App() {
   const mapRef = useRef<HTMLElement>(null);
@@ -59,6 +60,7 @@ export function App() {
   const log=formatLog(state.log);
   const opsMode=state.phase.kind==='DECISION'&&state.phase.decision.kind==='OPS_MODE'?state.phase.decision:null;
   const actor=activeSide(state),side=online.snapshot?.side??actor??state.phasingSide,p=state.phase;
+  useEffect(()=>{if(p.kind==='DICE_ROLL'){setArchiveSide(null);setActionsOpen(false);}},[p.kind]);
   const onlineActive=Boolean(online.session);
   const gameStarted=onlineActive?Boolean(online.snapshot?.started&&online.snapshot.view&&online.snapshot.side):localState!==null;
   useEffect(()=>{setArchiveSide(null);},[online.session?.roomId,state.seed,gameStarted]);
@@ -85,9 +87,9 @@ export function App() {
     if(placement){setCountrySelection(placement);setLastPlacement({...placement,before:state.influence[placement.country][placement.side]});}
     if(onlineActive){setSelected(null);online.send(action);return;}
     try {
-      const next = apply(state, side, action);
+      const next = apply({...state,manualDice:true}, side, action);
       if (activeSide(next) !== side) setRevealed(false);
-      setHistory(previous=>action.type==='END_ACTION'?[]:[...previous.slice(-31),{state,action}]);
+      setHistory(previous=>['END_ACTION','ROLL_DICE','CONTINUE_DICE'].includes(action.type)?[]:[...previous.slice(-31),{state,action}]);
       setState(next);setSelected(null);setError('');
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
   };
@@ -254,6 +256,7 @@ export function App() {
 
     </div>
     <PlayFlights flights={presentation.flights} onFinish={presentation.finishFlight}/>
+    {gameStarted&&p.kind==='DICE_ROLL'&&<DiceDialog key={p.id} phase={p} canAct={canAct} busy={onlineActive&&online.busy} pending={onlineActive&&online.hasPending} error={onlineActive?online.error:error} onRoll={()=>dispatch({type:'ROLL_DICE'})} onContinue={()=>dispatch({type:'CONTINUE_DICE'})} onRetry={online.retry}/>}
     {gameStarted&&archiveSide&&<DiscardGallery plays={state.publicPlays??[]} side={archiveSide} onSide={setArchiveSide} onClose={()=>setArchiveSide(null)}/>}
     <PhaseAnnouncer announcement={gameStarted&&canAct&&!blocked&&actor===side?phaseAnnouncement(state):null}/>
     <footer className="table-footer"><span>冷战热斗 · 中文牌桌</span><span>苏联先手 · 美国后手</span></footer>

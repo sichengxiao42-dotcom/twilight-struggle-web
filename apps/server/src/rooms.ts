@@ -19,7 +19,7 @@ export function parseAction(value:unknown):Action | {type:'UNDO'} | {type:'UNDO_
       return {type:a.type,from:a.from,to:a.to};
     case 'PLACE_SETUP':case 'TARGET':case 'CANCEL_CMC':keys(['country']);return {type:a.type,country:country()};
     case 'PLAY_EVENT':case 'SELECT_HEADLINE':case 'SPACE':case 'TRAP_DISCARD':keys(['card']);return {type:a.type,card:card()};
-    case 'END_ACTION':case 'END_OPS':case 'PASS_EMPTY':keys([]);return {type:a.type};
+    case 'ROLL_DICE':case 'CONTINUE_DICE':case 'END_ACTION':case 'END_OPS':case 'PASS_EMPTY':keys([]);return {type:a.type};
     case 'CHOOSE':keys(['value']);if(typeof a.value!=='string'||a.value.length>128)throw new Error('无效选择');return {type:a.type,value:a.value};
     case 'PLAY_OPS':
       keys(['card','mode','order','asiaOnly','seaOnly']);
@@ -90,7 +90,7 @@ export class RoomStore {
     if(!this.sideOf(room,key))throw new Error('请先选择阵营');
     if(!room.seats.US||!room.seats.USSR)throw new Error('等待另一名玩家选择阵营');
     if([room.seats.US,room.seats.USSR].some(owner=>owner!==BOT&&!room.members.get(owner)?.clientId))throw new Error('等待双方在线后开始对局');
-    room.state=createGame(this.seed());room.state.manualEnd=true;room.state.log=['双方入座，对局开始',...(this.sideOf(room,BOT)?['基础陪练机器人加入对局']:[])];
+    room.state=createGame(this.seed());room.state.manualEnd=true;room.state.manualDice=true;room.state.log=['双方入座，对局开始',...(this.sideOf(room,BOT)?['基础陪练机器人加入对局']:[])];
     room.started=true;room.revision++;room.touched=Date.now();return room.revision;
   }
   restart(roomId:string,key:string,clientId:string,expectedRevision:number) {
@@ -169,7 +169,7 @@ export class RoomStore {
       if(room.history.at(-1)?.side!==side)room.history=[];
       room.history.push({side,state:room.state,action});if(room.history.length>32)room.history.shift();
       room.state=next;room.actions.push({side,action});
-      if(action.type==='END_ACTION')room.history=[];
+      if(['END_ACTION','ROLL_DICE','CONTINUE_DICE'].includes(action.type))room.history=[];
     }
     room.revision++;room.touched=Date.now();
     member.requests.set(r.id,fingerprint);if(member.requests.size>512)member.requests.delete(member.requests.keys().next().value!);

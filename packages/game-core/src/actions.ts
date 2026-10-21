@@ -3,13 +3,15 @@ import { ADJACENCY } from './data/adjacency';
 import { CARD_BY_ID, WAR_CARDS } from './data/cards';
 import { COUNTRIES, COUNTRY_BY_ID } from './data/countries';
 import { actionRoundsForTurn, controller, coupResult, isRegionRestrictedByDefcon, placementCost, vpWinner } from './rules';
-import { createRng, rollDie } from './rng';
+import { DiceRequired, nextDie, rollDice, type DiceResult } from './dice';
 import { trackPublicPlays } from './publicPlays';
 import type { GameState, Task } from './state';
 import { addVp, beginHeadline, canEvent, changeDefcon, chooseDecision, drain, influenceTargets, modifiedOps, protectedCountry, roundsFor } from './engine';
 
 export type OpsMode = 'INFLUENCE' | 'REALIGNMENT' | 'COUP';
 export type Action =
+  | { type:'ROLL_DICE' }
+  | { type:'CONTINUE_DICE' }
   | { type: 'END_ACTION' }
   | { type: 'PLACE_SETUP'; country: string }
   | { type: 'RELOCATE_INFLUENCE'; from: string; to: string }
@@ -112,7 +114,41 @@ function playTasks(next: GameState, side: Side, action: Extract<Action, { type: 
   return [...(triggered ? (action.order === 'AFTER' ? [ops, event] : [event, ops]) : [ops]), { kind: 'DISPOSE', card: card.id, event: false }];
 }
 export function apply(state: GameState, side: Side, action: Action): GameState {
+  if(state.phase.kind==='DICE_ROLL'){
+    if(state.phase.side!==side)throw new Error('尚未轮到该阵营掷骰');
+    if(!state.pendingDice)throw new Error('缺少掷骰后续操作');
+    const p=state.phase;
+    if(action.type==='ROLL_DICE'){
+      if(p.values.length>=p.request.rollers.length)throw new Error('已经掷骰，不能重复投掷');
+      const next=structuredClone(state),phase=next.phase as typeof p;
+      phase.values.push(nextDie(next));
+      const complete=phase.values.length===phase.request.rollers.length;
+      phase.side=complete?phase.request.rollers[0]:phase.request.rollers[phase.values.length];
+      if(complete)next.diceHistory=[...(next.diceHistory??[]),{id:phase.id,...phase.request,values:[...phase.values]}].slice(-100);
+      return next;
+    }
+    if(action.type!=='CONTINUE_DICE'||p.values.length!==p.request.rollers.length)throw new Error('请先完成掷骰，再继续结算');
+    const pending=state.pendingDice;
+    return advanceWithDice(pending.base,pending.actor,pending.action,pending.approved+1,state.diceHistory??[]);
+  }
+  if(action.type==='ROLL_DICE'||action.type==='CONTINUE_DICE')throw new Error('当前没有待掷骰操作');
+  if(state.manualDice)return advanceWithDice(state,side,action,0,state.diceHistory??[]);
   return trackPublicPlays(state,applyInternal(state,side,action),side,action);
+}
+function advanceWithDice(base:GameState,side:Side,action:Action,approved:number,history:DiceResult[]):GameState {
+  const input=structuredClone(base);delete input.pendingDice;
+  input.diceReplay={allowed:approved,used:0};
+  let next:GameState;
+  try{next=applyInternal(input,side,action);}
+  catch(error){
+    if(!(error instanceof DiceRequired))throw error;
+    next=error.state;
+    next.phase={kind:'DICE_ROLL',side:error.request.rollers[0],id:(history.at(-1)?.id??0)+1,request:error.request,values:[]};
+    next.pendingDice={base:structuredClone(base),actor:side,action:structuredClone(action),approved};
+  }
+  delete next.diceReplay;
+  next.diceHistory=structuredClone(history);
+  return trackPublicPlays(base,next,side,action);
 }
 function applyInternal(state: GameState, side: Side, action: Action): GameState {
   if (activeSide(state) !== side) throw new Error('尚未轮到该阵营');
@@ -205,8 +241,7 @@ function applyInternal(state: GameState, side: Side, action: Action): GameState 
     if(p.kind !== 'ACTION_ROUND' || !trapped(next, side) || !trapDiscards(next, side).includes(action.card)) throw new Error('请弃置一张至少 2 OPS 的非计分牌');
     const name = side === 'US' ? '泥潭' : '捕熊陷阱';
     next.hands[side] = next.hands[side].filter(id => id !== action.card); next.discard.push(action.card);
-    const rng = createRng(next.seed); for (let i = 0; i < next.rngCalls; i++) rng(); next.rngCalls++;
-    const roll = rollDie(rng);
+    const [roll]=rollDice(next,{title:side==='US'?'泥潭 · 尝试脱困':'捕熊陷阱 · 尝试脱困',detail:'掷出 1–4 即可脱困；5–6 仍被困住。',rollers:[side]});
     next.log.push(name + '：' + side + ' 弃置 ' + CARD_BY_ID.get(action.card)!.nameZh + '，骰 ' + roll + (roll <= 4 ? '，脱困' : '，未能脱困'));
     if (roll <= 4) { if (side === 'US') delete next.effects.quagmire; else delete next.effects.bearTrap; }
     next.tasks = [{ kind: 'FINISH_ACTION', side, round: p.round }]; drain(next); return next;
@@ -265,9 +300,6 @@ function applyInternal(state: GameState, side: Side, action: Action): GameState 
   } else if (action.type === 'TARGET') {
     if (p.kind !== 'OPS' || !legalTargets(next).includes(action.country)) throw new Error('该国家不是合法目标');
     const country = COUNTRY_BY_ID.get(action.country)!, inf = next.influence[country.id], enemy = opponent(side);
-    const rng = createRng(next.seed);
-    for (let i = 0; i < next.rngCalls; i++) rng();
-    const die = () => { next.rngCalls++; return rollDie(rng); };
     if (p.mode === 'INFLUENCE') {
       const cost = placementCost(next, country.id, side);
       inf[side]++; p.remaining -= cost;
@@ -281,7 +313,8 @@ function applyInternal(state: GameState, side: Side, action: Action): GameState 
       // Coup die modifiers: SALT −1 for everyone; Latin American Death Squads ±1 in Central/South America.
       const latin = country.region === 'CENTRAL_AMERICA' || country.region === 'SOUTH_AMERICA';
       const modifier = -Number(Boolean(next.effects.salt)) + (latin && next.effects.deathSquads ? (next.effects.deathSquads === side ? 1 : -1) : 0);
-      const roll = die(), result = coupResult(roll + modifier, p.ops, country.stability), removed = Math.min(result, inf[enemy]);
+      const [roll]=rollDice(next,{title:'政变 · '+country.nameZh,detail:`骰点${modifier?' '+(modifier>0?'+':'−')+' '+Math.abs(modifier):''} + ${p.ops} OPS − 稳定度 ${country.stability} × 2；结果大于 0 才生效。`,rollers:[side]});
+      const result = coupResult(roll + modifier, p.ops, country.stability), removed = Math.min(result, inf[enemy]);
       inf[enemy] -= removed; inf[side] += result - removed;
       next.milOps[side] = Math.min(5, next.milOps[side] + (p.militaryOps ?? p.ops));
       next.log.push(side + ' 政变 ' + country.nameZh + '：骰 ' + roll + (modifier ? (modifier > 0 ? ' +' : ' ') + modifier : '') + ' + OPS ' + p.ops + ' − 稳定度×2 → ' + result + '；移除 ' + removed + '，增加 ' + (result - removed));
@@ -296,7 +329,9 @@ function applyInternal(state: GameState, side: Side, action: Action): GameState 
       if (p.che && removed > 0) next.tasks.unshift({ kind: 'START_OPS', side, base: 3, mode: 'COUP', only: p.only!.filter(id => id !== country.id), free: true });
     } else {
       const modifier = (s: Side) => ADJACENCY[country.id].filter(id => controller(next, id) === s).length + Number(inf[s] > inf[opponent(s)]) + Number(country.adjacentTo === s) - Number(s === 'US' && Boolean(next.effects.iranContra));
-      const a = die(), b = die(), ma = modifier(side), mb = modifier(enemy), difference = a + ma - b - mb;
+      const ma=modifier(side),mb=modifier(enemy);
+      const [a,b]=rollDice(next,{title:'调整 · '+country.nameZh,detail:`双方各掷一枚骰子；${side==='US'?'美国':'苏联'} +${ma}，${enemy==='US'?'美国':'苏联'} +${mb}。较高的一方移除对方影响力。`,rollers:[side,enemy]});
+      const difference = a + ma - b - mb;
       const loser = difference > 0 ? enemy : side, removed = Math.min(inf[loser], Math.abs(difference));
       inf[loser] -= removed; p.remaining--;
       next.log.push(country.nameZh + ' 调整：' + side + ' ' + a + '+' + ma + ' 对 ' + enemy + ' ' + b + '+' + mb + '；' + loser + ' 移除 ' + removed);

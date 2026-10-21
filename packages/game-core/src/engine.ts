@@ -8,11 +8,12 @@ import { scoreRegion } from './scoring';
 import type { Decision, GameState, OpsGrant, OpsKind, Task, Phase } from './state';
 import { legalTargets } from './actions';
 import { resolveCountryChoice, resolveLateChoice, resolveLateEvent } from './events';
+import { rollDice } from './dice';
 
 export function random(s:GameState) {
   const rng=createRng(s.seed);for(let i=0;i<s.rngCalls;i++)rng();s.rngCalls++;return rng();
 }
-export const die=(s:GameState)=>1+Math.floor(random(s)*6);
+export const die=(s:GameState)=>rollDice(s,{title:'事件掷骰',detail:'投掷一枚六面骰子。',rollers:[s.phasingSide]})[0];
 export function addVp(s:GameState,side:Side,n:number) {
   s.vp+=(side==='US'?1:-1)*n;
   s.log.push(side+' 获得 '+n+' VP（总计 '+s.vp+'）');
@@ -53,7 +54,8 @@ export function control(s:GameState,id:string,side:Side) { s.influence[id][side]
 function remove(s:GameState,id:string,side:Side,n:number) {s.influence[id][side]=Math.max(0,s.influence[id][side]-n);}
 /** War events (7.6): roll − adjacent enemy-controlled countries; success at `win`+ moves all enemy influence and scores `vp`; military ops always. */
 export function war(s:GameState,side:Side,target:string,{israel=false,win=4,vp=2,military=2}:{israel?:boolean;win?:number;vp?:number;military?:number}={}) {
-  const enemy=opponent(side),mod=ADJACENCY[target].filter(id=>controller(s,id)===enemy).length+Number(israel&&controller(s,target)===enemy),roll=die(s);
+  const enemy=opponent(side),mod=ADJACENCY[target].filter(id=>controller(s,id)===enemy).length+Number(israel&&controller(s,target)===enemy);
+  const [roll]=rollDice(s,{title:'战争 · '+COUNTRY_BY_ID.get(target)!.nameZh,detail:`骰点 − 相邻敌方控制修正 ${mod}，达到 ${win} 即成功。`,rollers:[side]});
   s.milOps[side]=Math.min(5,s.milOps[side]+military);
   s.log.push(side+' 战争 '+COUNTRY_BY_ID.get(target)!.nameZh+'：骰 '+roll+' − 修正 '+mod+'，需要 ≥'+win);
   if(roll-mod>=win){s.influence[target][side]+=s.influence[target][enemy];s.influence[target][enemy]=0;addVp(s,side,vp);}
@@ -247,7 +249,8 @@ export function drain(s:GameState) {
       (removed?s.removed:s.discard).push(t.card);
     } else if(t.kind==='START_OPS')startOps(s,t);
     else if(t.kind==='SPACE_ROLL'){
-      const roll=die(s),threshold=SPACE_ROLL[s.space[t.side]];s.log.push(t.side+' 太空尝试：骰 '+roll+'，需要 ≤'+threshold);
+      const threshold=SPACE_ROLL[s.space[t.side]];
+      const [roll]=rollDice(s,{title:'太空竞赛',detail:`掷出 ${threshold} 或以下即可前进一格。`,rollers:[t.side]});s.log.push(t.side+' 太空尝试：骰 '+roll+'，需要 ≤'+threshold);
       if(roll<=threshold)advanceSpace(s,t.side);
     }
     else if(t.kind==='FINISH_HEADLINES'){s.headlines={};beginAction(s,'USSR',1);}
@@ -323,7 +326,7 @@ export function chooseDecision(s:GameState,value:string) {
     if(d.event===16)influence(s,'USSR',east(),value==='add'?5:4,value==='add'?2:1,value==='add'?'ADD':'CLEAR',value==='add'?'USSR':'US','华沙条约：'+(value==='add'?'东欧 +5，每国最多 2':'移除东欧美国影响力'));
     if(d.event===20){
       if(value==='boycott'){changeDefcon(s,-1);if((s.phase as Phase).kind!=='GAME_OVER')s.tasks.unshift({kind:'START_OPS',side:d.actor,base:4});}
-      else {let a:number,b:number;do{a=die(s)+2;b=die(s);}while(a===b);s.log.push('奥运会：主办方 '+a+'，对手 '+b);addVp(s,a>b?d.actor:opponent(d.actor),2);}
+      else {let a:number,b:number;do{const rolls=rollDice(s,{title:'奥运会',detail:'双方各掷一枚骰子；主办方 +2，同点重掷。',rollers:[d.actor,opponent(d.actor)]});a=rolls[0]+2;b=rolls[1];}while(a===b);s.log.push('奥运会：主办方 '+a+'，对手 '+b);addVp(s,a>b?d.actor:opponent(d.actor),2);}
     }
     if(d.event===24)war(s,d.actor,value);
     if(d.event===32){const id=Number(value);s.hands[side]=s.hands[side].filter(c=>c!==id);s.discard.push(id);s.tasks.unshift({kind:'START_OPS',side,base:CARD_BY_ID.get(id)!.ops});}

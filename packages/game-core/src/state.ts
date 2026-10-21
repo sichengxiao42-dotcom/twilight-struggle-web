@@ -2,6 +2,8 @@ import type { Region, Side } from '@ts/shared';
 import { CARDS, CHINA_CARD_ID } from './data/cards';
 import { COUNTRIES } from './data/countries';
 import { createRng, shuffle } from './rng';
+import type { Action } from './actions';
+import type { DiceRequest, DiceResult } from './dice';
 
 export type Influence = Record<Side, number>;
 export type OpsKind = 'INFLUENCE' | 'REALIGNMENT' | 'COUP';
@@ -9,6 +11,7 @@ export type OpsKind = 'INFLUENCE' | 'REALIGNMENT' | 'COUP';
 export interface OpsGrant { only?: string[]; free?: boolean; che?: boolean }
 
 export type Phase =
+  | { kind:'DICE_ROLL'; side:Side; id:number; request:DiceRequest; values:number[] }
   | { kind: 'CONFIRM_END'; side: Side; round: number; context: 'ACTION' | 'SETUP' | 'HEADLINE' }
   | { kind: 'SETUP_PLACEMENT'; side: Side; remaining: number; subRegion: 'EASTERN_EUROPE' | 'WESTERN_EUROPE' }
   | { kind: 'HEADLINE'; side: Side }
@@ -64,6 +67,12 @@ export interface Effects {
 }
 
 export interface GameState {
+  manualDice?:boolean;
+  /** Private continuation; never included in player views. Baselines do not nest. */
+  pendingDice?:{base:GameState;actor:Side;action:Action;approved:number};
+  /** Transaction-local counter, removed before returning any state. */
+  diceReplay?:{allowed:number;used:number};
+  diceHistory?:DiceResult[];
   /** Only publicly played cards; secret headline selections are never recorded here. */
   publicPlays?: PublicPlay[];
   manualEnd?: boolean;

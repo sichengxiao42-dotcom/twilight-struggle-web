@@ -11,5 +11,6 @@ export * from './data/descriptions';
 export * from './view';
 export * from './logText';
 export { chooseBotAction } from './bot';
+export type { DiceRequest, DiceResult } from './dice';
 export { canEvent, roundsFor, modifiedOps } from './engine';
 export { REGION_NAMES } from './events';

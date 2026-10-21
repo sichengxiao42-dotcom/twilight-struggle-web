@@ -24,6 +24,7 @@ export interface Guide {
 export function phaseGuide(state: GameState, context: GuideContext): Guide {
   const p = state.phase;
   if (context.blocked) return { title: context.blocked, detail: '对方完成后会自动继续。', focus: 'none', waiting:true };
+  if(p.kind==='DICE_ROLL')return {title:sides[p.side]+'：'+p.request.title,detail:p.values.length===p.request.rollers.length?'点数已确定，在浮窗确认后继续结算。':'在浮窗点击骰子，投出本次点数。',focus:'none'};
   if (p.kind === 'CONFIRM_END') return {title:sides[p.side]+'：等待结束回合',detail:'本次操作已完成。可以先撤销检查，点击“结束回合”后才会继续；确认后不能撤销上轮操作。',focus:'none'};
   if (p.kind === 'SETUP_PLACEMENT') {
     const region = p.subRegion === 'EASTERN_EUROPE' ? '东欧' : '西欧';
@@ -40,9 +41,9 @@ export function phaseGuide(state: GameState, context: GuideContext): Guide {
   }
   if (p.kind === 'OPS') return {
     title: `轮到${sides[p.side]} · ${modes[p.mode]}`,
-    detail: context.targetCount ? p.mode==='INFLUENCE'?'点击金框国家部署，也可拖入棋子。':p.mode==='COUP'?'点击金框国家立即发动政变。':'点击金框国家执行一次调整。' : '当前没有可操作的国家，可结束操作。',
+    detail: context.targetCount ? p.mode==='INFLUENCE'?'点击金框国家部署，也可拖入棋子。':p.mode==='COUP'?'点击金框国家选择目标，再在浮窗掷骰。':'点击金框国家，在浮窗依次投掷双方骰子。' : '当前没有可操作的国家，可结束操作。',
     counter:{value:p.remaining,unit:'OPS'},
-    rule:p.mode==='INFLUENCE'?'在对方控制国放置 1 点影响力通常需要 2 OPS，其余通常为 1 OPS。':p.mode==='COUP'?'点击目标即执行政变，并消耗本次全部行动点；请先确认目标及 DEFCON 风险。':'每次调整消耗 1 OPS；骰点与国家局势共同决定结果。',
+    rule:p.mode==='INFLUENCE'?'在对方控制国放置 1 点影响力通常需要 2 OPS，其余通常为 1 OPS。':p.mode==='COUP'?'选择目标后掷骰结算政变，并消耗本次全部行动点；请先确认目标及 DEFCON 风险。':'每次调整消耗 1 OPS；骰点与国家局势共同决定结果。',
     actionHint:p.mode==='COUP'?'结束操作将放弃本次政变':'检查后确认结束行动',
     focus:context.targetCount?'map':'actions',
   };

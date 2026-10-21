@@ -51,7 +51,7 @@ test('OPS task separates remaining points from short instructions and expandable
   assert.match(guide.rule!,/2 OPS/);
   state.phase.mode='COUP';
   const coup=phaseGuide(state,context);
-  assert.match(coup.detail,/立即发动政变/);
+  assert.match(coup.detail,/浮窗掷骰/);
   assert.match(coup.rule!,/全部行动点/);
   assert.match(coup.actionHint!,/放弃本次政变/);
 });

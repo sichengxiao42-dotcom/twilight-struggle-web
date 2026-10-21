@@ -7,6 +7,7 @@
 - 原版素材导入：[docs/ASSETS.md](docs/ASSETS.md)
 - 生产运行与部署准备：[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 - 基础陪练使用与实现：[docs/BOT.md](docs/BOT.md)
+- 点击掷骰与结算：[docs/DICE.md](docs/DICE.md)
 
 > 《冷战热斗》© GMT Games。本私有仓库按项目所有者要求收录 TTS 中文模组的卡图、地图和标记图片；来源及校验记录见 [素材清单](docs/ASSET_INVENTORY.json)。
 

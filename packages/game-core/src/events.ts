@@ -6,7 +6,8 @@ import { controller, vpWinner } from './rules';
 import { shuffle } from './rng';
 import { scoreRegion, scoreSoutheastAsia } from './scoring';
 import type { Decision, GameState, Task } from './state';
-import { addVp, advanceSpace, changeDefcon, choice, countryChoice, die, ids, influence, modifiedOps, protectedCountry, random, reveal, war, west } from './engine';
+import { addVp, advanceSpace, changeDefcon, choice, countryChoice, ids, influence, modifiedOps, protectedCountry, random, reveal, war, west } from './engine';
+import { rollDice } from './dice';
 
 // Mid War and Late War events (#36–102, #107–110). Card text was checked against the Chinese card art.
 type EventTask = Extract<Task, { kind: 'EVENT' }>;
@@ -88,7 +89,9 @@ export function resolveLateEvent(s: GameState, t: EventTask, id: number, side: S
     case 44: s.effects.bearTrap = true; return true;
     case 45: {
       const regions = (who: Side) => (Object.keys(REGION_NAMES) as Region[]).filter((r) => ['DOMINATION', 'CONTROL'].includes(scoreRegion(s, r)[who].status)).length;
-      const rolls = { USSR: die(s) + regions('USSR'), US: die(s) + regions('US') };
+      const modifiers={USSR:regions('USSR'),US:regions('US')};
+      const dice=rollDice(s,{title:'首脑峰会',detail:`双方各掷一枚骰子，加支配地区数：苏联 +${modifiers.USSR}，美国 +${modifiers.US}。`,rollers:['USSR','US']});
+      const rolls = { USSR: dice[0] + modifiers.USSR, US: dice[1] + modifiers.US };
       s.log.push('首脑峰会：苏 ' + rolls.USSR + ' / 美 ' + rolls.US);
       if (rolls.USSR === rolls.US) return true;
       const winner: Side = rolls.US > rolls.USSR ? 'US' : 'USSR';

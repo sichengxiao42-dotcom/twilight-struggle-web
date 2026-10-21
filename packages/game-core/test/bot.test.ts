@@ -5,7 +5,7 @@ import { drain } from '../src/engine';
 
 test('basic bots finish seeded standard games without stalls or held scoring cards',()=>{
   for(let seed=1;seed<=16;seed++){
-    let state:GameState={...createGame(seed),manualEnd:true};
+    let state:GameState={...createGame(seed),manualEnd:true,manualDice:true};
     for(let step=0;step<2500&&state.phase.kind!=='GAME_OVER';step++){
       const before=JSON.stringify(state),action=chooseBotAction(state);
       assert.ok(action,`seed ${seed}, turn ${state.turn}: ${JSON.stringify(state.phase)}`);

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { io, type Socket } from 'socket.io-client';
 import type { ClientToServer, ServerToClient, RoomSnapshot, Session, Side } from '@ts/shared';
-import { CARD_BY_ID, type Action, type PlayerView } from '@ts/game-core';
+import { activeSide, apply, chooseBotAction, createGame, CARD_BY_ID, type Action, type PlayerView } from '@ts/game-core';
 import { createGameServer } from '../src/server';
 import { RoomStore } from '../src/rooms';
 type Snapshot=Omit<RoomSnapshot,'view'>&{view:PlayerView|null};
@@ -20,6 +20,42 @@ class Client {
   async start(){return this.socket.timeout(3000).emitWithAck('start',{});}
   async act(action:Action,id:string,revision=this.last!.revision){return this.socket.timeout(3000).emitWithAck('action',{id,expectedRevision:revision,action});}
 }
+
+test('dice socket flow rejects forged points, deduplicates rolls and restores rolled values on reconnect',{timeout:15000},async t=>{
+  const server=createGameServer(new RoomStore(()=>42));
+  await new Promise<void>(resolve=>server.http.listen(0,'127.0.0.1',resolve));
+  const addr=server.http.address();assert.ok(addr&&typeof addr==='object');const url='http://127.0.0.1:'+addr.port;
+  const a=new Client(url),b=new Client(url),back=new Client(url);
+  t.after(async()=>{for(const c of [a,b,back])c.socket.disconnect();await new Promise<void>(resolve=>server.io.close(()=>resolve()));});
+  await Promise.all([a.connect(),b.connect()]);const first=await a.create();const join=await b.join({roomId:first.roomId});assert.ok(join.ok);
+  const sessions={USSR:first,US:join.data},clients={USSR:a,US:b};
+  await a.seat('USSR');await b.seat('US');await a.start();await Promise.all([a.wait(s=>s.started),b.wait(s=>s.started)]);
+  let reference:ReturnType<typeof createGame>={...createGame(42),manualEnd:true,manualDice:true};
+  for(let step=0;step<200&&reference.phase.kind!=='DICE_ROLL';step++){
+    const side=activeSide(reference)!,action=chooseBotAction(reference)!;
+    assert.ok(action);const revision=clients[side].last!.revision+1;
+    const reply=await clients[side].act(action,'prepare_'+step);assert.ok(reply.ok,reply.ok?'':reply.error);
+    reference=apply(reference,side,action);
+    await Promise.all([a.wait(s=>s.revision===revision),b.wait(s=>s.revision===revision)]);
+  }
+  assert.equal(reference.phase.kind,'DICE_ROLL');const side=activeSide(reference)!,roller=clients[side],other=clients[side==='US'?'USSR':'US'];
+  const revision=roller.last!.revision;
+  assert.equal((await other.act({type:'ROLL_DICE'},'wrong_side')).ok,false);
+  const forged=await roller.socket.emitWithAck('action',{id:'forged',expectedRevision:revision,action:{type:'ROLL_DICE',value:6}});assert.equal(forged.ok,false);
+  const request={id:'one_roll',expectedRevision:revision,action:{type:'ROLL_DICE'}};
+  assert.ok((await roller.socket.emitWithAck('action',request)).ok);
+  await Promise.all([a.wait(s=>s.revision===revision+1),b.wait(s=>s.revision===revision+1)]);
+  const phase=roller.last!.view!.phase;assert.equal(phase.kind,'DICE_ROLL');
+  if(phase.kind!=='DICE_ROLL')throw new Error('missing dice phase');
+  assert.equal(phase.values.length,1);assert.ok(phase.values[0]>=1&&phase.values[0]<=6);
+  const duplicate=await roller.socket.emitWithAck('action',request);assert.ok(duplicate.ok);assert.equal(duplicate.data.revision,revision+1);
+  assert.equal(roller.last!.canUndo,false);
+  roller.socket.disconnect();await other.wait(s=>!s.seats[side].connected);
+  await back.connect();assert.ok((await back.join(sessions[side])).ok);
+  const restored=await back.wait(s=>s.revision===revision+1);
+  assert.deepEqual(restored.view!.phase,phase);
+  for(const key of ['pendingDice','diceReplay','seed','rngCalls'])assert.ok(!(key in restored.view!));
+});
 
 test('socket bot plays automatically, keeps its headline secret, and cancels pending work on restart',{timeout:15000},async t=>{
   const server=createGameServer(new RoomStore(()=>42),{botDelayMs:5});
@@ -46,7 +82,7 @@ test('socket bot plays automatically, keeps its headline secret, and cancels pen
   let revision=a.last!.revision+1;
   assert.ok((await a.act({type:'SELECT_HEADLINE',card},'headline')).ok);await a.wait(s=>s.revision>=revision);
   assert.ok((await a.act({type:'END_ACTION'},'confirm_headline')).ok);
-  await a.wait(s=>Boolean(s.view?.publicPlays.some(p=>p.use!=='HEADLINE'))||Boolean(s.botError)||s.view?.phase.kind==='DECISION'&&s.view.phase.side==='US');
+  await a.wait(s=>Boolean(s.view?.publicPlays.some(p=>p.use!=='HEADLINE'))||Boolean(s.botError)||(s.view?.phase.kind==='DECISION'||s.view?.phase.kind==='DICE_ROLL')&&s.view.phase.side==='US');
   assert.equal(a.last!.botError,undefined);
   revision=a.last!.revision;
   assert.ok((await a.socket.emitWithAck('restart',{expectedRevision:revision})).ok);
@@ -92,7 +128,8 @@ test('real Socket.IO clients: lobby seats, separate views, full early-war flow, 
     if(view.phase.kind==='GAME_OVER'||view.turn>=4)break;
     assert.ok('side' in view.phase);const side=view.phase.side,client=clients[side],p=client.last!.view!.phase;
     assert.notEqual(p.kind,'WAITING');let action:Action;
-    if(p.kind==='CONFIRM_END')action={type:'END_ACTION'};
+    if(p.kind==='DICE_ROLL')action={type:p.values.length===p.request.rollers.length?'CONTINUE_DICE':'ROLL_DICE'};
+    else if(p.kind==='CONFIRM_END')action={type:'END_ACTION'};
     else if(p.kind==='SETUP_PLACEMENT')action={type:'PLACE_SETUP',country:side==='USSR'?'poland':'west_germany'};
     else if(p.kind==='HEADLINE')action={type:'SELECT_HEADLINE',card:client.last!.view!.hands[side].find(id=>CARD_BY_ID.get(id)!.scoring)??client.last!.view!.hands[side].find(id=>id!==32)!};
     else if(p.kind==='ACTION_ROUND'){
