@@ -15,14 +15,14 @@ const found = import.meta.glob<TtsManifest>('../../../assets/tts-manifest.json',
 const manifest: TtsManifest | undefined = Object.values(found)[0];
 
 /** Percentage-based sprite so the card can be drawn at any size; the element's CSS sets width and height. */
-export function cardSprite(cardId: number): CSSProperties | null {
+export function cardSprite(cardId: number, original = false): CSSProperties | null {
   const entry = manifest?.cards[String(cardId)];
   if (!entry) return null;
   const sheet = manifest!.sheets[entry.sheet];
   const col = entry.index % sheet.columns;
   const row = Math.floor(entry.index / sheet.columns);
   return {
-    backgroundImage: `url(${sheet.webUrl ?? sheet.url})`,
+    backgroundImage: `url(${original ? sheet.url : sheet.webUrl ?? sheet.url})`,
     backgroundSize: `${sheet.columns * 100}% ${sheet.rows * 100}%`,
     backgroundPosition: `${(col / (sheet.columns - 1)) * 100}% ${(row / (sheet.rows - 1)) * 100}%`,
   };

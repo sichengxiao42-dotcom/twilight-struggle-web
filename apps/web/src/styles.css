@@ -268,6 +268,25 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
 .ongoing-effects details { min-width:0; flex:1; }
 .ongoing-effects summary { padding:0; font-weight:700; line-height:1.65; }
 .ongoing-effects .effect-description { margin:9px 0 6px; }
+.catalog-entry { display:flex; flex-direction:column; align-items:flex-start; gap:5px; width:100%; margin:0 0 14px; padding:12px; text-align:left; }
+.catalog-entry strong { font:700 17px SimSun,serif; }.catalog-entry span { font-size:11px; color:var(--muted); }
+.discard-dialog.catalog-dialog { --gallery-color:var(--accent); width:min(1380px,calc(100vw - 32px)); }
+.catalog-scroll { flex:1; min-height:0; overflow:auto; scrollbar-width:thin; }
+.catalog-scroll[hidden] { display:none; }
+.catalog-columns { display:grid; grid-template-columns:repeat(3,minmax(230px,1fr)); gap:20px; padding:0 24px 24px; }
+.catalog-period { min-width:0; }
+.catalog-period>h3 { position:sticky; top:0; z-index:1; display:flex; align-items:baseline; justify-content:space-between; padding:14px 0; margin-bottom:14px; border-bottom:2px solid var(--line); background:var(--surface); font:700 20px SimSun,serif; }
+.catalog-period h3 small { font:12px "Microsoft YaHei",sans-serif; }
+.catalog-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(165px,1fr)); gap:22px 16px; }
+.catalog-cards figure { margin:0; min-width:0; }
+.catalog-card { display:block; width:100%; min-height:0; padding:0; border:0; background:none; box-shadow:0 3px 8px #37332235; }
+.catalog-card>.card { width:100%; height:auto; aspect-ratio:7/10; }
+.catalog-cards figcaption { margin-top:7px; font-size:11px; line-height:1.5; }.catalog-cards figcaption span { color:var(--muted); }
+.catalog-detail { flex:1; min-height:0; overflow:auto; padding:16px 24px 24px; }
+.catalog-back { margin-bottom:16px; }.catalog-detail figure { width:min(100%,440px); margin:0 auto; }
+.catalog-detail .card { width:100%; height:auto; aspect-ratio:7/10; box-shadow:0 3px 12px #37332240; }
+.catalog-detail figcaption { padding:12px 0; text-align:center; font-size:14px; }
+@media(max-width:600px) { .discard-dialog.catalog-dialog { width:calc(100vw - 16px); }.catalog-columns { padding:0 12px 16px; gap:16px; }.catalog-detail { padding:12px; } }
 .peer-pointer { pointer-events:none; color:#365e86; transition:transform .06s linear; }
 .peer-pointer.peer-USSR { color:#9a342c; }
 .peer-pointer path,.peer-pointer circle { fill:currentColor; stroke:#fff8e7; stroke-width:2px; vector-effect:non-scaling-stroke; }

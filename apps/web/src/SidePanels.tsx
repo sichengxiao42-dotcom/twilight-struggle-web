@@ -1,6 +1,8 @@
 import { COUNTRIES, REGION_NAMES, controller, scoreRegion, scoreSoutheastAsia, type GameState } from '@ts/game-core';
 import type { Region, Side } from '@ts/shared';
 import { ongoingEffects } from './ongoingEffects';
+import { lazy, Suspense, useState } from 'react';
+const CardCatalog=lazy(()=>import('./CardCatalog'));
 
 export type SidePanel = 'cards' | 'regions' | 'log' | 'rules' | 'effects' | 'room' | 'recent';
 export const PANEL_TITLES: Record<SidePanel, string> = { cards:'卡牌操作', regions:'地区局势', log:'对局日志', rules:'规则速查', effects:'持续效果', room:'房间大厅', recent:'弃牌堆' };
@@ -39,7 +41,10 @@ export function LogPanel({lines}:{lines:string[]}) {
   return <section className="info-panel" aria-label="对局日志详情"><p className="panel-intro">最新记录在上 · 共 {lines.length} 条</p>{lines.length?<ol className="match-log" reversed>{[...lines].reverse().map((line,i)=><li key={lines.length-i}>{line}</li>)}</ol>:<p className="panel-empty">对局开始后，布点、出牌与结算会记录在这里。</p>}</section>;
 }
 export function RulesPanel() {
+  const [catalogOpen,setCatalogOpen]=useState(false);
   return <section className="info-panel rules-panel" aria-label="规则速查详情"><p className="panel-intro">展开需要的规则，随时切回卡牌继续行动。</p>
+    <button className="catalog-entry" aria-haspopup="dialog" onClick={()=>setCatalogOpen(true)}><strong>卡牌图鉴</strong><span>冷战早期 · 中期 · 晚期，查看全部中文原图 →</span></button>
+    {catalogOpen&&<Suspense fallback={<p role="status">正在打开卡牌图鉴…</p>}><CardCatalog onClose={()=>setCatalogOpen(false)}/></Suspense>}
     <details open><summary>如何推进当前步骤</summary><p>先看面板上方的当前步骤。点击手牌查看效果，选择用途并确认；地图金框是合法目标，可点击国家或拖入棋子。处理完行动后，点击“结束回合”继续。</p></details>
     <details><summary>影响力与国家控制</summary><p>一方影响力减去另一方影响力，达到该国稳定度即控制。放置 1 点影响力通常花费 1 OPS；对方控制国通常花费 2 OPS。合法目标由当前局面和事件决定。</p></details>
     <details><summary>头条、事件与行动点</summary><p>头条只执行事件。行动轮可以执行事件，或用行动点放置影响力、调整、政变。使用对方阵营卡的 OPS 时，对方事件通常仍会触发；太空竞赛可避免触发事件，但有 OPS 门槛与次数限制。</p></details>

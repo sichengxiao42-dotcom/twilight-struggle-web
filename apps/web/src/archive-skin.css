@@ -116,6 +116,8 @@ button.piece-US:hover:not(:disabled), button.piece-USSR:hover:not(:disabled) {
   background-image: var(--paper-grain), radial-gradient(ellipse at 35% 20%, #ffffff88, #d7c49b33);
   box-shadow: inset 0 1px 2px #fffef6, inset 0 -2px 4px #a28a4e22, 0 5px 0 #b2a98a, 0 8px 15px #443b2525;
 }
+.catalog-period>h3 { background-image:var(--paper-grain),var(--paper-light); }
+.catalog-card,.catalog-card:hover:not(:disabled) { background:none; }
 
 @media (forced-colors: active) {
   :root { --paper-grain: none; --archive-fibers: none; --paper-light: none; }

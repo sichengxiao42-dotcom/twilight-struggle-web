@@ -4,8 +4,8 @@ import { cardSprite } from './assets';
 const SIDE_LABEL = { USSR: '苏', US: '美', NEUTRAL: '中' } as const;
 
 /** 有本地 TTS 素材时显示原版卡图（雪碧图切片），否则回退到文字卡。 */
-export function CardView({ card }: { card: CardDef }) {
-  const sprite = cardSprite(card.id);
+export function CardView({ card, original = false }: { card: CardDef; original?:boolean }) {
+  const sprite = cardSprite(card.id, original);
   if (sprite) return <div className="card image" style={sprite} title={card.nameZh} />;
   return (
     <div className={`card side-${card.side}`}>
