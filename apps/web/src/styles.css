@@ -268,6 +268,15 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
 .ongoing-effects details { min-width:0; flex:1; }
 .ongoing-effects summary { padding:0; font-weight:700; line-height:1.65; }
 .ongoing-effects .effect-description { margin:9px 0 6px; }
+.peer-pointer { pointer-events:none; color:#365e86; transition:transform .06s linear; }
+.peer-pointer.peer-USSR { color:#9a342c; }
+.peer-pointer path,.peer-pointer circle { fill:currentColor; stroke:#fff8e7; stroke-width:2px; vector-effect:non-scaling-stroke; }
+.peer-pointer text { fill:currentColor; stroke:#fff8e7; stroke-width:3px; paint-order:stroke; font-weight:700; }
+.peer-pointer .peer-ripple { fill:none; stroke:currentColor; animation:peer-ripple .65s ease-out both; transform-box:fill-box; transform-origin:center; }
+.peer-released { animation:peer-release 1s ease-out forwards; }
+@keyframes peer-ripple { from { opacity:.9; transform:scale(.5); } to { opacity:0; transform:scale(1.8); } }
+@keyframes peer-release { 0%,40% { opacity:1; } to { opacity:0; } }
+@media(prefers-reduced-motion:reduce) { .peer-pointer { transition:none; }.peer-pointer .peer-ripple { animation:none; opacity:.5; }.peer-released { animation:none; } }
 .public-card-slot { pointer-events:none; overflow:visible; }
 .public-play { width:100%; padding:24px; background:#f4efdc; border:10px solid #426489; border-radius:28px; box-shadow:0 20px 70px #1f211d66; color:#2e4c6e; animation:public-play-in .2s ease-out; }
 .public-play.public-USSR { border-color:#9b4235; color:#883a30; }

@@ -1,8 +1,9 @@
 import { boardChanges, type CountryChange } from './boardChanges';
 import { PublicCard } from './PlayedCards';
 import { publicCardSlot } from './publicCardLayout';
+import { PeerPointer, useBoardPresence } from './BoardPresence';
 import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from 'react';
-import type { Region, Side } from '@ts/shared';
+import type { BoardPointer, BoardPresence, Region, Side } from '@ts/shared';
 import { ADJACENCY, COUNTRIES, controller, placementCost, type Action, type Country, type GameState, type PublicPlay } from '@ts/game-core';
 import { boardImage } from './assets';
 import { usePieceDrag } from './usePieceDrag';
@@ -30,7 +31,8 @@ const trackColours = { US: ['#2f5d9e', '#fff'], USSR: ['#b3261e', '#fff'], neutr
 
 export interface PlacementFeedback { country: string; side: Side; before: number }
 
-export function Board({selectedCountry,state,targets,onCountry,onAction,canInteract,scale=1,lastPlacement,publicPlays=[]}:{selectedCountry?:string;state:GameState;targets:string[];onCountry:(id:string)=>void;onAction:(action:Action)=>void;canInteract:boolean;scale?:number;lastPlacement?:PlacementFeedback|null;publicPlays?:PublicPlay[]}) {
+export function Board({selectedCountry,state,targets,onCountry,onAction,canInteract,scale=1,lastPlacement,publicPlays=[],peerPointer,onPointer}:{selectedCountry?:string;state:GameState;targets:string[];onCountry:(id:string)=>void;onAction:(action:Action)=>void;canInteract:boolean;scale?:number;lastPlacement?:PlacementFeedback|null;publicPlays?:PublicPlay[];peerPointer?:BoardPresence|null;onPointer?:(pointer:BoardPointer|null)=>void}) {
+  const {boardEvents:presenceEvents,reserveEvents}=useBoardPresence(onPointer);
   const [hover, setHover] = useState<string | null>(null);
   const previous = useRef(state);
   const sequence = useRef(0);
@@ -61,7 +63,7 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
   const draggedPiece=gesture.drag?.piece;
   const ghostLabel=draggedPiece?(draggedPiece.side==='USSR'?'苏':'美')+' 1':'';
   const gestureLayer=gesture.drag&&<div className={'piece-ghost piece-'+(draggedPiece&&draggedPiece.side)} style={{left:gesture.drag.x,top:gesture.drag.y}} aria-hidden="true">{ghostLabel}</div>;
-  const reserves=<div className="piece-tray"><span>备用棋子</span>{(['USSR','US'] as const).map(side=><button key={side} className={'reserve-counter piece-'+side} data-reserve-side={side} aria-label={'拖动'+(side==='USSR'?'苏联':'美国')+'影响力棋子'} {...gesture.bindings({kind:'reserve',side})} onClick={()=>{if(!gesture.suppressClick())setDragMessage('按住棋子拖到金框国家；移除影响力时拖回同色备用区');}}>{side==='USSR'?'苏':'美'} <b>1</b></button>)}<small>拖入国家部署 · 拖回备用区移除</small></div>;
+  const reserves=<div className="piece-tray"><span>备用棋子</span>{(['USSR','US'] as const).map(side=><button key={side} className={'reserve-counter piece-'+side} data-reserve-side={side} aria-label={'拖动'+(side==='USSR'?'苏联':'美国')+'影响力棋子'} {...gesture.bindings({kind:'reserve',side})} {...reserveEvents} onClick={()=>{if(!gesture.suppressClick())setDragMessage('按住棋子拖到金框国家；移除影响力时拖回同色备用区');}}>{side==='USSR'?'苏':'美'} <b>1</b></button>)}<small>拖入国家部署 · 拖回备用区移除</small></div>;
   // Track markers follow the authoritative state and slide to their new box on their own.
   const renderedTracks=<g className="track-markers">{tracks.map(t=>{
     const [fill,ink]=trackColours[t.owner],r=TRACK_MARKER_RADIUS;
@@ -106,7 +108,7 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
   if (map) {
     const centre = (id: string) => [MAP_POSITIONS[id][0] + BOX_WIDTH / 2, MAP_POSITIONS[id][1] + BOX_HEIGHT / 2];
     return <>
-      {reserves}{gestureLayer}<div className="board-scroll"><svg viewBox={'0 0 ' + MAP_WIDTH + ' ' + MAP_HEIGHT} className="board map-board" style={{width: `${scale * 100}%`, '--board-zoom':scale} as CSSProperties} aria-label="世界局势地图">
+      {reserves}{gestureLayer}<div className="board-scroll"><svg {...presenceEvents} viewBox={'0 0 ' + MAP_WIDTH + ' ' + MAP_HEIGHT} className="board map-board" style={{width: `${scale * 100}%`, '--board-zoom':scale} as CSSProperties} aria-label="世界局势地图">
         <image href={map} width={MAP_WIDTH} height={MAP_HEIGHT} pointerEvents="none"/>
         {hover && ADJACENCY[hover].map(id => { const a = centre(hover), b = centre(id); return <line key={id} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} className="connection"/>; })}
         {COUNTRIES.map(c => {
@@ -121,10 +123,11 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
         })}
         {renderedTracks}
       {publicCards}
+      <PeerPointer presence={peerPointer} width={MAP_WIDTH} height={MAP_HEIGHT}/>
       </svg></div>{feedback}<p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>放大后可横向滚动</span></p></>;
   }
   return <>
-    {reserves}{gestureLayer}<div className="board-scroll"><svg viewBox="0 0 1208 810" className="board" style={{width: `${scale * 100}%`, '--board-zoom':scale} as CSSProperties} aria-label="世界局势示意地图">
+    {reserves}{gestureLayer}<div className="board-scroll"><svg {...presenceEvents} viewBox="0 0 1208 810" className="board" style={{width: `${scale * 100}%`, '--board-zoom':scale} as CSSProperties} aria-label="世界局势示意地图">
       {(Object.keys(labels) as Region[]).map(r => { const [x, y] = origins[r]; return <text key={r} x={x + 8} y={y + 25} className="region-title">{labels[r]}</text>; })}
       {hover && ADJACENCY[hover].map(id => { const a = positions[hover], b = positions[id]; return <line key={id} x1={a[0] + 60} y1={a[1] + 20} x2={b[0] + 60} y2={b[1] + 20} className="connection"/>; })}
       {COUNTRIES.map(c => {
@@ -132,5 +135,6 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
         return country(c, positions[c.id], <><rect width="120" height="40" rx="5"/><text x="6" y="15">{c.battleground ? '★ ' : ''}{c.nameZh}</text><text x="6" y="32" className="stability">稳 {c.stability}</text><text x="72" y="32" className="us-value">{inf.US}</text><text x="99" y="32" className="ussr-value">{inf.USSR}</text></>);
       })}
     {publicCards}
+      <PeerPointer presence={peerPointer} width={1208} height={810}/>
       </svg></div>{feedback}<p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>放大后可横向滚动</span></p></>;
 }

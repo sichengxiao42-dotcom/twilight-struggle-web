@@ -67,6 +67,13 @@ export class RoomStore {
   private sideOf(room:Room,key:string):Side|null {
     return room.seats.USSR===key?'USSR':room.seats.US===key?'US':null;
   }
+  /** Recheck live ownership on every presence packet, including after identity replacement. */
+  pointerPeer(roomId:string,key:string,clientId:string) {
+    const {room}=this.member(roomId,key,clientId),side=this.sideOf(room,key);
+    if(!room.started||!side)return null;
+    const peerKey=room.seats[side==='US'?'USSR':'US'];
+    return {side,clientId:peerKey?room.members.get(peerKey)?.clientId:null};
+  }
   /** Lobby seat change: sit on a free side, switch, stand up, or random assignment. Locked once the game starts. */
   seat(roomId:string,key:string,clientId:string,choice:unknown) {
     const {room}=this.member(roomId,key,clientId);

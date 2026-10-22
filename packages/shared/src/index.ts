@@ -1,4 +1,7 @@
 export type Side = 'USSR' | 'US';
+/** Ephemeral public-board coordinates; never part of the game state or action log. */
+export interface BoardPointer { x:number; y:number; kind:'mouse'|'touch'; phase:'move'|'down'|'up' }
+export interface BoardPresence { roomId:string; side:Side; pointer:BoardPointer|null }
 export type CardSide = Side | 'NEUTRAL';
 export type Period = 'EARLY' | 'MID' | 'LATE';
 export type Region = 'EUROPE' | 'ASIA' | 'MIDDLE_EAST' | 'AFRICA' | 'CENTRAL_AMERICA' | 'SOUTH_AMERICA';
@@ -23,11 +26,13 @@ export type Reply<T = undefined> = { ok: true; data: T } | { ok: false; error: s
 export interface Session { roomId: string; token: string }
 export type SeatChoice = Side | 'RANDOM' | null;
 export interface ServerToClient {
+  pointer: (presence:BoardPresence) => void;
   closed: (message: {roomId:string;reason:string}) => void;
   state: (snapshot: RoomSnapshot) => void;
   error: (message: string) => void;
 }
 export interface ClientToServer {
+  pointer: (pointer:BoardPointer|null) => void;
   bot: (request: {enabled:boolean}, ack: (reply: Reply<{revision:number}>) => void) => void;
   botRetry: (request: Record<string,never>, ack: (reply: Reply<{revision:number}>) => void) => void;
   restart: (request: {expectedRevision:number}, ack: (reply: Reply<{revision:number}>) => void) => void;

@@ -1,7 +1,7 @@
 import { readSession, writeSession, forgetSession } from './roomSession';
 import { useEffect, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
-import type { ClientToServer, Reply, RoomSnapshot, SeatChoice, ServerToClient, Session } from '@ts/shared';
+import type { BoardPointer, BoardPresence, ClientToServer, Reply, RoomSnapshot, SeatChoice, ServerToClient, Session } from '@ts/shared';
 import type { Action, GameState, PlayerView } from '@ts/game-core';
 type Snapshot=Omit<RoomSnapshot,'view'>&{view:PlayerView|null};
 function saved(roomId?:string):Session|null {
@@ -19,6 +19,7 @@ export function useOnline() {
   const pending=useRef<{id:string;expectedRevision:number;action:Action|{type:'UNDO'}|{type:'UNDO_PLACEMENT';country:string}}|null>(null);
   const [session,setSession]=useState<Session|null>(null);
   const [snapshot,setSnapshot]=useState<Snapshot|null>(null);
+  const [peerPointer,setPeerPointer]=useState<BoardPresence|null>(null);
   const [ready,setReady]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
   const [hasPending,setHasPending]=useState(false);
   const sendPending=useRef<()=>void>(()=>{});
@@ -32,6 +33,15 @@ export function useOnline() {
     socket.current=client;
     let restoreTimer:ReturnType<typeof setTimeout>|undefined;
     let restoring=false;
+    let pointerExpiry:ReturnType<typeof setTimeout>|undefined;
+    const clearPointer=()=>{clearTimeout(pointerExpiry);setPeerPointer(null);};
+    client.on('pointer',presence=>{
+      if(identity.current?.roomId!==presence.roomId)return;
+      clearTimeout(pointerExpiry);
+      if(!presence.pointer){setPeerPointer(null);return;}
+      setPeerPointer(presence);
+      pointerExpiry=setTimeout(clearPointer,presence.pointer.kind==='touch'&&presence.pointer.phase==='up'?1000:6500);
+    });
     const restore=(s:Session)=>{
       if(restoring)return;restoring=true;
       setBusy(true);
@@ -56,18 +66,18 @@ export function useOnline() {
       if(identity.current)restore(identity.current);
       else if(autoJoin){const request=autoJoin;autoJoin=null;setBusy(true);client.timeout(8000).emit('join',request,joined);}
     });
-    client.on('disconnect',()=>{restoring=false;clearTimeout(restoreTimer);setReady(false);setBusy(false);});
+    client.on('disconnect',()=>{clearPointer();restoring=false;clearTimeout(restoreTimer);setReady(false);setBusy(false);});
     client.on('connect_error',()=>{setReady(false);setBusy(false);setError('无法连接游戏服务器，请确认服务已启动；连接将自动重试。');});
     client.on('error',message=>{setError(message);setReady(false);});
     client.on('closed',message=>{
       if(identity.current?.roomId!==message.roomId)return;
       try{forgetSession(sessionStorage,localStorage,message.roomId);}catch{/* storage unavailable */}
-      identity.current=null;pending.current=null;setHasPending(false);setSession(null);setSnapshot(null);setReady(false);setBusy(false);setError(message.reason);history.replaceState(null,'',location.pathname+location.search);
+      clearPointer();identity.current=null;pending.current=null;setHasPending(false);setSession(null);setSnapshot(null);setReady(false);setBusy(false);setError(message.reason);history.replaceState(null,'',location.pathname+location.search);
     });
-    client.on('state',incoming=>{if(identity.current?.roomId===incoming.roomId)setSnapshot(incoming as Snapshot);});
+    client.on('state',incoming=>{if(identity.current?.roomId===incoming.roomId){setSnapshot(incoming as Snapshot);if(!incoming.started||!incoming.side||!incoming.seats[incoming.side==='US'?'USSR':'US'].connected)clearPointer();}});
     if(prior){remember(prior);client.connect();}
     else if(autoJoin)client.connect();
-    return ()=>{clearTimeout(restoreTimer);client.removeAllListeners();client.disconnect();socket.current=null;};
+    return ()=>{clearTimeout(restoreTimer);clearTimeout(pointerExpiry);client.removeAllListeners();client.disconnect();socket.current=null;};
   },[]);
   sendPending.current=()=>{
     const client=socket.current,request=pending.current;
@@ -106,5 +116,6 @@ export function useOnline() {
   };
   const leave=()=>{socket.current?.disconnect();identity.current=null;pending.current=null;setHasPending(false);setSession(null);setSnapshot(null);setReady(false);setBusy(false);setError('');};
   const resume=()=>{const s=saved();if(!s){setError('此标签页没有可恢复的房间');return;}remember(s);socket.current?.connect();};
-  return {session,snapshot,ready,busy,error,hasPending,create:()=>enter(),join:(room:string)=>enter(room),seat,bot,retryBot,start,restart,close,send,leave,resume,retry:()=>sendPending.current()};
+  const sendPointer=(pointer:BoardPointer|null)=>{if(ready&&snapshot?.started&&socket.current?.connected)socket.current.volatile.emit('pointer',pointer);};
+  return {session,snapshot,ready,busy,error,hasPending,peerPointer,sendPointer,create:()=>enter(),join:(room:string)=>enter(room),seat,bot,retryBot,start,restart,close,send,leave,resume,retry:()=>sendPending.current()};
 }
