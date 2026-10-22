@@ -265,6 +265,9 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
 .match-log { padding-left:28px; margin:0; }.match-log li { padding:8px 0 8px 5px; border-bottom:1px solid var(--line); font-size:12px; overflow-wrap:anywhere; }.match-log li::marker { color:#91866d; font:11px ui-monospace,monospace; }
 .rules-panel details { border-top:1px solid var(--line); padding:10px 0; }.rules-panel summary { font-size:13px; font-weight:700; cursor:pointer; }.rules-panel details p { margin-top:9px; color:#59584c; }
 .ongoing-effects { padding:0; margin:0; list-style:none; }.ongoing-effects li { display:flex; gap:9px; padding:12px 0; border-top:1px solid var(--line); }.ongoing-effects li>span { color:#8b6f38; }
+.ongoing-effects details { min-width:0; flex:1; }
+.ongoing-effects summary { padding:0; font-weight:700; line-height:1.65; }
+.ongoing-effects .effect-description { margin:9px 0 6px; }
 .public-card-slot { pointer-events:none; overflow:visible; }
 .public-play { width:100%; padding:24px; background:#f4efdc; border:10px solid #426489; border-radius:28px; box-shadow:0 20px 70px #1f211d66; color:#2e4c6e; animation:public-play-in .2s ease-out; }
 .public-play.public-USSR { border-color:#9b4235; color:#883a30; }

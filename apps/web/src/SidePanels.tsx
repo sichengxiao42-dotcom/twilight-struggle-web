@@ -1,5 +1,6 @@
 import { COUNTRIES, REGION_NAMES, controller, scoreRegion, scoreSoutheastAsia, type GameState } from '@ts/game-core';
 import type { Region, Side } from '@ts/shared';
+import { ongoingEffects } from './ongoingEffects';
 
 export type SidePanel = 'cards' | 'regions' | 'log' | 'rules' | 'effects' | 'room' | 'recent';
 export const PANEL_TITLES: Record<SidePanel, string> = { cards:'卡牌操作', regions:'地区局势', log:'对局日志', rules:'规则速查', effects:'持续效果', room:'房间大厅', recent:'弃牌堆' };
@@ -47,6 +48,7 @@ export function RulesPanel() {
     <details><summary>手牌、撤销与隐藏信息</summary><p>点击卡牌仅查看，确认用途才出牌。等待时也能看自己的牌；点击侧栏可查局势和日志。热座交接会隐藏手牌。撤销适合纠正误操作，已看到的信息无法收回。</p></details>
   </section>;
 }
-export function EffectsPanel({effects}:{effects:string[]}) {
-  return <section className="info-panel" aria-label="持续效果详情"><p className="panel-intro">当前仍生效的公开事件</p>{effects.length?<ul className="ongoing-effects">{effects.map(effect=><li key={effect}><span aria-hidden="true">◆</span>{effect}</li>)}</ul>:<div className="panel-empty"><h3>暂无持续效果</h3><p>带有持续影响的事件生效后，会显示在这里。</p></div>}<p className="panel-footnote">效果的结束时机与限制由规则引擎结算。</p></section>;
+export function EffectsPanel({effects}:{effects:GameState['effects']}) {
+  const entries=ongoingEffects(effects);
+  return <section className="info-panel" aria-label="持续效果详情"><p className="panel-intro">当前仍生效的公开事件 · 点击名称展开说明</p>{entries.length?<ul className="ongoing-effects">{entries.map(effect=><li key={effect.id}><span aria-hidden="true">◆</span><details><summary>{effect.label}</summary><p className="effect-description">{effect.description}</p><small>原事件说明；其中的一次性结算不会重复执行。</small></details></li>)}</ul>:<div className="panel-empty"><h3>暂无持续效果</h3><p>带有持续影响的事件生效后，会显示在这里。</p></div>}<p className="panel-footnote">效果的结束时机与限制由规则引擎结算。</p></section>;
 }

@@ -247,7 +247,7 @@ export function App() {
         {gameStarted&&visiblePanel==='regions'&&<RegionPanel state={state} side={side}/>}
         {gameStarted&&visiblePanel==='log'&&<LogPanel lines={log}/>}
         {visiblePanel==='rules'&&<RulesPanel/>}
-        {gameStarted&&visiblePanel==='effects'&&<EffectsPanel effects={activeEffects(state.effects)}/>}
+        {gameStarted&&visiblePanel==='effects'&&<EffectsPanel effects={state.effects}/>}
         {gameStarted&&visiblePanel==='room'&&<section className="info-panel"><p>房间 {online.session?.roomId} · 你是{sides[side]}</p><p className="panel-intro">对局已开始，阵营已锁定。</p><input aria-label="邀请链接" readOnly value={invite}/><button onClick={copyInvite}>复制邀请链接</button></section>}
         </div>
       </aside>
