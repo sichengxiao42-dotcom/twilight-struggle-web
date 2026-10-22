@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="384" viewBox="0 0 384 384">
+  <filter id="fibers" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".18 .65" numOctaves="3" seed="31" stitchTiles="stitch"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .27  0 0 0 0 .22  0 0 0 0 .12  .34 0 0 0 -.04"/>
+  </filter>
+  <path fill="#fff" filter="url(#fibers)" d="M0 0h384v384H0z"/>
+</svg>

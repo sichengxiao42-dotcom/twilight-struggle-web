@@ -1,0 +1,128 @@
+/* Cold War archive materials. Paint only: geometry, type and gestures live in styles.css.
+   Repeatable local SVG textures never cover the board/card artwork or intercept input. */
+:root {
+  --paper-grain: url('./textures/paper-grain.svg');
+  --archive-fibers: url('./textures/archive-fibers.svg');
+  --paper-light: linear-gradient(110deg, #fffdf133, #fffdf105 48%, #71542a0b);
+  --paper-rim: inset 0 0 0 1px #fffbea66, inset 0 0 20px #785a2420;
+}
+
+body {
+  background-color: #d2c8af;
+  background-image: var(--archive-fibers), radial-gradient(ellipse at 35% 5%, #f4ecda88, #ac9b7926 85%);
+}
+
+.surface, .table-actions, .influence-editor, .card-composer,
+.discard-dialog, .dice-dialog {
+  background-color: #f0e9d7;
+  background-image: var(--paper-grain), var(--paper-light);
+  border-color: #aaa084;
+  box-shadow: var(--paper-rim), 0 2px 5px #40382226;
+}
+
+.panel-heading, .workspace-heading, .room-controls, .room-entry,
+.discard-window>header, .discard-window>footer {
+  background-color: #e6ddc5;
+  background-image: var(--paper-grain), linear-gradient(#fff7e544, #a8916010);
+  border-color: #b3a88b;
+  box-shadow: inset 0 1px #fffbed99, inset 0 -1px #fffbed55;
+}
+
+.board-scroll {
+  background-color: #c9c0aa;
+  background-image: var(--archive-fibers);
+}
+.map-interaction {
+  background-color: #e9e1cc;
+  background-image: var(--paper-grain);
+  box-shadow: inset 0 1px #fffbea88;
+}
+.hand-dock {
+  background-color: #e3d8bc;
+  background-image: var(--archive-fibers), linear-gradient(#8d754515, #fff9e326 35%);
+  box-shadow: var(--paper-rim), 0 -2px 5px #4d3f2420;
+}
+.hand-dock>.panel-heading { background: none; box-shadow: none; }
+
+button {
+  background-color: #eee5ce;
+  background-image: var(--paper-grain), linear-gradient(#fffbee88, #bba87918);
+  border-color: #ada183;
+  box-shadow: inset 0 1px #fffdf1cc, inset 0 -1px #a8945e22, 0 1px 2px #473b2317;
+  text-shadow: 0 1px #fff9e766;
+}
+button:hover:not(:disabled) {
+  background-color: #f7efd9;
+  background-image: var(--paper-grain), linear-gradient(#fffdf3aa, #c6b58222);
+  border-color: #827b57;
+}
+button:active:not(:disabled) { box-shadow: inset 0 1px 3px #4e3f2933; }
+button.primary, button.primary:hover:not(:disabled), .side-rail button[aria-pressed="true"] {
+  background-color: #596044;
+  background-image: var(--paper-grain), linear-gradient(#f7f0c91f, #17200b25);
+  border-color: #484f35;
+  box-shadow: inset 0 1px #f5edc433, inset 0 -1px #252d1755, 0 1px 3px #302e2333;
+  text-shadow: 0 1px #252b2266;
+}
+button.primary:hover:not(:disabled) { background-color: #485237; }
+button.secondary { background-color: #eee5ce66; background-image: var(--paper-grain); }
+.end-action { box-shadow: 0 0 0 2px #cda94488, inset 0 1px #fff9df66; }
+input, select {
+  background-color: #faf5e7;
+  background-image: var(--paper-grain);
+  border-color: #b0a384;
+  box-shadow: inset 0 1px 3px #5a49221c, 0 1px #fff9e788;
+}
+
+.card-head, .card:not(.image), .play-choice, .play-choice.chosen,
+.lobby-seat, .lobby-seat.mine, .add-bot,
+.discard-pile, .discard-pile:hover, .pile-cards::before, .pile-cards::after,
+.pile-cards.empty>span, .gallery-sides button[aria-pressed=true] {
+  background-image: var(--paper-grain), var(--paper-light);
+}
+.play-choice.chosen { box-shadow: inset 0 0 0 1px #6c735444, inset 0 1px #fffce6aa; }
+.side-rail button {
+  background-color: #ddd2b6;
+  background-image: var(--archive-fibers), linear-gradient(90deg, #59452512, #fff3d433 35%);
+  border-color: #b1a281;
+  border-left-color: transparent;
+  box-shadow: inset 0 1px #fff4d688, 1px 2px 3px #4b3d2622;
+}
+.side-rail button:hover:not(:disabled):not([aria-pressed="true"]) {
+  background-color: #f3e9cf;
+  background-image: var(--paper-grain), var(--paper-light);
+}
+.card-workspace>.stage-guide, .card-workspace>.stage-guide.task-waiting,
+.phase-banner, .turn-indicator {
+  background-color: #f8f1de;
+  background-image: var(--paper-grain), linear-gradient(105deg, #fffbed66, #c6a5580c);
+  box-shadow: inset 0 0 0 1px #fffbee99, inset 0 0 16px #a58b4f16, 0 2px 4px #403a2520;
+}
+.card-workspace>.stage-guide.task-waiting { background-color: #e9e2cf; }
+.public-play { background-image: var(--paper-grain), var(--paper-light); }
+
+button.piece-US, button.piece-USSR,
+button.piece-US:hover:not(:disabled), button.piece-USSR:hover:not(:disabled) {
+  background-image: var(--paper-grain), linear-gradient(#fff8df20, #151c1f22);
+  border-color: #fffbeb;
+  text-shadow: 0 1px #24201b66;
+}
+.discard-dialog, .dice-dialog {
+  box-shadow: var(--paper-rim), 0 18px 65px #25201380;
+}
+.discard-dialog { border-top-color: var(--gallery-color); }
+.dice-dialog { border-top-color: var(--dice-color); }
+.die-button, .die-button:not(:disabled):hover {
+  background-image: var(--paper-grain), radial-gradient(ellipse at 35% 20%, #ffffff88, #d7c49b33);
+  box-shadow: inset 0 1px 2px #fffef6, inset 0 -2px 4px #a28a4e22, 0 5px 0 #b2a98a, 0 8px 15px #443b2525;
+}
+
+@media (forced-colors: active) {
+  :root { --paper-grain: none; --archive-fibers: none; --paper-light: none; }
+  body, button, input, select, .surface, .panel-heading, .workspace-heading,
+  .hand-dock, .stage-guide, .turn-indicator, .discard-dialog, .dice-dialog {
+    background-image: none;
+    box-shadow: none;
+    text-shadow: none;
+  }
+}
