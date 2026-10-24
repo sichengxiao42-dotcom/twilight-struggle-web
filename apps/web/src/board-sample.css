@@ -1,0 +1,4 @@
+.material-compare {
+  position:fixed; right:12px; bottom:2px; z-index:1100;
+  min-height:20px; padding:1px 8px; font-size:10px;
+}

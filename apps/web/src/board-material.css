@@ -1,0 +1,104 @@
+/* Board materials. All application geometry and typography are inherited. */
+:root[data-material="board"] {
+  --bg:#cfcdc2;
+  --surface:#e5e3d9;
+  --surface-raised:#cfcec1;
+  --fg:#353832;
+  --muted:#64665d;
+  --line:#aaa89a;
+  --accent:#4f5c61;
+  --paper-light:linear-gradient(115deg,#fffef642,#ffffff03 55%,#4d4a3410);
+  --paper-rim:inset 0 1px #fffdf0cc,inset 1px 0 #fffdf067,inset -1px 0 #77756630;
+  --board-edge:0 1px 0 #b0ac9d,0 2px 0 #949082,0 3px 0 #878374,0 4px 0 #736f62;
+  --board-shadow:0 5px 3px #393a3033,0 9px 13px #30312824;
+}
+[data-material="board"] body {
+  background-color:#bcbdb2;
+  background-image:var(--archive-fibers),radial-gradient(ellipse at 30% 0%,#eef0e048,transparent 75%);
+}
+[data-material="board"] :is(.surface,.table-actions,.influence-editor,.card-composer,.discard-dialog,.dice-dialog) {
+  background-color:var(--surface);
+  border-color:#939386;
+  box-shadow:var(--paper-rim),var(--board-edge),var(--board-shadow);
+}
+[data-material="board"] :is(.panel-heading,.workspace-heading,.room-controls,.room-entry,.discard-window>header,.discard-window>footer) {
+  background-color:#cfcec1;
+  background-image:var(--paper-grain),linear-gradient(#fffef747,#5558460b);
+  border-color:#a6a597;
+  box-shadow:inset 0 1px #ffffedaa,inset 0 -1px #76766726;
+}
+[data-material="board"] .board-scroll {
+  background-color:#c3c3b8;
+  background-image:var(--archive-fibers);
+  box-shadow:inset 0 2px 4px #33392f26;
+}
+[data-material="board"] .map-interaction {
+  background-color:#dbdbce;
+  box-shadow:inset 0 1px #ffffed99,inset 0 -2px #8a8b7b33;
+}
+[data-material="board"] .hand-dock {
+  background-color:#c4c5b7;
+  background-image:var(--archive-fibers),linear-gradient(#3c46331c,transparent 35%);
+  border-color:#939386;
+  box-shadow:inset 0 2px 4px #353a302b,inset 0 -1px #fdfdeb99,var(--board-edge),var(--board-shadow);
+}
+[data-material="board"] .hand-dock>.panel-heading { background:none; box-shadow:none; }
+[data-material="board"] button {
+  background-color:#e2e1d4;
+  background-image:var(--paper-grain),linear-gradient(#fffef36b,#696b5010);
+  border-color:#a1a18f;
+  box-shadow:inset 0 1px #fffff1d9,inset 1px 0 #ffffed66,0 1px 0 #aaa795,0 2px 0 #8d8b79,0 3px 3px #363b302b;
+  text-shadow:0 1px #ffffef66;
+}
+[data-material="board"] button:hover:not(:disabled) {
+  background-color:#eeede1;
+  border-color:#727b72;
+}
+[data-material="board"] :is(button.primary,.side-rail button[aria-pressed="true"]) {
+  background-color:#4f5c61;
+  background-image:var(--paper-grain),linear-gradient(#eff6ed22,#19252e22);
+  border-color:#3e4a4d;
+  box-shadow:inset 0 1px #edf5e94a,0 1px 0 #39474b,0 2px 0 #2b383c,0 3px 3px #28373244;
+  text-shadow:0 1px #1d2a3255;
+}
+[data-material="board"] button.primary:hover:not(:disabled) { background-color:#5e6a6c; }
+[data-material="board"] button:active:not(:disabled) {
+  box-shadow:inset 0 2px 3px #29332a33,0 1px 0 #8d8b79;
+}
+[data-material="board"] :is(input,select) {
+  background-color:#efeee3;
+  border-color:#acac9a;
+  box-shadow:inset 0 2px 3px #3d443023,0 1px #fffef0aa;
+}
+[data-material="board"] .side-rail button:not([aria-pressed="true"]) {
+  background-color:#c5c7b8;
+  border-color:#959b8d;
+  box-shadow:inset 0 1px #fcffed99,0 2px 0 #8c917e,1px 4px 4px #333c3026;
+}
+[data-material="board"] :is(.card-workspace>.stage-guide,.card-workspace>.stage-guide.task-waiting,.phase-banner,.turn-indicator) {
+  background-color:#eeece0;
+  background-image:var(--paper-grain),var(--paper-light);
+  box-shadow:inset 0 1px #fffff1cc,inset 0 -1px #86877433,0 2px 0 #b0ac9c,0 3px 4px #343b3026;
+}
+[data-material="board"] :is(button.piece-US,button.piece-US:hover:not(:disabled)) { background-color:#365e86; }
+[data-material="board"] :is(button.piece-USSR,button.piece-USSR:hover:not(:disabled)) { background-color:#8b342f; }
+[data-material="board"] :is(button.piece-US,button.piece-USSR) {
+  border-color:#f7f1df;
+  box-shadow:inset 0 1px #fffdf35c,0 1px 0 #c6bfa9,0 2px 0 #8d8574,1px 3px 3px #28302655;
+}
+[data-material="board"] .map-board .marker {
+  filter:drop-shadow(0 9px 0 #867e6d) drop-shadow(3px 14px 7px #242b305c);
+}
+[data-material="board"] .track-marker {
+  filter:drop-shadow(0 7px 0 #8b8373) drop-shadow(3px 12px 6px #242b304d);
+}
+[data-material="board"] :is(.card.image,.card-button .card) {
+  box-shadow:0 1px 0 #eee8d9,0 2px 0 #b5ae9a,1px 3px 4px #282e3140;
+}
+[data-material="board"] :is(.discard-dialog,.dice-dialog) {
+  box-shadow:var(--paper-rim),var(--board-edge),0 18px 65px #252c2480;
+}
+@media(forced-colors:active) {
+  [data-material="board"] :is(.surface,button,input,select,.hand-dock,.stage-guide,.turn-indicator) { box-shadow:none; background-image:none; }
+  [data-material="board"] :is(.map-board .marker,.track-marker) { filter:none; }
+}
