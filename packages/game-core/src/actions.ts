@@ -319,6 +319,7 @@ function applyInternal(state: GameState, side: Side, action: Action): GameState 
       inf[enemy] -= removed; inf[side] += result - removed;
       next.milOps[side] = Math.min(5, next.milOps[side] + (p.militaryOps ?? p.ops));
       next.log.push(side + ' 政变 ' + country.nameZh + '：骰 ' + roll + (modifier ? (modifier > 0 ? ' +' : ' ') + modifier : '') + ' + OPS ' + p.ops + ' − 稳定度×2 → ' + result + '；移除 ' + removed + '，增加 ' + (result - removed));
+      next.clash = { id: (next.clash?.id ?? 0) + 1, kind: 'COUP', side, country: country.id, roll, total: roll + modifier + p.ops, need: 2 * country.stability, removed, added: result - removed, defconDrop: country.battleground && !(side === 'US' && Boolean(next.effects.nuclearSubs)) };
       if (side === 'US' && next.effects.yuri) { next.log.push('尤里和萨曼莎：美国政变'); addVp(next, 'USSR', 1); if (next.phase.kind === 'GAME_OVER') return next; }
       if (country.battleground && !(side === 'US' && next.effects.nuclearSubs)) {if(next.mode==='STANDARD')changeDefcon(next,-1);else next.defcon--;}
       p.remaining = 0;
@@ -336,6 +337,7 @@ function applyInternal(state: GameState, side: Side, action: Action): GameState 
       const loser = difference > 0 ? enemy : side, removed = Math.min(inf[loser], Math.abs(difference));
       inf[loser] -= removed; p.remaining--;
       next.log.push(country.nameZh + ' 调整：' + side + ' ' + a + '+' + ma + ' 对 ' + enemy + ' ' + b + '+' + mb + '；' + loser + ' 移除 ' + removed);
+      next.clash = { id: (next.clash?.id ?? 0) + 1, kind: 'REALIGN', side, country: country.id, rolls: [a, b], modifiers: [ma, mb], winner: difference > 0 ? side : difference < 0 ? enemy : null, removed };
     }
     if (!p.remaining || !legalTargets(next).length) finish(next, side, p.round);
   }

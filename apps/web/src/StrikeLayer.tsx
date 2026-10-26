@@ -1,33 +1,15 @@
 import { useEffect, useState, type CSSProperties } from 'react';
-import type { Side } from '@ts/shared';
 import type { Strike } from '@ts/game-core';
-import { BOX_HEIGHT, BOX_WIDTH, MAP_POSITIONS } from './mapPositions';
+import { ORIGIN, arc, isNewEffect } from './boardFx';
 
-/** Where the arrows leave from: the "U.S.S.R." and "U.S.A." titles printed on the map. */
-const ORIGIN: Record<Side, [number, number]> = { USSR: [5400, 1180], US: [960, 2010] };
 const STAGGER = 0.18, FLIGHT = 0.7, AFTER = 1.4;
-
-/** Highest strike id already shown per game, kept outside the board so undo/remount or a refresh never replays old arrows. */
-const shown = new Map<string, number>();
-
-function arc(side: Side, country: string) {
-  const [ox, oy] = ORIGIN[side], tx = MAP_POSITIONS[country][0] + BOX_WIDTH / 2, ty = MAP_POSITIONS[country][1] + BOX_HEIGHT / 2;
-  const dx = tx - ox, dy = ty - oy, length = Math.hypot(dx, dy) || 1, bend = Math.min(1100, length * 0.28);
-  // Bow the flight path upward (towards the top of the map) so arrows read as launched, not slid.
-  let cx = (ox + tx) / 2 - dy / length * bend, cy = (oy + ty) / 2 + dx / length * bend;
-  if (cy > (oy + ty) / 2) { cx = (ox + tx) - cx; cy = (oy + ty) - cy; }
-  return { d: `M${ox},${oy} Q${cx},${cy} ${tx},${ty}`, tx, ty, angle: Math.atan2(ty - cy, tx - cx) * 180 / Math.PI };
-}
 
 /** Animates the influence gained in the step that just ended, for whichever player is watching. */
 export function StrikeLayer({ strike, scope }: { strike?: Strike; scope: string }) {
   const [active, setActive] = useState<Strike | null>(null);
   const id = strike?.id ?? 0;
   useEffect(() => {
-    const seen = shown.get(scope);
-    shown.set(scope, id);
-    // First sight of a game (fresh mount or page refresh) only records the current strike.
-    if (seen !== undefined && strike && id > seen) setActive(strike);
+    if (isNewEffect('strike:' + scope, id) && strike) setActive(strike);
     // Keyed on the id, not the object: the strike is rebuilt from each new snapshot.
   }, [scope, id]);
   useEffect(() => {

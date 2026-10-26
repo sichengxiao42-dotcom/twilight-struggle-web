@@ -10,6 +10,7 @@ import { usePieceDrag } from './usePieceDrag';
 import { influenceDrop } from './pieceMoves';
 import { trackPieces } from './tracks';
 import { StrikeLayer } from './StrikeLayer';
+import { ClashLayer } from './ClashLayer';
 import { BOX_HEADER, BOX_HEIGHT, BOX_WIDTH, MAP_HEIGHT, MAP_POSITIONS, MAP_WIDTH, TRACK_MARKER_RADIUS } from './mapPositions';
 const labels: Record<Region, string> = { EUROPE: '欧洲', ASIA: '亚洲', MIDDLE_EAST: '中东', AFRICA: '非洲', CENTRAL_AMERICA: '中美洲', SOUTH_AMERICA: '南美洲' };
 // Fallback when the manifest has no map: region panels form an original schematic board; connections are board links, not geographic borders.
@@ -125,6 +126,7 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
         {renderedTracks}
       {publicCards}
       <StrikeLayer strike={state.strike} scope={strikeScope}/>
+      <ClashLayer clash={state.clash} scope={strikeScope} defcon={state.defcon}/>
       <PeerPointer presence={peerPointer} width={MAP_WIDTH} height={MAP_HEIGHT}/>
       </svg></div>{feedback}<p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>放大后可横向滚动</span></p></>;
   }

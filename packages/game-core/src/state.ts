@@ -77,6 +77,8 @@ export interface GameState {
   publicPlays?: PublicPlay[];
   /** Influence gains of the last finished step, animated as arrows on the board for both players. */
   strike?: import('./strikes').Strike;
+  /** Last coup or realignment outcome, animated on the board for both players. */
+  clash?: import('./strikes').Clash;
   /** Influence when the current step began; private bookkeeping, never sent to players. */
   strikeBase?: Record<string, Influence>;
   manualEnd?: boolean;

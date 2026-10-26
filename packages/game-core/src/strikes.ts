@@ -42,3 +42,9 @@ export function trackStrikes(before: GameState, next: GameState): GameState {
   } else next.strikeBase = structuredClone(base);
   return next;
 }
+
+/** Public outcome of one coup or realignment roll, animated on the board for both players. */
+export type Clash = { id: number; side: Side; country: string } & (
+  | { kind: 'COUP'; roll: number; total: number; need: number; removed: number; added: number; defconDrop: boolean }
+  | { kind: 'REALIGN'; rolls: [number, number]; modifiers: [number, number]; winner: Side | null; removed: number }
+);

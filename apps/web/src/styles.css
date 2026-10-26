@@ -388,3 +388,46 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
 @keyframes strike-amount { from { opacity:0; transform:translateY(250px); } 25% { opacity:1; transform:none; } 75% { opacity:1; } to { opacity:0; transform:translateY(-400px); } }
 @keyframes strike-charge { from { transform:scale(.85); opacity:.25; } to { transform:scale(1.15); opacity:.5; } }
 @keyframes strike-fade { to { opacity:0; } }
+
+/* Coup and realignment effects (both players see them). Colours come from .strike-USSR / .strike-US. */
+.clash-layer { pointer-events:none; animation:strike-fade .4s ease-in 2.2s both; }
+.clash-layer path { fill:none; stroke-linecap:round; }
+/* Coup: reticle locks on, a missile flies in, impact flash and shock wave, enemy counters shatter. */
+.clash-reticle circle,.clash-reticle path { fill:none; stroke:var(--strike-color); stroke-width:34; }
+.clash-reticle { transform-box:fill-box; transform-origin:center; animation:clash-lock .6s ease-out both; }
+.coup-smoke { stroke:#5d5a52; stroke-width:150; opacity:.28; stroke-dasharray:1; animation:strike-draw .6s cubic-bezier(.5,0,.8,.4) .1s both; }
+.coup-trail { stroke:var(--strike-color); stroke-width:60; stroke-dasharray:1; animation:strike-draw .6s cubic-bezier(.5,0,.8,.4) .1s both; }
+.coup-missile { stroke:#fff6dc; stroke-width:150; stroke-dasharray:.05 2; stroke-dashoffset:-1; animation:strike-comet .6s cubic-bezier(.5,0,.8,.4) .1s both; }
+.coup-flash { fill:#fff6dc; opacity:0; transform-box:fill-box; transform-origin:center; animation:clash-flash .5s ease-out .7s both; }
+.coup-wave { fill:none; stroke:var(--strike-bright); stroke-width:70; opacity:0; transform-box:fill-box; transform-origin:center; animation:strike-ring 1s ease-out .7s both; }
+.coup-shard { stroke:#fffaf0; stroke-width:16; opacity:0; transform-box:fill-box; transform-origin:center; animation:clash-shard 1s cubic-bezier(.2,.7,.3,1) .72s both; }
+.shard-US { fill:var(--us); }.shard-USSR { fill:var(--ussr); }
+.coup-puff { fill:#8d877a; opacity:0; transform-box:fill-box; transform-origin:center; animation:clash-puff 1.1s ease-out .7s both; }
+.clash-num { font:900 300px/1 Georgia,serif; stroke-width:28; paint-order:stroke; fill:#fffaf0; animation:strike-amount 1.4s ease-out .8s both; }
+.num-US { stroke:var(--us); }.num-USSR { stroke:var(--ussr); }.num-tie { stroke:#6d685c; font-size:220px; }
+.clash-defcon circle { fill:none; stroke:#e0301e; stroke-width:60; transform-box:fill-box; transform-origin:center; animation:clash-alarm .5s ease-in-out .85s 3 both; }
+.clash-defcon text { font:900 190px/1 Georgia,serif; fill:#fff3e8; stroke:#b3261e; stroke-width:24; paint-order:stroke; animation:strike-amount 1.5s ease-out .85s both; }
+.map-board:has(.clash-coup.hit) { animation:board-shake .45s ease-in-out .7s; }
+/* Realignment: both superpowers push a beam into the country; the winner's beam holds, the loser's recedes. */
+.realign-beam .beam-glow { stroke:var(--strike-color); stroke-width:110; opacity:.55; stroke-dasharray:1; animation:strike-draw .6s ease-out both; }
+.realign-beam .beam-core { stroke:var(--strike-bright); stroke-width:30; stroke-dasharray:1; animation:strike-draw .6s ease-out both; }
+.realign-beam.winner .beam-glow { animation:strike-draw .6s ease-out both, beam-win .7s ease-in-out .85s both; }
+.realign-beam.loser path,.clash-realign.tie .realign-beam path { animation:strike-draw .6s ease-out both, beam-retreat .7s ease-in .85s both; }
+.realign-orb { fill:#f3e7c8; stroke:#6d685c; stroke-width:30; transform-box:fill-box; transform-origin:center; animation:clash-orb 1.2s ease-in-out .5s both; }
+.realign-orb.strike-USSR,.realign-orb.strike-US { fill:var(--strike-bright); stroke:var(--strike-color); }
+/* Result banner above the target. */
+.clash-banner rect { fill:#f6efdc; stroke:#3b3a32; stroke-width:12; opacity:.96; }
+.clash-banner-title { font:800 150px/1 "Noto Serif SC","Songti SC",SimSun,serif; fill:#2d2c27; }
+.clash-banner-detail { font:500 92px/1 "Microsoft YaHei",sans-serif; fill:#4b4a40; }
+.clash-banner { transform-box:fill-box; transform-origin:center; animation:clash-banner 1.6s ease-out .8s both; }
+.clash-coup .clash-banner rect,.clash-realign .clash-banner rect { stroke:#3b3a32; }
+@keyframes clash-lock { from { opacity:0; transform:scale(1.8) rotate(-30deg); } 60% { opacity:1; } to { opacity:.9; transform:none; } }
+@keyframes clash-flash { from { opacity:.95; transform:scale(.2); } to { opacity:0; transform:scale(1.4); } }
+@keyframes clash-shard { from { opacity:1; transform:none; } 70% { opacity:1; } to { opacity:0; transform:translate(var(--dx),var(--dy)) rotate(var(--spin)) scale(.6); } }
+@keyframes clash-puff { from { opacity:.6; transform:scale(.3); } to { opacity:0; transform:scale(1.5); } }
+@keyframes clash-alarm { from { opacity:.2; transform:scale(.8); } 50% { opacity:1; transform:scale(1.15); } to { opacity:.2; transform:scale(.8); } }
+@keyframes clash-orb { from { opacity:0; transform:scale(.2); } 40% { opacity:1; transform:scale(1.15); } 60% { transform:scale(.9); } to { opacity:.85; transform:none; } }
+@keyframes beam-win { 50% { stroke-width:190; opacity:.9; } to { stroke-width:140; opacity:.75; } }
+@keyframes beam-retreat { from { stroke-dashoffset:0; opacity:1; } to { stroke-dashoffset:1; opacity:0; } }
+@keyframes clash-banner { from { opacity:0; transform:translateY(120px) scale(.9); } 15% { opacity:1; transform:none; } 80% { opacity:1; } to { opacity:0; } }
+@keyframes board-shake { 0%,100% { transform:none; } 20% { transform:translate(-6px,3px); } 40% { transform:translate(5px,-4px); } 60% { transform:translate(-4px,2px); } 80% { transform:translate(3px,-1px); } }

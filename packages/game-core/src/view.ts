@@ -8,6 +8,7 @@ export interface PlayerView {
   diceHistory?:DiceResult[];
   publicPlays: NonNullable<GameState['publicPlays']>;
   strike?: GameState['strike'];
+  clash?: GameState['clash'];
   currentAction?: {side:Side;round:number};
   turn: number; phase: ViewPhase; vp: number; defcon: number;
   milOps: GameState['milOps']; space: GameState['space']; spaceAttempts: GameState['spaceAttempts'];
@@ -31,6 +32,7 @@ export function viewFor(state:GameState,viewer:Side):PlayerView {
     diceHistory:state.diceHistory,
     publicPlays:state.publicPlays??[],
     strike:state.strike,
+    clash:state.clash,
     currentAction,
     turn:state.turn,phase,vp:state.vp,defcon:state.defcon,milOps:state.milOps,space:state.space,spaceAttempts:state.spaceAttempts,
     influence:state.influence,effects:state.effects,
