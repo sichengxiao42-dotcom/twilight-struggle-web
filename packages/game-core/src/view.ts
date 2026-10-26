@@ -15,7 +15,7 @@ export interface PlayerView {
   influence: GameState['influence']; effects: GameState['effects'];
   hands: Record<Side,number[]>; handCounts: Record<Side,number>;
   discard: number[]; removed: number[]; deckCount: number;
-  chinaCard: GameState['chinaCard']; log: string[];
+  chinaCard: GameState['chinaCard']; log: string[]; logFx: NonNullable<GameState['logFx']>;
   headlines: Partial<Record<Side,number>>; headlineCommitted: Record<Side,boolean>;
   targets: string[];
 }
@@ -28,6 +28,8 @@ export function viewFor(state:GameState,viewer:Side):PlayerView {
   if(ownHeadline!==undefined)headlines[viewer]=ownHeadline;
   if(state.phase.kind==='HEADLINE'&&state.space[viewer]>=4&&state.space[enemy]<4&&otherHeadline!==undefined)headlines[enemy]=otherHeadline;
   const phase=(state.phase.kind==='DECISION'||state.phase.kind==='CONFIRM_END'&&state.phase.context==='HEADLINE')&&state.phase.side!==viewer?{kind:'WAITING' as const,side:state.phase.side}:state.phase;
+  // Indices of the lines players may see; logFx is re-keyed to match the filtered log.
+  const shown=state.log.flatMap((line,i)=>line.startsWith('Game created with seed ')?[]:[i]);
   return structuredClone({
     diceHistory:state.diceHistory,
     publicPlays:state.publicPlays??[],
@@ -39,7 +41,7 @@ export function viewFor(state:GameState,viewer:Side):PlayerView {
     hands:{[viewer]:state.hands[viewer],[enemy]:(viewer==='US'&&state.effects.cia)||(viewer==='USSR'&&state.effects.aldrich)?state.hands[enemy]:[]} as Record<Side,number[]>,
     handCounts:{US:state.hands.US.length,USSR:state.hands.USSR.length},
     discard:state.discard,removed:state.removed,deckCount:state.deck.length,chinaCard:state.chinaCard,
-    log:state.log.filter(line=>!line.startsWith('Game created with seed ')),headlines,
+    log:shown.map(i=>state.log[i]),logFx:Object.fromEntries(shown.flatMap((raw,i)=>state.logFx?.[raw]?[[i,state.logFx[raw]]]:[])),headlines,
     headlineCommitted:{US:state.headlines.US!==undefined,USSR:state.headlines.USSR!==undefined},
     targets:activeSide(state)===viewer?legalTargets(state):[],
   });

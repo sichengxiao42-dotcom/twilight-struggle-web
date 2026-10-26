@@ -431,3 +431,15 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
 @keyframes beam-retreat { from { stroke-dashoffset:0; opacity:1; } to { stroke-dashoffset:1; opacity:0; } }
 @keyframes clash-banner { from { opacity:0; transform:translateY(120px) scale(.9); } 15% { opacity:1; transform:none; } 80% { opacity:1; } to { opacity:0; } }
 @keyframes board-shake { 0%,100% { transform:none; } 20% { transform:translate(-6px,3px); } 40% { transform:translate(5px,-4px); } 60% { transform:translate(-4px,2px); } 80% { transform:translate(3px,-1px); } }
+
+/* Log hover: a line with a board picture or a card is focusable and highlighted; the picture is drawn still on the map. */
+.match-log li.log-rich { cursor:help; }
+.match-log li.log-rich:hover,.match-log li.log-active { background:#22201e12; box-shadow:inset 3px 0 var(--accent); }
+.match-log li.log-rich:focus-visible { outline-offset:-2px; }
+.log-card-popup { position:fixed; z-index:70; display:flex; gap:8px; padding:12px; pointer-events:none; background:var(--surface); border:1px solid var(--line); border-radius:6px; box-shadow:0 10px 30px #22201e40; animation:log-popup-in .12s ease-out both; }
+.log-card-popup>.card { width:210px; height:auto; aspect-ratio:7/10; margin:0; border-radius:8px; }
+.fx-still { pointer-events:none; animation:log-popup-in .15s ease-out both; }
+.fx-still path { fill:none; stroke-linecap:round; }
+.fx-still * { animation:none !important; }
+.fx-still .realign-beam.loser path,.fx-still.tie .realign-beam path { opacity:.35; stroke-dasharray:.015 .015; }
+@keyframes log-popup-in { from { opacity:0; } to { opacity:1; } }

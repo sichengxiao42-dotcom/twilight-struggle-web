@@ -1,3 +1,5 @@
+import type { LogFx } from './strikes';
+
 // The engine writes some log lines with internal codes (sides, OPS modes, regions, scoring tiers).
 // Translate them for display only, so engine strings and replays stay unchanged.
 const TERMS: Record<string, string> = {
@@ -14,7 +16,15 @@ export function formatLogLine(line: string): string {
   return line.replace(PATTERN, (term) => TERMS[term]);
 }
 
+const SEED_LINE = 'Game created with seed ';
+
 /** Drops engine-internal lines (the seed must not be shown) and translates the rest. */
 export function formatLog(lines: readonly string[]): string[] {
-  return lines.filter((line) => !line.startsWith('Game created with seed ')).map(formatLogLine);
+  return lines.filter((line) => !line.startsWith(SEED_LINE)).map(formatLogLine);
+}
+
+export interface LogEntry { text: string; fx?: LogFx }
+/** Same lines as formatLog, each with the board picture recorded for it (keyed by index in `lines`). */
+export function formatLogEntries(lines: readonly string[], fx: Readonly<Record<number, LogFx>> = {}): LogEntry[] {
+  return lines.flatMap((line, i) => line.startsWith(SEED_LINE) ? [] : [{ text: formatLogLine(line), fx: fx[i] }]);
 }

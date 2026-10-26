@@ -37,9 +37,6 @@ export function RegionPanel({state,side}:{state:GameState;side:Side}) {
     <p className="panel-footnote">仅为当前计分预估，不会改变胜利分。事件和后续布点会改变结果；欧洲控制可直接获胜。</p>
   </section>;
 }
-export function LogPanel({lines}:{lines:string[]}) {
-  return <section className="info-panel" aria-label="对局日志详情"><p className="panel-intro">最新记录在上 · 共 {lines.length} 条</p>{lines.length?<ol className="match-log" reversed>{[...lines].reverse().map((line,i)=><li key={lines.length-i}>{line}</li>)}</ol>:<p className="panel-empty">对局开始后，布点、出牌与结算会记录在这里。</p>}</section>;
-}
 export function RulesPanel() {
   const [catalogOpen,setCatalogOpen]=useState(false);
   return <section className="info-panel rules-panel" aria-label="规则速查详情"><p className="panel-intro">展开需要的规则，随时切回卡牌继续行动。</p>

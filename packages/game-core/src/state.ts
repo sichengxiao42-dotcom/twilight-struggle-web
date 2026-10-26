@@ -81,6 +81,10 @@ export interface GameState {
   clash?: import('./strikes').Clash;
   /** Influence when the current step began; private bookkeeping, never sent to players. */
   strikeBase?: Record<string, Influence>;
+  /** Log length when the current step began, so the step's arrows can be attached to its lines. */
+  strikeLog?: number;
+  /** Board pictures keyed by log line index (public: the same facts the lines describe). */
+  logFx?: Record<number, import('./strikes').LogFx>;
   manualEnd?: boolean;
   pendingHeadline?: number;
   mode: 'PRACTICE' | 'STANDARD';

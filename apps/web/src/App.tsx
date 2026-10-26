@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Region, Side } from '@ts/shared';
-import { CARD_BY_ID, COUNTRIES, REGION_NAMES, createBoardPreview, activeSide, apply, influencePlacement, placementCost, canPass, createGame, forcedMissileEnvy, formatLog, legalTargets, trapped, type GameState, type Action, type Effects, type OpsMode } from '@ts/game-core';
+import { CARD_BY_ID, COUNTRIES, REGION_NAMES, createBoardPreview, activeSide, apply, influencePlacement, placementCost, canPass, createGame, forcedMissileEnvy, formatLog, formatLogEntries, legalTargets, trapped, type GameState, type LogFx, type Action, type Effects, type OpsMode } from '@ts/game-core';
 import { phaseGuide, StageGuide } from './StageGuide';
 import { Board, type PlacementFeedback } from './Board';
 import { CardComposer } from './CardComposer';
 import { cardChoices } from './cardPlay';
 import { CardView } from './CardView';
 import { DiceDialog } from './DiceDialog';
+import { LogPanel } from './LogPanel';
 import { PhaseAnnouncer, phaseAnnouncement } from './PhaseAnnouncer';
 import { LobbyPanel } from './LobbyPanel';
 import { DiscardGallery, PlayFlights, RecentDock, usePlayPresentation } from './PlayedCards';
-import { EffectsPanel, LogPanel, PANEL_TITLES, RegionPanel, RulesPanel, SideRail, type SidePanel } from './SidePanels';
+import { EffectsPanel, PANEL_TITLES, RegionPanel, RulesPanel, SideRail, type SidePanel } from './SidePanels';
 import { displayState, useOnline } from './useOnline';
 const sides: Record<Side, string> = { USSR: '苏联', US: '美国' };
 const modes: Record<OpsMode, string> = { INFLUENCE: '放置影响力', REALIGNMENT: '调整', COUP: '政变' };
@@ -58,6 +59,7 @@ export function App() {
   const [error, setError] = useState('');
   const [revealed, setRevealed] = useState(false);
   const log=formatLog(state.log);
+  const [logFx,setLogFx]=useState<LogFx|null>(null);
   const opsMode=state.phase.kind==='DECISION'&&state.phase.decision.kind==='OPS_MODE'?state.phase.decision:null;
   const actor=activeSide(state),side=online.snapshot?.side??actor??state.phasingSide,p=state.phase;
   useEffect(()=>{if(p.kind==='DICE_ROLL'){setArchiveSide(null);setActionsOpen(false);}},[p.kind]);
@@ -147,7 +149,7 @@ export function App() {
           <p>{canIncrease?(p.kind==='OPS'?'每加 1 点消耗 '+placementCost(state,countrySelection.country,side)+' OPS':'每次增加 1 点影响力'):canDecrease?'本次放置已完成，仍可用减号撤回最后一点':'当前不能继续放置，请按阶段提示操作'}<small>减号仅撤回该国最近的放置；其他误操作用“撤销上一步”。</small></p>
           <button className="secondary" onClick={()=>setCountrySelection(null)}>收起</button>
         </div>}
-        <Board strikeScope={online.session?.roomId??'local-'+state.seed} peerPointer={onlineActive&&gameStarted&&online.ready?online.peerPointer:null} onPointer={onlineActive&&gameStarted&&online.ready?online.sendPointer:undefined} publicPlays={gameStarted?presentation.boardPlays:[]} selectedCountry={countrySelection?.country} key={(online.session?.roomId??'local-'+state.seed)+'-undo-'+(online.snapshot?.undoVersion??undoVersion)} canInteract={canAct} onAction={dispatch} state={state} targets={targets} onCountry={onCountry} scale={zoom} lastPlacement={lastPlacement}/>
+        <Board logFx={gameStarted&&visiblePanel==='log'?logFx:null} strikeScope={online.session?.roomId??'local-'+state.seed} peerPointer={onlineActive&&gameStarted&&online.ready?online.peerPointer:null} onPointer={onlineActive&&gameStarted&&online.ready?online.sendPointer:undefined} publicPlays={gameStarted?presentation.boardPlays:[]} selectedCountry={countrySelection?.country} key={(online.session?.roomId??'local-'+state.seed)+'-undo-'+(online.snapshot?.undoVersion??undoVersion)} canInteract={canAct} onAction={dispatch} state={state} targets={targets} onCountry={onCountry} scale={zoom} lastPlacement={lastPlacement}/>
       </section>
       <aside id="table-actions" className={'action-panel command-dock surface table-actions '+(actionsOpen?'is-open':'')} hidden={!actionsOpen} ref={actionRef} tabIndex={-1} aria-label="操作区">
         <div className="panel-heading"><div><span className="eyebrow">{sides[side]}指挥席</span><h2>{blocked?'等待对局':p.kind==='SETUP_PLACEMENT'?'开局部署':p.kind==='OPS'?'执行行动':p.kind==='DECISION'||p.kind==='SUBPLAY'?'事件处理':'出牌与行动'}</h2></div><button className="secondary" aria-label="关闭操作区" onClick={()=>setActionsOpen(false)}>×</button></div>
@@ -245,7 +247,7 @@ export function App() {
       {visiblePanel==='cards'&&selected!==null&&revealed&&<CardComposer key={selected} id={selected} state={state} side={side} canAct={canAct} blocked={blocked} onPlay={dispatch} onClose={closeCard}/>}
         {visiblePanel==='cards'&&p.kind!=='CONFIRM_END'&&(selected===null||!revealed)&&<div className="card-workspace-empty"><span aria-hidden="true">▤</span><h3>{revealed?'点击下方的一张手牌':'手牌暂时隐藏'}</h3><p>{revealed?'卡牌效果、用途与确认按钮会显示在这里。':'确认由'+sides[side]+'玩家操作后，显示手牌。'}</p>{!revealed&&<button className="primary" onClick={()=>setRevealed(true)}>显示自己的手牌</button>}</div>}</>:null}
         {gameStarted&&visiblePanel==='regions'&&<RegionPanel state={state} side={side}/>}
-        {gameStarted&&visiblePanel==='log'&&<LogPanel lines={log}/>}
+        {gameStarted&&visiblePanel==='log'&&<LogPanel entries={formatLogEntries(state.log,state.logFx)} onFx={setLogFx}/>}
         {visiblePanel==='rules'&&<RulesPanel/>}
         {gameStarted&&visiblePanel==='effects'&&<EffectsPanel effects={state.effects}/>}
         {gameStarted&&visiblePanel==='room'&&<section className="info-panel"><p>房间 {online.session?.roomId} · 你是{sides[side]}</p><p className="panel-intro">对局已开始，阵营已锁定。</p><input aria-label="邀请链接" readOnly value={invite}/><button onClick={copyInvite}>复制邀请链接</button></section>}

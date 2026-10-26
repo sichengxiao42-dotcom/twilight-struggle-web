@@ -61,3 +61,26 @@ test('each realignment records both rolls, modifiers and the winner',()=>{
   }
   assert.ok(wins>0);
 });
+
+test('log lines keep the arrows of the step that wrote them, re-keyed in the player view',()=>{
+  let state:GameState={...createGame(42),manualEnd:true};
+  for(let i=0;i<4;i++)state=apply(state,'USSR',{type:'PLACE_SETUP',country:'poland'});
+  for(let i=0;i<2;i++)state=apply(state,'USSR',{type:'PLACE_SETUP',country:'hungary'});
+  assert.deepEqual(state.logFx??{},{},'nothing is attached before the step ends');
+  state=apply(state,'USSR',{type:'END_ACTION'});
+  const poland={side:'USSR',country:'poland',amount:4},hungary={side:'USSR',country:'hungary',amount:2};
+  const lines=state.log.flatMap((line,i)=>line.includes('开局布点')?[i]:[]);
+  assert.equal(lines.length,6);
+  assert.deepEqual(lines.map(i=>state.logFx![i]),[...Array(4).fill({arrows:[poland]}),...Array(2).fill({arrows:[hungary]})]);
+  const view=viewFor(state,'US'),k=view.log.findIndex(line=>line.includes('开局布点'));
+  assert.equal(k,lines[0]-1,'the hidden seed line shifts every index by one');
+  assert.deepEqual(view.logFx[k],{arrows:[poland]});
+});
+
+test('a coup or realignment line carries its clash',()=>{
+  const state:GameState={...createGame(3)};
+  state.influence.iran={US:2,USSR:0};
+  state.phase={kind:'OPS',side:'USSR',round:1,mode:'COUP',remaining:3,ops:3,eligible:[]};state.tasks=[{kind:'FINISH_ACTION',side:'USSR',round:1}];
+  const next=apply(state,'USSR',{type:'TARGET',country:'iran'}),i=next.log.findIndex(line=>line.includes('政变 伊朗'));
+  assert.deepEqual(next.logFx![i],{clash:next.clash});
+});

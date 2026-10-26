@@ -33,7 +33,12 @@ export function ClashLayer({ clash, scope, defcon }: { clash?: Clash; scope: str
     return () => window.clearTimeout(timer);
   }, [active]);
   if (!active) return null;
-  const c = active.clash, [tx, ty] = countryCentre(c.country), enemy = opponent(c.side), text = banner(c);
+  return <ClashPicture key={active.clash.id} clash={active.clash} defcon={active.defcon}/>;
+}
+
+/** One coup or realignment on the board. `still` keeps only the settled parts (no missile, blast or alarm) for log hover. */
+export function ClashPicture({ clash: c, defcon = 5, still = false }: { clash: Clash; defcon?: number; still?: boolean }) {
+  const [tx, ty] = countryCentre(c.country), enemy = opponent(c.side), text = banner(c), motion = !still;
   // Position with the outer group: a CSS animation's transform would replace an SVG transform attribute on the same element.
   const label = <g transform={`translate(${clampX(tx, BANNER_WIDTH)},${Math.max(330, ty - 600)})`}><g className="clash-banner">
     <rect x={-BANNER_WIDTH / 2} y={-170} width={BANNER_WIDTH} height={300} rx={46}/>
@@ -42,28 +47,28 @@ export function ClashLayer({ clash, scope, defcon }: { clash?: Clash; scope: str
   </g></g>;
   if (c.kind === 'COUP') {
     const { d } = arc(c.side, c.country, 0.18), success = c.removed + c.added > 0;
-    return <g key={c.id} className={'clash-layer clash-coup strike-' + c.side + (success ? ' hit' : ' miss')} aria-hidden="true">
+    return <g className={(still ? 'fx-still' : 'clash-layer') + ' clash-coup strike-' + c.side + (success ? ' hit' : ' miss')} aria-hidden="true">
       <g transform={`translate(${tx},${ty})`}><g className="clash-reticle">
         <circle r="270"/><path d="M-420,0H-170M170,0H420M0,-420V-170M0,170V420"/>
       </g></g>
-      <path className="coup-smoke" d={d} pathLength={1}/>
+      {motion && <path className="coup-smoke" d={d} pathLength={1}/>}
       <path className="coup-trail" d={d} pathLength={1}/>
-      <path className="coup-missile" d={d} pathLength={1}/>
+      {motion && <path className="coup-missile" d={d} pathLength={1}/>}
       <g transform={`translate(${tx},${ty})`}>
-        <circle className="coup-flash" r="340"/>
-        <circle className="coup-wave" r="460"/>
-        {success ? SHARDS.map(([dx, dy], i) => <rect key={i} className={'coup-shard shard-' + enemy} x={-55} y={-55} width={110} height={110} rx={14} style={{ ['--dx' as string]: dx + 'px', ['--dy' as string]: dy + 'px', ['--spin' as string]: (i % 2 ? 1 : -1) * (120 + i * 25) + 'deg' }}/>)
-          : <circle className="coup-puff" r="300"/>}
+        {motion && <circle className="coup-flash" r="340"/>}
+        {motion && <circle className="coup-wave" r="460"/>}
+        {motion && (success ? SHARDS.map(([dx, dy], i) => <rect key={i} className={'coup-shard shard-' + enemy} x={-55} y={-55} width={110} height={110} rx={14} style={{ ['--dx' as string]: dx + 'px', ['--dy' as string]: dy + 'px', ['--spin' as string]: (i % 2 ? 1 : -1) * (120 + i * 25) + 'deg' }}/>)
+          : <circle className="coup-puff" r="300"/>)}
         {c.removed > 0 && <text className={'clash-num num-' + enemy} x={c.added > 0 ? -230 : 0} y={-300} textAnchor="middle">−{c.removed}</text>}
         {c.added > 0 && <text className={'clash-num num-' + c.side} x={c.removed > 0 ? 230 : 0} y={-300} textAnchor="middle">+{c.added}</text>}
       </g>
-      {c.defconDrop && <g className="clash-defcon" transform={`translate(${DEFCON_TRACK[Math.max(1, active.defcon)][0]},${DEFCON_TRACK[Math.max(1, active.defcon)][1]})`}>
+      {motion && c.defconDrop && <g className="clash-defcon" transform={`translate(${DEFCON_TRACK[Math.max(1, defcon)][0]},${DEFCON_TRACK[Math.max(1, defcon)][1]})`}>
         <circle r="230"/><text y={-300} textAnchor="middle">DEFCON −1</text>
       </g>}
       {label}
     </g>;
   }
-  return <g key={c.id} className={'clash-layer clash-realign' + (c.winner ? '' : ' tie')} aria-hidden="true">
+  return <g className={(still ? 'fx-still' : 'clash-layer') + ' clash-realign' + (c.winner ? '' : ' tie')} aria-hidden="true">
     {(['USSR', 'US'] as const).map(side => {
       const { d } = arc(side, c.country, 0.22), role = c.winner === side ? ' winner' : c.winner ? ' loser' : '';
       return <g key={side} className={'realign-beam strike-' + side + role}><path className="beam-glow" d={d} pathLength={1}/><path className="beam-core" d={d} pathLength={1}/></g>;
