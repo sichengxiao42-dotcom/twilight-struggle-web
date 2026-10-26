@@ -5,6 +5,7 @@ import { COUNTRIES, COUNTRY_BY_ID } from './data/countries';
 import { actionRoundsForTurn, controller, coupResult, isRegionRestrictedByDefcon, placementCost, vpWinner } from './rules';
 import { DiceRequired, nextDie, rollDice, type DiceResult } from './dice';
 import { trackPublicPlays } from './publicPlays';
+import { trackStrikes } from './strikes';
 import type { GameState, Task } from './state';
 import { addVp, beginHeadline, canEvent, changeDefcon, chooseDecision, drain, influenceTargets, modifiedOps, protectedCountry, roundsFor } from './engine';
 
@@ -133,7 +134,7 @@ export function apply(state: GameState, side: Side, action: Action): GameState {
   }
   if(action.type==='ROLL_DICE'||action.type==='CONTINUE_DICE')throw new Error('当前没有待掷骰操作');
   if(state.manualDice)return advanceWithDice(state,side,action,0,state.diceHistory??[]);
-  return trackPublicPlays(state,applyInternal(state,side,action),side,action);
+  return trackStrikes(state,trackPublicPlays(state,applyInternal(state,side,action),side,action));
 }
 function advanceWithDice(base:GameState,side:Side,action:Action,approved:number,history:DiceResult[]):GameState {
   const input=structuredClone(base);delete input.pendingDice;
@@ -148,7 +149,7 @@ function advanceWithDice(base:GameState,side:Side,action:Action,approved:number,
   }
   delete next.diceReplay;
   next.diceHistory=structuredClone(history);
-  return trackPublicPlays(base,next,side,action);
+  return trackStrikes(base,trackPublicPlays(base,next,side,action));
 }
 function applyInternal(state: GameState, side: Side, action: Action): GameState {
   if (activeSide(state) !== side) throw new Error('尚未轮到该阵营');

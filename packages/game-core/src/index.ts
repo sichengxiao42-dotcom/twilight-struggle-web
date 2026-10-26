@@ -14,3 +14,4 @@ export { chooseBotAction } from './bot';
 export type { DiceRequest, DiceResult } from './dice';
 export { canEvent, roundsFor, modifiedOps } from './engine';
 export { REGION_NAMES } from './events';
+export type { Strike, StrikeArrow } from './strikes';

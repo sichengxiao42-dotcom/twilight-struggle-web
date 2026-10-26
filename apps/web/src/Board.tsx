@@ -9,6 +9,7 @@ import { boardImage } from './assets';
 import { usePieceDrag } from './usePieceDrag';
 import { influenceDrop } from './pieceMoves';
 import { trackPieces } from './tracks';
+import { StrikeLayer } from './StrikeLayer';
 import { BOX_HEADER, BOX_HEIGHT, BOX_WIDTH, MAP_HEIGHT, MAP_POSITIONS, MAP_WIDTH, TRACK_MARKER_RADIUS } from './mapPositions';
 const labels: Record<Region, string> = { EUROPE: '欧洲', ASIA: '亚洲', MIDDLE_EAST: '中东', AFRICA: '非洲', CENTRAL_AMERICA: '中美洲', SOUTH_AMERICA: '南美洲' };
 // Fallback when the manifest has no map: region panels form an original schematic board; connections are board links, not geographic borders.
@@ -31,7 +32,7 @@ const trackColours = { US: ['#2f5d9e', '#fff'], USSR: ['#b3261e', '#fff'], neutr
 
 export interface PlacementFeedback { country: string; side: Side; before: number }
 
-export function Board({selectedCountry,state,targets,onCountry,onAction,canInteract,scale=1,lastPlacement,publicPlays=[],peerPointer,onPointer}:{selectedCountry?:string;state:GameState;targets:string[];onCountry:(id:string)=>void;onAction:(action:Action)=>void;canInteract:boolean;scale?:number;lastPlacement?:PlacementFeedback|null;publicPlays?:PublicPlay[];peerPointer?:BoardPresence|null;onPointer?:(pointer:BoardPointer|null)=>void}) {
+export function Board({selectedCountry,state,targets,onCountry,onAction,canInteract,scale=1,lastPlacement,publicPlays=[],peerPointer,onPointer,strikeScope='local'}:{strikeScope?:string;selectedCountry?:string;state:GameState;targets:string[];onCountry:(id:string)=>void;onAction:(action:Action)=>void;canInteract:boolean;scale?:number;lastPlacement?:PlacementFeedback|null;publicPlays?:PublicPlay[];peerPointer?:BoardPresence|null;onPointer?:(pointer:BoardPointer|null)=>void}) {
   const {boardEvents:presenceEvents,reserveEvents}=useBoardPresence(onPointer);
   const [hover, setHover] = useState<string | null>(null);
   const previous = useRef(state);
@@ -123,6 +124,7 @@ export function Board({selectedCountry,state,targets,onCountry,onAction,canInter
         })}
         {renderedTracks}
       {publicCards}
+      <StrikeLayer strike={state.strike} scope={strikeScope}/>
       <PeerPointer presence={peerPointer} width={MAP_WIDTH} height={MAP_HEIGHT}/>
       </svg></div>{feedback}<p className="map-caption"><span>● 美国</span><span>● 苏联</span><span>金框：当前可选 · 实心：控制</span><span>放大后可横向滚动</span></p></>;
   }

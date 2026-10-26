@@ -75,6 +75,10 @@ export interface GameState {
   diceHistory?:DiceResult[];
   /** Only publicly played cards; secret headline selections are never recorded here. */
   publicPlays?: PublicPlay[];
+  /** Influence gains of the last finished step, animated as arrows on the board for both players. */
+  strike?: import('./strikes').Strike;
+  /** Influence when the current step began; private bookkeeping, never sent to players. */
+  strikeBase?: Record<string, Influence>;
   manualEnd?: boolean;
   pendingHeadline?: number;
   mode: 'PRACTICE' | 'STANDARD';

@@ -367,3 +367,24 @@ button.piece-USSR:hover:not(:disabled) { background:#82352c; }button.piece-US:ho
 @keyframes die-tumble { 0%,100% {transform:rotate(0) translateY(0);} 20% {transform:rotate(-18deg) translateY(-14px);} 45% {transform:rotate(23deg) translateY(2px);} 65% {transform:rotate(-11deg) translateY(-7px);} 85% {transform:rotate(5deg) translateY(0);} }
 @media(prefers-reduced-motion:reduce) { .die-button.rolling { animation:none; }.die-button { transition:none; } }
 @media(max-width:420px) { .dice-window { padding:20px 16px; }.dice-window h2 { font-size:21px; }.dice-table { gap:28px; }.die-button { width:85px; height:85px; padding:14px; } }
+
+/* Influence strike: arrows fly from the superpower to the countries it gained in once a step ends (both players see it). */
+.strike-layer { pointer-events:none; animation:strike-fade .45s ease-in var(--strike-total) both; }
+.strike-USSR { --strike-color:#d8382b; --strike-bright:#ffb08a; }
+.strike-US { --strike-color:#2f74c8; --strike-bright:#bfe0ff; }
+.strike path { fill:none; stroke-linecap:round; }
+.strike-trail { stroke:var(--strike-color); stroke-width:95; opacity:.8; stroke-dasharray:1; animation:strike-draw .7s cubic-bezier(.4,.1,.3,1) var(--strike-delay) both; }
+.strike-core { stroke:var(--strike-bright); stroke-width:28; stroke-dasharray:1; animation:strike-draw .7s cubic-bezier(.4,.1,.3,1) var(--strike-delay) both; }
+.strike-comet { stroke:#fffaf0; stroke-width:170; stroke-dasharray:.06 2; stroke-dashoffset:-1; animation:strike-comet .7s cubic-bezier(.4,.1,.3,1) var(--strike-delay) both; }
+.strike-head { fill:var(--strike-color); stroke:#fffaf0; stroke-width:24; transform-box:fill-box; animation:strike-pop .35s ease-out var(--strike-hit) both; }
+.strike-ring { fill:none; stroke:var(--strike-bright); stroke-width:60; transform-box:fill-box; transform-origin:center; opacity:0; animation:strike-ring 1s ease-out var(--strike-hit) both; }
+.strike-amount { font:900 300px/1 Georgia,serif; fill:#fffaf0; stroke:var(--strike-color); stroke-width:28; paint-order:stroke; animation:strike-amount 1.3s ease-out var(--strike-hit) both; }
+.strike-origin circle { fill:var(--strike-color); opacity:.35; transform-box:fill-box; transform-origin:center; animation:strike-charge .9s ease-in-out infinite alternate; }
+.strike-origin .strike-origin-core { fill:var(--strike-bright); opacity:.9; }
+@keyframes strike-draw { from { stroke-dashoffset:1; } to { stroke-dashoffset:0; } }
+@keyframes strike-comet { from { stroke-dashoffset:.06; opacity:1; } 92% { opacity:1; } to { stroke-dashoffset:-1; opacity:0; } }
+@keyframes strike-pop { from { opacity:0; transform:scale(.2); } 70% { opacity:1; transform:scale(1.25); } to { opacity:1; transform:none; } }
+@keyframes strike-ring { from { opacity:.95; transform:scale(.25); } to { opacity:0; transform:scale(1.6); } }
+@keyframes strike-amount { from { opacity:0; transform:translateY(250px); } 25% { opacity:1; transform:none; } 75% { opacity:1; } to { opacity:0; transform:translateY(-400px); } }
+@keyframes strike-charge { from { transform:scale(.85); opacity:.25; } to { transform:scale(1.15); opacity:.5; } }
+@keyframes strike-fade { to { opacity:0; } }
