@@ -1,104 +1,143 @@
-/* Board materials. All application geometry and typography are inherited. */
+/* Board materials. All application geometry and typography are inherited.
+   Paint follows the printed map: its cool grey ocean paper, thin ink rules, the black title plates of its
+   tracks, and the exact red and blue of its influence counters. Print is flat, so edges are hairlines, not bevels. */
 :root[data-material="board"] {
-  --bg:#cfcdc2;
-  --surface:#e5e3d9;
-  --surface-raised:#cfcec1;
-  --fg:#353832;
-  --muted:#64665d;
-  --line:#aaa89a;
-  --accent:#4f5c61;
-  --paper-light:linear-gradient(115deg,#fffef642,#ffffff03 55%,#4d4a3410);
-  --paper-rim:inset 0 1px #fffdf0cc,inset 1px 0 #fffdf067,inset -1px 0 #77756630;
-  --board-edge:0 1px 0 #b0ac9d,0 2px 0 #949082,0 3px 0 #878374,0 4px 0 #736f62;
-  --board-shadow:0 5px 3px #393a3033,0 9px 13px #30312824;
+  --bg:#d3d2ce;
+  --surface:#ebeae6;
+  --surface-raised:#dcdbd7;
+  --fg:#242220;
+  --muted:#5e5b56;
+  --line:#b4b1ab;
+  --accent:#22201e;
+  --us:#2f5d9e;
+  --ussr:#b3261e;
+  --plate:#22201e;
+  --plate-ink:#f2f1ed;
+  --ink-rule:#8c8983;
+  --paper-light:linear-gradient(115deg,#ffffff3d,#ffffff00 55%,#22201e08);
+  --paper-rim:inset 0 1px #ffffffb3;
+  --board-edge:0 1px 0 #9d9a94;
+  --board-shadow:0 2px 6px #22201e1f;
 }
 [data-material="board"] body {
-  background-color:#bcbdb2;
-  background-image:var(--archive-fibers),radial-gradient(ellipse at 30% 0%,#eef0e048,transparent 75%);
+  background-color:#c8c7c3;
+  background-image:var(--archive-fibers),radial-gradient(ellipse at 30% 0%,#f4f4f04d,transparent 75%);
 }
 [data-material="board"] :is(.surface,.table-actions,.influence-editor,.card-composer,.discard-dialog,.dice-dialog) {
   background-color:var(--surface);
-  border-color:#939386;
+  border-color:var(--ink-rule);
   box-shadow:var(--paper-rim),var(--board-edge),var(--board-shadow);
 }
-[data-material="board"] :is(.panel-heading,.workspace-heading,.room-controls,.room-entry,.discard-window>header,.discard-window>footer) {
-  background-color:#cfcec1;
-  background-image:var(--paper-grain),linear-gradient(#fffef747,#5558460b);
-  border-color:#a6a597;
-  box-shadow:inset 0 1px #ffffedaa,inset 0 -1px #76766726;
+/* Panel titles are the board's black track plates ("ACTION ROUND TRACK", "冷战早期"). */
+[data-material="board"] :is(.panel-heading,.workspace-heading,.game-layout .hand-dock>.panel-heading) {
+  color:var(--plate-ink);
+  background-color:var(--plate);
+  background-image:var(--paper-grain),linear-gradient(#ffffff0f,#00000014);
+  border-color:var(--plate);
+  box-shadow:none;
+}
+[data-material="board"] :is(.panel-heading,.workspace-heading) :is(small,span:not(.lobby-seal)),
+[data-material="board"] :is(.target-legend,.hand-dock h2 small) { color:#bdb9b2; }
+[data-material="board"] .panel-heading button,
+[data-material="board"] .panel-heading button:hover:not(:disabled) {
+  color:var(--plate-ink);
+  background-color:#ffffff0d;
+  background-image:none;
+  border-color:#5f5b55;
+  box-shadow:none;
+  text-shadow:none;
+}
+[data-material="board"] .panel-heading button:hover:not(:disabled) { background-color:#ffffff24; border-color:#a29e97; }
+[data-material="board"] :is(.room-controls,.room-entry,.discard-window>header,.discard-window>footer) {
+  background-color:var(--surface-raised);
+  background-image:var(--paper-grain),linear-gradient(#ffffff38,#22201e08);
+  border-color:var(--line);
+  box-shadow:inset 0 1px #ffffff99;
 }
 [data-material="board"] .board-scroll {
-  background-color:#c3c3b8;
+  background-color:#c8c7c3;
   background-image:var(--archive-fibers);
-  box-shadow:inset 0 2px 4px #33392f26;
+  box-shadow:inset 0 1px 3px #22201e24;
 }
 [data-material="board"] .map-interaction {
-  background-color:#dbdbce;
-  box-shadow:inset 0 1px #ffffed99,inset 0 -2px #8a8b7b33;
+  background-color:var(--surface-raised);
+  box-shadow:inset 0 1px var(--ink-rule);
 }
 [data-material="board"] .hand-dock {
-  background-color:#c4c5b7;
-  background-image:var(--archive-fibers),linear-gradient(#3c46331c,transparent 35%);
-  border-color:#939386;
-  box-shadow:inset 0 2px 4px #353a302b,inset 0 -1px #fdfdeb99,var(--board-edge),var(--board-shadow);
+  background-color:#d7d6d2;
+  background-image:var(--archive-fibers);
+  border-color:var(--ink-rule);
+  box-shadow:inset 0 1px 3px #22201e1f,var(--board-edge),var(--board-shadow);
 }
-[data-material="board"] .hand-dock>.panel-heading { background:none; box-shadow:none; }
 [data-material="board"] button {
-  background-color:#e2e1d4;
-  background-image:var(--paper-grain),linear-gradient(#fffef36b,#696b5010);
-  border-color:#a1a18f;
-  box-shadow:inset 0 1px #fffff1d9,inset 1px 0 #ffffed66,0 1px 0 #aaa795,0 2px 0 #8d8b79,0 3px 3px #363b302b;
-  text-shadow:0 1px #ffffef66;
+  background-color:#efeeea;
+  background-image:var(--paper-grain),linear-gradient(#ffffff59,#22201e08);
+  border-color:#9d9a94;
+  box-shadow:inset 0 1px #ffffffcc,0 1px 0 #9d9a94;
+  text-shadow:none;
 }
 [data-material="board"] button:hover:not(:disabled) {
-  background-color:#eeede1;
-  border-color:#727b72;
+  background-color:#f8f7f4;
+  border-color:#4c4945;
 }
 [data-material="board"] :is(button.primary,.side-rail button[aria-pressed="true"]) {
-  background-color:#4f5c61;
-  background-image:var(--paper-grain),linear-gradient(#eff6ed22,#19252e22);
-  border-color:#3e4a4d;
-  box-shadow:inset 0 1px #edf5e94a,0 1px 0 #39474b,0 2px 0 #2b383c,0 3px 3px #28373244;
-  text-shadow:0 1px #1d2a3255;
+  color:var(--plate-ink);
+  background-color:var(--plate);
+  background-image:var(--paper-grain),linear-gradient(#ffffff14,#00000024);
+  border-color:#000;
+  box-shadow:inset 0 1px #ffffff1f,0 1px 0 #000;
+  text-shadow:none;
 }
-[data-material="board"] button.primary:hover:not(:disabled) { background-color:#5e6a6c; }
-[data-material="board"] button:active:not(:disabled) {
-  box-shadow:inset 0 2px 3px #29332a33,0 1px 0 #8d8b79;
-}
+[data-material="board"] button.primary:hover:not(:disabled) { background-color:#3b3835; border-color:#000; }
+[data-material="board"] button:active:not(:disabled) { box-shadow:inset 0 2px 3px #22201e33; }
+[data-material="board"] button.secondary { background-color:#efeeea80; }
 [data-material="board"] :is(input,select) {
-  background-color:#efeee3;
-  border-color:#acac9a;
-  box-shadow:inset 0 2px 3px #3d443023,0 1px #fffef0aa;
+  background-color:#f7f6f3;
+  border-color:#9d9a94;
+  box-shadow:inset 0 1px 2px #22201e1f;
 }
 [data-material="board"] .side-rail button:not([aria-pressed="true"]) {
-  background-color:#c5c7b8;
-  border-color:#959b8d;
-  box-shadow:inset 0 1px #fcffed99,0 2px 0 #8c917e,1px 4px 4px #333c3026;
+  color:#4c4945;
+  background-color:#dcdbd7;
+  background-image:var(--archive-fibers);
+  border-color:#9d9a94;
+  box-shadow:inset 0 1px #ffffff99,1px 2px 3px #22201e1f;
 }
-[data-material="board"] :is(.card-workspace>.stage-guide,.card-workspace>.stage-guide.task-waiting,.phase-banner,.turn-indicator) {
-  background-color:#eeece0;
+[data-material="board"] .side-rail button:hover:not(:disabled):not([aria-pressed="true"]) { color:var(--fg); background-color:#efeeea; border-left-color:var(--plate); }
+[data-material="board"] .side-rail button:focus-visible { outline-color:var(--ussr); }
+[data-material="board"] :is(.card-workspace>.stage-guide,.phase-banner,.turn-indicator) {
+  background-color:#f4f3ef;
   background-image:var(--paper-grain),var(--paper-light);
-  box-shadow:inset 0 1px #fffff1cc,inset 0 -1px #86877433,0 2px 0 #b0ac9c,0 3px 4px #343b3026;
+  box-shadow:inset 0 1px #ffffffcc,0 1px 0 #9d9a94,0 2px 5px #22201e1f;
 }
-[data-material="board"] :is(button.piece-US,button.piece-US:hover:not(:disabled)) { background-color:#365e86; }
-[data-material="board"] :is(button.piece-USSR,button.piece-USSR:hover:not(:disabled)) { background-color:#8b342f; }
+[data-material="board"] .card-workspace>.stage-guide.task-waiting { background-color:#e6e5e1; }
+[data-material="board"] .play-choice.chosen { background-color:#f8f7f4; border-color:var(--plate); box-shadow:inset 0 0 0 1px var(--plate); }
+[data-material="board"] .lobby-seat.mine { background-color:#f8f7f4; border-color:var(--plate); }
+[data-material="board"] .notice { background-color:#e6e5e1; border-left-color:var(--plate); }
+[data-material="board"] :is(button.piece-US,button.piece-US:hover:not(:disabled)) { background-color:var(--us); }
+[data-material="board"] :is(button.piece-USSR,button.piece-USSR:hover:not(:disabled)) { background-color:var(--ussr); }
 [data-material="board"] :is(button.piece-US,button.piece-USSR) {
-  border-color:#f7f1df;
-  box-shadow:inset 0 1px #fffdf35c,0 1px 0 #c6bfa9,0 2px 0 #8d8574,1px 3px 3px #28302655;
+  color:#fff;
+  border-color:#fff;
+  box-shadow:0 1px 0 #6f6c67,1px 2px 3px #22201e55;
 }
 [data-material="board"] .map-board .marker {
-  filter:drop-shadow(0 9px 0 #867e6d) drop-shadow(3px 14px 7px #242b305c);
+  filter:drop-shadow(0 7px 0 #6f6c67) drop-shadow(3px 12px 6px #22201e4d);
 }
 [data-material="board"] .track-marker {
-  filter:drop-shadow(0 7px 0 #8b8373) drop-shadow(3px 12px 6px #242b304d);
+  filter:drop-shadow(0 6px 0 #6f6c67) drop-shadow(3px 10px 5px #22201e40);
 }
 [data-material="board"] :is(.card.image,.card-button .card) {
-  box-shadow:0 1px 0 #eee8d9,0 2px 0 #b5ae9a,1px 3px 4px #282e3140;
+  box-shadow:0 1px 0 #9d9a94,1px 3px 4px #22201e40;
 }
 [data-material="board"] :is(.discard-dialog,.dice-dialog) {
-  box-shadow:var(--paper-rim),var(--board-edge),0 18px 65px #252c2480;
+  box-shadow:var(--paper-rim),0 18px 65px #12110f80;
+}
+[data-material="board"] :is(.discard-dialog,.dice-dialog)::backdrop { background:#12110fa8; }
+[data-material="board"] :is(.die-button,.die-button:not(:disabled):hover) {
+  box-shadow:inset 0 1px 2px #fff,inset 0 -2px 4px #22201e1f,0 5px 0 #8c8983,0 8px 15px #22201e33;
 }
 @media(forced-colors:active) {
-  [data-material="board"] :is(.surface,button,input,select,.hand-dock,.stage-guide,.turn-indicator) { box-shadow:none; background-image:none; }
+  [data-material="board"] :is(.surface,button,input,select,.hand-dock,.stage-guide,.turn-indicator,.panel-heading,.workspace-heading) { box-shadow:none; background-image:none; }
   [data-material="board"] :is(.map-board .marker,.track-marker) { filter:none; }
 }
